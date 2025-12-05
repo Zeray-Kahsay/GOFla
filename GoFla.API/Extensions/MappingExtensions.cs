@@ -1,0 +1,135 @@
+using System;
+using GoFla.API.Domain;
+using GoFla.API.DTOs.Address;
+using GoFla.API.DTOs.Auth;
+using GoFla.API.DTOs.Cart;
+using GoFla.API.DTOs.MenuItems;
+using GoFla.API.DTOs.Orders;
+using GoFla.API.DTOs.Restaurants;
+
+namespace GoFla.API.Extensions;
+
+public static class MappingExtensions
+{
+    // User mappings 
+    public static UserDto ToUserDto(this User user)
+    {
+        return new UserDto
+        {
+            Id = user.Id,
+            Email = user.Email!,
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            ProfileImageUrl = user.ProfileImageUrl
+        };
+    }
+
+    // Restaurant mappings 
+    public static RestaurantDto ToRestaurantDto(this Restaurant restaurant)
+    {
+        return new RestaurantDto
+        {
+            Id = restaurant.Id,
+            Name = restaurant.Name,
+            Description = restaurant.Description,
+            ImageUrl = restaurant.ImageUrl,
+            Address = restaurant.Address,
+            Phone = restaurant.Phone,
+            DeliveryFee = restaurant.DeliveryFee,
+            EstimatedDeliveryTime = restaurant.EstimatedDeliveryTime,
+            IsActive = restaurant.IsActive
+        };
+    }
+
+    // MenuItem mappings 
+    public static MenuItemDto ToMenuItemDto(this MenuItem menuItem)
+    {
+        return new MenuItemDto
+        {
+            Id = menuItem.Id,
+            Name = menuItem.Name,
+            Description = menuItem.Description,
+            Price = menuItem.Price,
+            ImageUrl = menuItem.ImageUrl,
+            Category = menuItem.Category,
+            IsAvailable = menuItem.IsAvailable,
+            RestaurantId = menuItem.RestaurantId,
+            RestaurantName = menuItem.Restaurant?.Name ?? string.Empty
+        };
+    }
+
+    // Cart mappings 
+    public static CartDto ToCartDto(this Cart cart)
+    {
+        var items = cart.Items.Select(ci => ci.ToCartItemDto()).ToList();
+        return new CartDto
+        {
+            Id = cart.Id,
+            Items = items,
+            SubTotal = items.Sum(i => i.ItemTotal),
+            TotalItems = items.Sum(i => i.Quantity)
+        };
+    }
+    public static CartItemDto ToCartItemDto(this CartItem cartItem)
+    {
+        return new CartItemDto
+        {
+            Id = cartItem.Id,
+            MenuItemId = cartItem.MenuItemId,
+            Name = cartItem.MenuItem.Name,
+            ImageUrl = cartItem.MenuItem.ImageUrl,
+            Price = cartItem.MenuItem.Price,
+            Quantity = cartItem.Quantity,
+            SpecialInstructions = cartItem.SpecialInstructions,
+            ItemTotal = cartItem.MenuItem.Price * cartItem.Quantity,
+            RestaurantName = cartItem.MenuItem.Restaurant?.Name ?? string.Empty
+        };
+    }
+
+    // Order mappings 
+    public static OrderDto ToOrderDto(this Order order)
+    {
+        return new OrderDto
+        {
+            Id = order.Id,
+            OrderNumber = order.OrderNumber,
+            RestaurantName = order.Restaurant?.Name ?? string.Empty,
+            Status = order.Status.ToString(),
+            SubTotal = order.SubTotal,
+            DeliveryFee = order.DeliveryFee,
+            Tax = order.Tax,
+            TotalAmount = order.TotalAmount,
+            PaymentStatus = order.PaymentStatus.ToString(),
+            DeliveryAddress = order.DeliveryAddress.ToAddressDto(),
+            Items = order.Items.Select(i => i.ToOrderItemDto()).ToList(),
+            CreatedAt = order.CreatedAt
+        };
+    }
+
+    public static OrderItemDto ToOrderItemDto(this OrderItem orderItem)
+    {
+        return new OrderItemDto
+        {
+            Id = orderItem.Id,
+            Name = orderItem.MenuItem?.Name ?? string.Empty,
+            Quantity = orderItem.Quantity,
+            Price = orderItem.Price,
+            SpecialInstructions = orderItem.SpecialInstructions
+        };
+    }
+
+    // Address mappings
+    public static AddressDto ToAddressDto(this Address address)
+    {
+        return new AddressDto
+        {
+            Id = address.Id,
+            Label = address.Label,
+            Street = address.Street,
+            City = address.City,
+            State = address.State,
+            ZipCode = address.ZipCode,
+            IsDefault = address.IsDefault
+        };
+    }
+}
