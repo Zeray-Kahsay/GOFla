@@ -1,4 +1,6 @@
 using System.Text;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using GoFla.API.Configuration;
 using GoFla.API.Data;
 using GoFla.API.Domain;
@@ -147,8 +149,15 @@ builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 // Services
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddHttpClient<IExternalAuthService, ExternalAuthService>();
+builder.Services.AddScoped<IRestaurantService, RestaurantService>();
+builder.Services.AddScoped<IMenuItemService, MenuItemService>();
+builder.Services.AddScoped<ICartService, CartService>();
 
-// AutoMapper or manual mapping is already done via extension methods
+
+// Global fluent validation configuration
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+
 
 var app = builder.Build();
 
