@@ -154,8 +154,9 @@ builder.Services.AddScoped<IMenuItemService, MenuItemService>();
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IAddressService, AddressService>();
-// builder.Services.AddScoped<IStripeService, StripeService>();
-// builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
+builder.Services.AddScoped<IStripeService, StripeService>();
+builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
+
 
 
 // Global fluent validation configuration
