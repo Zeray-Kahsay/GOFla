@@ -86,6 +86,12 @@ builder.Services.AddIdentity<User, IdentityRole>(options =>
 var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>()!;
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 
+// Stripe Configuration
+builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("StripeSettings"));
+
+// Cloudinary Configuration
+builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("CloudinarySettings"));
+
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
