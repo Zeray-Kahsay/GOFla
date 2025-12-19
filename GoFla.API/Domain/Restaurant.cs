@@ -15,5 +15,5 @@ public class Restaurant
     public DateTime? UpdatedAt { get; set; }
 
     // Navigation properties
-    public virtual ICollection<MenuItem> MenuItems { get; set; } = new List<MenuItem>();
+    public virtual ICollection<MenuItem> MenuItems { get; set; } = [];
 }

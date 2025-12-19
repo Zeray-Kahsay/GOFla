@@ -5,7 +5,6 @@ namespace GoFla.API.Domain;
 public class Address
 {
     public int Id { get; set; }
-    public string UserId { get; set; } = string.Empty;
     public string Label { get; set; } = string.Empty; // e.g., "Home", "Work"
     public string Street { get; set; } = string.Empty;
     public string City { get; set; } = string.Empty;
@@ -15,5 +14,6 @@ public class Address
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     // Navigation properties
-    public virtual User User { get; set; } = null!;
+    public  User User { get; set; } = null!;
+    public string UserId { get; set; } = string.Empty;
 }

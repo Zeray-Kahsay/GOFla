@@ -11,8 +11,10 @@ public class User : IdentityUser
     public DateTime? UpdatedAt { get; set; }
 
     // Navigation properties
-    public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
-    public virtual ICollection<Address> Addresses { get; set; } = new List<Address>();
-    public virtual Cart? Cart { get; set; }
+    public ICollection<Order> Orders { get; set; } = [];
+    public ICollection<Address> Addresses { get; set; } = [];
+    public ICollection<AppUserRole> UserRoles { get; set; } = [];
+
+    public Cart? Cart { get; set; }
 }
 

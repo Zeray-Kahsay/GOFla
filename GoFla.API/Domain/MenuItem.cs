@@ -9,12 +9,12 @@ public class MenuItem
     public string ImageUrl { get; set; } = string.Empty;
     public string Category { get; set; } = string.Empty;
     public bool IsAvailable { get; set; } = true;
-    public int RestaurantId { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAt { get; set; }
 
     // Navigation properties
-    public virtual Restaurant Restaurant { get; set; } = null!;
-    public virtual ICollection<CartItem> CartItems { get; set; } = new List<CartItem>();
-    public virtual ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
+    public Restaurant Restaurant { get; set; } = null!;
+    public int RestaurantId { get; set; }
+    public ICollection<CartItem> CartItems { get; set; } = [];
+    public ICollection<OrderItem> OrderItems { get; set; } = [];
 }

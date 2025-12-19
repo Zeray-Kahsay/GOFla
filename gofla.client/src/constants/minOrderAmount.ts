@@ -1,0 +1,1 @@
+export const MIN_ORDER_AMOUNT = 10; // $10 minimum

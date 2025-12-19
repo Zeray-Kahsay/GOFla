@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GoFla.API.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251208235049_InitialCreate")]
+    [Migration("20251219205057_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -185,44 +185,63 @@ namespace GoFla.API.Data.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
 
                     b.Property<int>("DeliveryAddressId")
                         .HasColumnType("int");
 
                     b.Property<decimal>("DeliveryFee")
-                        .HasColumnType("decimal(18,2)");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("decimal(18,2)")
+                        .HasDefaultValue(0m);
 
                     b.Property<string>("OrderNumber")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
-                    b.Property<int>("PaymentStatus")
-                        .HasColumnType("int");
+                    b.Property<string>("PaymentStatus")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(450)")
+                        .HasDefaultValue("Pending");
 
                     b.Property<int>("RestaurantId")
                         .HasColumnType("int");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(450)")
+                        .HasDefaultValue("Pending");
 
                     b.Property<string>("StripePaymentIntentId")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<decimal>("SubTotal")
-                        .HasColumnType("decimal(18,2)");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("decimal(18,2)")
+                        .HasDefaultValue(0m);
 
                     b.Property<decimal>("Tax")
-                        .HasColumnType("decimal(18,2)");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("decimal(18,2)")
+                        .HasDefaultValue(0m);
 
                     b.Property<decimal>("TotalAmount")
-                        .HasColumnType("decimal(18,2)");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("decimal(18,2)")
+                        .HasDefaultValue(0m);
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("UserId")
                         .IsRequired()
+                        .HasMaxLength(450)
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
@@ -234,11 +253,15 @@ namespace GoFla.API.Data.Migrations
                     b.HasIndex("OrderNumber")
                         .IsUnique();
 
+                    b.HasIndex("PaymentStatus");
+
                     b.HasIndex("RestaurantId");
+
+                    b.HasIndex("Status");
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Orders");
+                    b.ToTable("Orders", (string)null);
                 });
 
             modelBuilder.Entity("GoFla.API.Domain.OrderItem", b =>
@@ -252,6 +275,9 @@ namespace GoFla.API.Data.Migrations
                     b.Property<int>("MenuItemId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("MenuItemId1")
+                        .HasColumnType("int");
+
                     b.Property<int>("OrderId")
                         .HasColumnType("int");
 
@@ -259,18 +285,26 @@ namespace GoFla.API.Data.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("Quantity")
-                        .HasColumnType("int");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(1);
 
                     b.Property<string>("SpecialInstructions")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("MenuItemId");
 
+                    b.HasIndex("MenuItemId1");
+
                     b.HasIndex("OrderId");
 
-                    b.ToTable("OrderItems");
+                    b.HasIndex("OrderId", "MenuItemId")
+                        .IsUnique();
+
+                    b.ToTable("OrderItems", (string)null);
                 });
 
             modelBuilder.Entity("GoFla.API.Domain.RefreshToken", b =>
@@ -450,6 +484,11 @@ namespace GoFla.API.Data.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
+                        .HasMaxLength(13)
+                        .HasColumnType("nvarchar(13)");
+
                     b.Property<string>("Name")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
@@ -466,6 +505,10 @@ namespace GoFla.API.Data.Migrations
                         .HasFilter("[NormalizedName] IS NOT NULL");
 
                     b.ToTable("AspNetRoles", (string)null);
+
+                    b.HasDiscriminator().HasValue("IdentityRole");
+
+                    b.UseTphMappingStrategy();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -548,11 +591,20 @@ namespace GoFla.API.Data.Migrations
                     b.Property<string>("RoleId")
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
+                        .HasMaxLength(34)
+                        .HasColumnType("nvarchar(34)");
+
                     b.HasKey("UserId", "RoleId");
 
                     b.HasIndex("RoleId");
 
                     b.ToTable("AspNetUserRoles", (string)null);
+
+                    b.HasDiscriminator().HasValue("IdentityUserRole<string>");
+
+                    b.UseTphMappingStrategy();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
@@ -572,6 +624,20 @@ namespace GoFla.API.Data.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
+                });
+
+            modelBuilder.Entity("GoFla.API.Domain.AppRole", b =>
+                {
+                    b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityRole");
+
+                    b.HasDiscriminator().HasValue("AppRole");
+                });
+
+            modelBuilder.Entity("GoFla.API.Domain.AppUserRole", b =>
+                {
+                    b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityUserRole<string>");
+
+                    b.HasDiscriminator().HasValue("AppUserRole");
                 });
 
             modelBuilder.Entity("GoFla.API.Domain.Address", b =>
@@ -632,19 +698,22 @@ namespace GoFla.API.Data.Migrations
                         .WithMany()
                         .HasForeignKey("DeliveryAddressId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK_Orders_DeliveryAddress");
 
                     b.HasOne("GoFla.API.Domain.Restaurant", "Restaurant")
                         .WithMany()
                         .HasForeignKey("RestaurantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("FK_Orders_Restaurant");
 
                     b.HasOne("GoFla.API.Domain.User", "User")
                         .WithMany("Orders")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK_Orders_User");
 
                     b.Navigation("DeliveryAddress");
 
@@ -656,16 +725,22 @@ namespace GoFla.API.Data.Migrations
             modelBuilder.Entity("GoFla.API.Domain.OrderItem", b =>
                 {
                     b.HasOne("GoFla.API.Domain.MenuItem", "MenuItem")
-                        .WithMany("OrderItems")
+                        .WithMany()
                         .HasForeignKey("MenuItemId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("FK_OrderItems_MenuItem");
+
+                    b.HasOne("GoFla.API.Domain.MenuItem", null)
+                        .WithMany("OrderItems")
+                        .HasForeignKey("MenuItemId1");
 
                     b.HasOne("GoFla.API.Domain.Order", "Order")
                         .WithMany("Items")
                         .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_OrderItems_Order");
 
                     b.Navigation("MenuItem");
 
@@ -717,12 +792,6 @@ namespace GoFla.API.Data.Migrations
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("GoFla.API.Domain.User", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
@@ -732,6 +801,25 @@ namespace GoFla.API.Data.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("GoFla.API.Domain.AppUserRole", b =>
+                {
+                    b.HasOne("GoFla.API.Domain.AppRole", "Role")
+                        .WithMany("UserRoles")
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("GoFla.API.Domain.User", "User")
+                        .WithMany("UserRoles")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Role");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("GoFla.API.Domain.Cart", b =>
@@ -763,6 +851,13 @@ namespace GoFla.API.Data.Migrations
                     b.Navigation("Cart");
 
                     b.Navigation("Orders");
+
+                    b.Navigation("UserRoles");
+                });
+
+            modelBuilder.Entity("GoFla.API.Domain.AppRole", b =>
+                {
+                    b.Navigation("UserRoles");
                 });
 #pragma warning restore 612, 618
         }

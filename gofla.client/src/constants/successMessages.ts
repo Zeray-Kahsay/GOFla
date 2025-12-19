@@ -1,0 +1,15 @@
+export const SUCCESS_MESSAGES = {
+  LOGIN: 'Welcome back!',
+  REGISTER: 'Account created successfully!',
+  LOGOUT: 'Logged out successfully.',
+  ORDER_PLACED: 'Order placed successfully!',
+  REVIEW_SUBMITTED: 'Review submitted successfully!',
+  ITEM_ADDED: 'Item added to cart.',
+  ITEM_REMOVED: 'Item removed from cart.',
+  FAVORITE_ADDED: 'Added to favorites.',
+  FAVORITE_REMOVED: 'Removed from favorites.',
+  PASSWORD_CHANGED: 'Password changed successfully.',
+  ADDRESS_ADDED: 'Address added successfully.',
+  ADDRESS_UPDATED: 'Address updated successfully.',
+  ADDRESS_DELETED: 'Address deleted successfully.',
+} as const;

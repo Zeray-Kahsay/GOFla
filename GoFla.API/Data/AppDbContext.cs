@@ -1,4 +1,5 @@
 using GoFla.API.Domain;
+using GoFla.API.Data.Configurations;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -40,6 +41,20 @@ public class AppDbContext : IdentityDbContext<User>
                 .OnDelete(DeleteBehavior.Cascade);
         });
 
+        // User and user-roles config 
+
+        builder.Entity<User>()
+                     .HasMany(au => au.UserRoles)
+                     .WithOne(ur => ur.User)
+                     .HasForeignKey(ur => ur.UserId)
+                     .IsRequired();
+
+        builder.Entity<AppRole>()
+               .HasMany(ap => ap.UserRoles)
+               .WithOne(ur => ur.Role)
+               .HasForeignKey(ar => ar.RoleId)
+               .IsRequired();
+
         // Restaurant configuration
         builder.Entity<Restaurant>(entity =>
         {
@@ -72,34 +87,10 @@ public class AppDbContext : IdentityDbContext<User>
         });
 
         // Order configuration
-        builder.Entity<Order>(entity =>
-        {
-            entity.Property(o => o.SubTotal).HasColumnType("decimal(18,2)");
-            entity.Property(o => o.DeliveryFee).HasColumnType("decimal(18,2)");
-            entity.Property(o => o.Tax).HasColumnType("decimal(18,2)");
-            entity.Property(o => o.TotalAmount).HasColumnType("decimal(18,2)");
-
-            entity.HasIndex(o => o.OrderNumber).IsUnique();
-            entity.HasIndex(o => o.UserId);
-            entity.HasIndex(o => o.CreatedAt);
-
-            entity.HasMany(o => o.Items)
-                .WithOne(oi => oi.Order)
-                .HasForeignKey(oi => oi.OrderId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            entity.HasOne(o => o.DeliveryAddress)
-                .WithMany()
-                .HasForeignKey(o => o.DeliveryAddressId)
-                .OnDelete(DeleteBehavior.Restrict);
-        });
+        builder.ApplyConfiguration(new OrderConfiguration());
 
         // OrderItem configuration
-        builder.Entity<OrderItem>(entity =>
-        {
-            entity.Property(oi => oi.Price)
-                .HasColumnType("decimal(18,2)");
-        });
+        builder.ApplyConfiguration(new OrderItemConfiguration());
     }
 
 }

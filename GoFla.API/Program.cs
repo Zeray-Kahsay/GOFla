@@ -4,14 +4,17 @@ using FluentValidation.AspNetCore;
 using GoFla.API.Configuration;
 using GoFla.API.Data;
 using GoFla.API.Domain;
+using GoFla.API.Extensions;
 using GoFla.API.Middleware;
 using GoFla.API.Repositories;
 using GoFla.API.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
+
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -57,12 +60,18 @@ builder.Services.AddSwaggerGen(options =>
     // });
 });
 
+// Configure file upload limits
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 10 * 1024 * 1024; // 10 MB
+});
+
 // Database
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Identity
-builder.Services.AddIdentity<User, IdentityRole>(options =>
+builder.Services.AddIdentityCore<User>(options =>
 {
     // Password settings
     options.Password.RequireDigit = true;
@@ -79,8 +88,12 @@ builder.Services.AddIdentity<User, IdentityRole>(options =>
     options.User.RequireUniqueEmail = true;
     options.SignIn.RequireConfirmedEmail = false; // will be Set to true in production
 })
-.AddEntityFrameworkStores<AppDbContext>()
-.AddDefaultTokenProviders();
+    .AddRoles<AppRole>()
+    .AddRoleManager<RoleManager<AppRole>>()
+    .AddSignInManager<SignInManager<User>>()
+    .AddRoleValidator<RoleValidator<AppRole>>()
+    .AddEntityFrameworkStores<AppDbContext>()
+    .AddDefaultTokenProviders();
 
 // JWT Configuration
 var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>()!;
@@ -189,5 +202,7 @@ app.UseAuthorization();
 app.UseExceptionHandler();
 
 app.MapControllers();
+
+await app.MigrateDatabase(); // Extension method to migrate database and seed data
 
 app.Run();
