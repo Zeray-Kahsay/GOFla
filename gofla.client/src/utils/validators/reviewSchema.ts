@@ -14,3 +14,5 @@ export const reviewSchema = z.object({
     .min(10, 'Comment must be at least 10 characters')
     .max(1000, 'Comment is too long'),
 });
+
+export type ReviewFormData = z.infer< typeof reviewSchema>;

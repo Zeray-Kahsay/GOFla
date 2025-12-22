@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useAppDispatch } from '../../app/store/store';
 import { useRegisterMutation } from '../../app/api/auth/authApi';
-import { registerSchema, type RegisterFormData } from '../../utils/registerSchema';
+import { registerSchema, type RegisterFormData } from '../../utils/validators/registerSchema';
 import { setCredentials } from '../../app/store/slices/authSlice';
 import { toast } from 'react-toastify';
 import { Input } from '../../app/layout/ui/Input';
@@ -127,7 +127,7 @@ export function RegisterModal({ isOpen, onClose, onSwitchToLogin }: RegisterModa
             </label>
           </div>
 
-          <Button type="submit" isLoading={isLoading} className="w-full">
+          <Button type="submit" isLoading={isLoading} className="w-full bg-amber-500 hover:bg-amber-600">
             Create Account
           </Button>
         </form>
@@ -138,7 +138,7 @@ export function RegisterModal({ isOpen, onClose, onSwitchToLogin }: RegisterModa
               Already have an account?{' '}
               <button
                 onClick={onSwitchToLogin}
-                className="text-primary-600 hover:text-primary-700 font-medium"
+                className="text-primary-600 hover:text-primary-700 font-medium "
               >
                 Sign in
               </button>

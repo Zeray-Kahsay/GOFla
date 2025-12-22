@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "react-router-dom"
 import { useAppDispatch } from "../../app/store/store";
 import { useLoginMutation } from "../../app/api/auth/authApi";
-import { loginSchema, type LoginFormData } from "../../utils/validators";
+import { loginSchema, type LoginFormData } from "../../utils/validators/loginSchema";
 import {useForm} from 'react-hook-form';
 import {zodResolver } from '@hookform/resolvers/zod';
 import { toast } from "react-toastify";

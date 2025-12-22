@@ -1,5 +1,7 @@
 import { Outlet } from "react-router-dom"
 import {Header} from "./Header"
+import { Footer } from "./Footer"
+import { CartSidebar } from "../../features/cart/CartSidebar"
 
 function App() {
   return (
@@ -9,6 +11,9 @@ function App() {
   <div>
     <Outlet />
   </div>
+  
+  <Footer />
+  <CartSidebar />
     </>
   )
 }

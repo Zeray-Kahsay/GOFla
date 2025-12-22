@@ -33,13 +33,12 @@ export function Header() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 bg-white border-b shadow-sm">
+      <header className="sticky top-0 z-40 bg-amber-300 border-b shadow-sm">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <Link to="/" className="flex items-center gap-2">
               <div className="w-10 h-10 bg-primary-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-xl">FO</span>
               </div>
               <span className="text-xl font-bold text-gray-900 hidden sm:block">
                 GO-FLA
@@ -147,7 +146,7 @@ export function Header() {
                   </div>
                 </>
               ) : (
-                <Button onClick={openLogin}>Sign In</Button>
+                <Button onClick={openLogin} className="font-serif">Sign In</Button>
               )}
 
               {/* Mobile Menu Toggle */}
@@ -207,8 +206,6 @@ export function Header() {
           )}
         </div>
       </header>
-
-      {/* Auth Modals */}
       <LoginModal 
         isOpen={showLogin} 
         onClose={closeAll} 

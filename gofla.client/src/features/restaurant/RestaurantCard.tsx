@@ -1,11 +1,11 @@
 import { Link } from 'react-router-dom';
 import { Clock, DollarSign, Heart } from 'lucide-react';
-import { Restaurant } from '@/types';
-import { formatCurrency } from '@/utils/formatters';
-import { useAddFavoriteMutation, useRemoveFavoriteMutation } from '@/store/api/favoriteApi';
-import { useAuth } from '@/hooks/useAuth';
-import { toast } from '@/utils/toast';
 import { Rating } from '../../app/layout/ui/Rating';
+import type { Restaurant } from '../../types/restaurant';
+import { useAuth } from '../../hooks/useAuth';
+import { useAddFavoriteMutation, useRemoveFavoriteMutation } from '../../app/api/favorite/FavoriteApi';
+import { toast } from 'react-toastify';
+import { formatCurrency } from '../../utils/formatters';
 
 interface RestaurantCardProps {
   restaurant: Restaurant;

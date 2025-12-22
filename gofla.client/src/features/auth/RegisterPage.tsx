@@ -2,7 +2,7 @@ import { Link, useNavigate } from "react-router-dom"
 import { useAppDispatch } from "../../app/store/store";
 import { useRegisterMutation } from "../../app/api/auth/authApi";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { registerSchema, type RegisterFormData } from "../../utils/registerSchema";
+import { registerSchema, type RegisterFormData } from "../../utils/validators/registerSchema";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import { setCredentials } from "../../app/store/slices/authSlice";

@@ -3,7 +3,7 @@ import App from "../layout/App";
 import HomePage from "../../features/home/HomePage";
 import LoginPage from "../../features/auth/LoginPage";
 import RegisterPage from "../../features/auth/RegisterPage";
-import Footer from "../layout/Footer";
+import {Footer} from "../layout/Footer";
 
 export const router = createBrowserRouter([
     {

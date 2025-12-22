@@ -2,7 +2,7 @@ import { toast } from "react-toastify";
 import { Button } from "../../app/layout/ui/Button";
 import { Input } from "../../app/layout/ui/Input";
 import { setCredentials } from "../../app/store/slices/authSlice";
-import { loginSchema, type LoginFormData } from "../../utils/validators";
+import { loginSchema, type LoginFormData } from "../../utils/validators/loginSchema";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAppDispatch } from "../../app/store/store";
@@ -139,7 +139,7 @@ export function LoginModal({ isOpen, onClose, onSwitchToRegister }: LoginModalPr
             </button>
           </div>
 
-          <Button type="submit" isLoading={isLoading} className="w-full">
+          <Button type="submit" isLoading={isLoading} className="w-full bg-amber-500 hover:bg-amber-600">
             Sign In
           </Button>
         </form>

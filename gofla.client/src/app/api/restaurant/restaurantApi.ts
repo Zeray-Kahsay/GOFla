@@ -16,13 +16,10 @@ export const restaurantApi = apiSlice.injectEndpoints({
         url: '/restaurants',
         params,
       }),
-      providesTags: (result) =>
-        result
-          ? [
-              ...result.items.map(({ id }) => ({ type: 'Restaurant' as const, id })),
-              { type: 'Restaurant', id: 'LIST' },
-            ]
-          : [{ type: 'Restaurant', id: 'LIST' }],
+      providesTags: (result) => [
+        ...(result?.items?.map(({ id }) => ({ type: 'Restaurant' as const, id })) ?? []),
+        { type: 'Restaurant', id: 'LIST' },
+      ],
     }),
     getRestaurantById: builder.query<Restaurant, number>({
       query: (id) => `/restaurants/${id}`,
