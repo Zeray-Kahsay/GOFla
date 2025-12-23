@@ -3,9 +3,11 @@ using GoFla.API.Domain;
 using GoFla.API.DTOs.Address;
 using GoFla.API.DTOs.Auth;
 using GoFla.API.DTOs.Cart;
+using GoFla.API.DTOs.Favorites;
 using GoFla.API.DTOs.MenuItems;
 using GoFla.API.DTOs.Orders;
 using GoFla.API.DTOs.Restaurants;
+using GoFla.API.DTOs.Review;
 
 namespace GoFla.API.Extensions;
 
@@ -130,6 +132,51 @@ public static class MappingExtensions
             State = address.State,
             ZipCode = address.ZipCode,
             IsDefault = address.IsDefault
+        };
+    }
+
+    // Review mappings
+    public static ReviewDto ToDto(this Review review)
+    {
+        return new ReviewDto
+        {
+            Id = review.Id,
+            UserId = review.UserId,
+            UserName = $"{review.User.FirstName} {review.User.LastName}",
+            UserProfileImage = review.User.ProfileImageUrl,
+            RestaurantId = review.RestaurantId,
+            RestaurantName = review.Restaurant?.Name ?? string.Empty,
+            Rating = review.Rating,
+            Title = review.Title,
+            Comment = review.Comment,
+            CreatedAt = review.CreatedAt,
+            Responses = review.Responses.Select(r => r.ToDto()).ToList()
+        };
+    }
+
+    public static ReviewResponseDto ToDto(this ReviewResponse response)
+    {
+        return new ReviewResponseDto
+        {
+            Id = response.Id,
+            ResponderName = $"{response.Responder.FirstName} {response.Responder.LastName}",
+            ResponseText = response.ResponseText,
+            CreatedAt = response.CreatedAt
+        };
+    }
+
+    // Favorite mappings
+    public static FavoriteDto ToDto(this Favorite favorite)
+    {
+        return new FavoriteDto
+        {
+            Id = favorite.Id,
+            RestaurantId = favorite.RestaurantId,
+            RestaurantName = favorite.Restaurant.Name,
+            RestaurantImage = favorite.Restaurant.ImageUrl,
+            RestaurantAddress = favorite.Restaurant.Address,
+            DeliveryFee = favorite.Restaurant.DeliveryFee,
+            CreatedAt = favorite.CreatedAt
         };
     }
 }

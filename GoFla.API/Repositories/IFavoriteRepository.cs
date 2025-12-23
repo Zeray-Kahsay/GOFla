@@ -4,7 +4,7 @@ using GoFla.API.Domain;
 
 namespace GoFla.API.Repositories;
 
-public interface IFavoriteRepository
+public interface IFavoriteRepository : IRepository<Favorite>
 {
     Task<PagedResult<Favorite>> GetUserFavoritesAsync(string userId, string? cursor, int pageSize, CancellationToken cancellationToken = default);
     Task<Favorite?> GetByUserAndRestaurantAsync(string userId, int restaurantId, CancellationToken cancellationToken = default);

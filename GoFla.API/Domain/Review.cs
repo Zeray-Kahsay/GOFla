@@ -22,5 +22,5 @@ public class Review
     public int RestaurantId { get; set; }
     public Order? Order { get; set; }
     public int? OrderId { get; set; } // Link to order to verify purchase
-    public ICollection<ReviewResponse> Responses {get; set;}
+    public ICollection<ReviewResponse> Responses { get; set; } = [];
 }

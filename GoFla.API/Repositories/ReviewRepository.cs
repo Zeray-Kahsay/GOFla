@@ -6,8 +6,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GoFla.API.Repositories;
 
-public class ReviewRepository(AppDbContext context) : Repository<Review>(context), IReviewRepository
+public class ReviewRepository : Repository<Review>, IReviewRepository
 {
+    public ReviewRepository(AppDbContext _context) : base(_context){}
+   
     public async Task<PagedResult<Review>> GetRestaurantReviewsAsync(int restaurantId, string? cursor, int pageSize, CancellationToken cancellationToken = default)
     {
         return await GetPagedAsync(
@@ -34,7 +36,7 @@ public class ReviewRepository(AppDbContext context) : Repository<Review>(context
 
     public async Task<Review?> GetWithDetailsAsync(int id, CancellationToken cancellationToken = default)
     {
-       return await context.Reviews
+       return await _context.Reviews
             .Include(r => r.User)
             .Include(r => r.Restaurant)
             .Include(r => r.Responses)
@@ -46,14 +48,14 @@ public class ReviewRepository(AppDbContext context) : Repository<Review>(context
 
     public async Task<bool> HasUserReviewedRestaurantAsync(string userId, int restaurantId, CancellationToken cancellationToken = default)
     {
-       return await context.Reviews
+       return await _context.Reviews
             .AnyAsync(r => r.UserId == userId && r.RestaurantId == restaurantId, cancellationToken);
     }
 
 
     public async Task<double> GetAverageRatingAsync(int restaurantId, CancellationToken cancellationToken = default)
     {
-        var reviews = await context.Reviews
+        var reviews = await _context.Reviews
                   .Where(r => r.RestaurantId == restaurantId && r.IsApproved && !r.IsFlagged)
                   .ToListAsync(cancellationToken);
 
@@ -62,7 +64,7 @@ public class ReviewRepository(AppDbContext context) : Repository<Review>(context
 
     public async Task<Dictionary<int, int>> GetRatingDistributionAsync(int restaurantId, CancellationToken cancellationToken = default)
     {
-        var distribution = await context.Reviews
+        var distribution = await _context.Reviews
                 .Where(r => r.RestaurantId == restaurantId && r.IsApproved && !r.IsFlagged)
                 .GroupBy(r => r.Rating)
                 .Select(g => new {Rating = g.Key, Count = g.Count()})
