@@ -17,6 +17,10 @@ public class AppDbContext : IdentityDbContext<User>
     public DbSet<OrderItem> OrderItems { get; set; } = null!;
     public DbSet<Address> Addresses { get; set; } = null!;
     public DbSet<RefreshToken> RefreshTokens { get; set; } = null!;
+    public DbSet<Review> Reviews { get; set; }
+    public DbSet<ReviewResponse> ReviewResponses { get; set; }
+    public DbSet<Favorite> Favorites { get; set; }
+
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -44,10 +48,10 @@ public class AppDbContext : IdentityDbContext<User>
         // User and user-roles config 
 
         builder.Entity<User>()
-                     .HasMany(au => au.UserRoles)
-                     .WithOne(ur => ur.User)
-                     .HasForeignKey(ur => ur.UserId)
-                     .IsRequired();
+                .HasMany(au => au.UserRoles)
+                .WithOne(ur => ur.User)
+                .HasForeignKey(ur => ur.UserId)
+                .IsRequired();
 
         builder.Entity<AppRole>()
                .HasMany(ap => ap.UserRoles)
@@ -86,12 +90,71 @@ public class AppDbContext : IdentityDbContext<User>
                 .OnDelete(DeleteBehavior.Cascade);
         });
 
+        // Review configuration
+        builder.Entity<Review>(entity =>
+        {
+            entity.HasIndex(r => r.RestaurantId);
+            entity.HasIndex(r => r.UserId);
+            entity.HasIndex(r => new { r.RestaurantId, r.UserId });
+
+            entity.Property(r => r.Rating)
+                .IsRequired();
+
+            entity.HasOne(r => r.User)
+                .WithMany()
+                .HasForeignKey(r => r.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(r => r.Restaurant)
+                .WithMany()
+                .HasForeignKey(r => r.RestaurantId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(r => r.Order)
+                .WithMany()
+                .HasForeignKey(r => r.OrderId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasMany(r => r.Responses)
+                .WithOne(rr => rr.Review)
+                .HasForeignKey(rr => rr.ReviewId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // Favorite configuration
+        builder.Entity<Favorite>(entity =>
+        {
+            entity.HasIndex(f => new { f.UserId, f.RestaurantId })
+            .IsUnique();
+
+            entity.HasOne(f => f.User)
+                .WithMany()
+                .HasForeignKey(f => f.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(f => f.Restaurant)
+                .WithMany()
+                .HasForeignKey(f => f.RestaurantId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // ReviewResponse configuration
+        builder.Entity<ReviewResponse>(entity =>
+        {
+            entity.HasOne(rr => rr.Responder)
+              .WithMany()
+              .HasForeignKey(rr => rr.ResponderId)
+              .OnDelete(DeleteBehavior.Restrict);
+        });
+
         // Order configuration
         builder.ApplyConfiguration(new OrderConfiguration());
 
         // OrderItem configuration
         builder.ApplyConfiguration(new OrderItemConfiguration());
     }
+
+
 
 }
 

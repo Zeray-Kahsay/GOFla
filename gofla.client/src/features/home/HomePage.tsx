@@ -46,7 +46,7 @@ export default function HomePage() {
       <section className="mb-12">
         <h2 className="text-2xl font-bold text-gray-900 mb-6">Popular Categories</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          {['Pizza', 'Burger', 'Sushi', 'Chinese', 'Italian', 'Mexican'].map((category) => (
+          {['Pizza', 'Burger', 'Sushi', 'Habesha', 'Italian', 'Mexican'].map((category) => (
             <button
               key={category}
               className="p-4 bg-white rounded-lg shadow hover:shadow-md transition-shadow text-center"

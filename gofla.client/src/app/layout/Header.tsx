@@ -9,8 +9,8 @@ import { Heart, LogOut, Menu, ShoppingCart, User, X } from "lucide-react";
 import { Button } from "./ui/Button";
 import { LoginModal } from "../../features/auth/LoginModal";
 import { RegisterModal } from "../../features/auth/RegisterModal";
-import SearchBar from "./SearchBar";
 import { useAuthModal } from "../../hooks/useAuthModal";
+import { SearchBar } from "./SearchBar";
 
 export function Header() {
   const dispatch = useAppDispatch();
@@ -112,7 +112,7 @@ export function Header() {
                       
                       <Link
                         to="/profile"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                        className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
                       >
                         <User size={16} />
                         My Profile
