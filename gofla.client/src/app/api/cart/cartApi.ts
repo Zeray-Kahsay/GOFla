@@ -16,12 +16,12 @@ interface UpdateCartItemRequest {
 export const cartApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getCart: builder.query<Cart, void>({
-      query: () => '/cart',
+      query: () => '/carts',
       providesTags: ['Cart'],
     }),
     addToCart: builder.mutation<Cart, AddToCartRequest>({
       query: (item) => ({
-        url: '/cart/items',
+        url: '/carts/items',
         method: 'POST',
         body: item,
       }),
@@ -29,7 +29,7 @@ export const cartApi = apiSlice.injectEndpoints({
     }),
     updateCartItem: builder.mutation<Cart, { cartItemId: number; data: UpdateCartItemRequest }>({
       query: ({ cartItemId, data }) => ({
-        url: `/cart/items/${cartItemId}`,
+        url: `/carts/items/${cartItemId}`,
         method: 'PUT',
         body: data,
       }),
@@ -37,14 +37,14 @@ export const cartApi = apiSlice.injectEndpoints({
     }),
     removeCartItem: builder.mutation<Cart, number>({
       query: (cartItemId) => ({
-        url: `/cart/items/${cartItemId}`,
+        url: `/carts/items/${cartItemId}`,
         method: 'DELETE',
       }),
       invalidatesTags: ['Cart'],
     }),
     clearCart: builder.mutation<void, void>({
       query: () => ({
-        url: '/cart/clear',
+        url: '/carts/clear',
         method: 'DELETE',
       }),
       invalidatesTags: ['Cart'],

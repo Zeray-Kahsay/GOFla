@@ -24,7 +24,7 @@ export function useCart(){
         isLoading,
         refetch,
         itemCount: cart?.totalItems || 0,
-        isEmpty: !cart || cart.items.length == 0,
+        isEmpty: !cart || cart.items?.length == 0,
     }
 
     

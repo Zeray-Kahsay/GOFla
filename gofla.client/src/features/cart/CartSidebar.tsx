@@ -45,7 +45,7 @@ export function CartSidebar() {
             <div className="flex items-center justify-center h-full">
               <p className="text-gray-500">Loading cart...</p>
             </div>
-          ) : !cart || cart.items.length === 0 ? (
+          ) : !cart || (cart.items?.length ?? 0) === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center">
               <ShoppingCart size={64} className="text-gray-300 mb-4" />
               <p className="text-gray-500 text-lg mb-2">Your cart is empty</p>
@@ -53,7 +53,7 @@ export function CartSidebar() {
             </div>
           ) : (
             <div>
-              {cart.items.map((item) => (
+              {cart.items?.map((item) => (
                 <CartItem key={item.id} item={item} />
               ))}
             </div>
@@ -61,14 +61,14 @@ export function CartSidebar() {
         </div>
         
         {/* Footer */}
-        {cart && cart.items.length > 0 && (
+        {cart && (cart.items?.length ?? 0) > 0 && (
           <div className="border-t p-4 space-y-4">
             <div className="flex justify-between text-lg font-bold">
               <span>Subtotal:</span>
               <span>{formatCurrency(cart.subTotal)}</span>
             </div>
             <Link to="/checkout" onClick={handleClose}>
-              <Button className="w-full" size="lg">
+              <Button className="w-full bg-green-500" size="lg">
                 Proceed to Checkout
               </Button>
             </Link>

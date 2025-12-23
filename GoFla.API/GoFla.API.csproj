@@ -28,6 +28,7 @@
     <Folder Include="DTOs\Favorites\" />
     <Folder Include="DTOs\Payment\" />
     <Folder Include="DTOs\Review\" />
+    <Folder Include="DTOs\Search\" />
   </ItemGroup>
 
 </Project>
