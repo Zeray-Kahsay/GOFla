@@ -17,11 +17,12 @@ export const cartApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getCart: builder.query<Cart, void>({
       query: () => '/carts',
+      transformResponse: (response: any) => response.data,
       providesTags: ['Cart'],
     }),
     addToCart: builder.mutation<Cart, AddToCartRequest>({
       query: (item) => ({
-        url: '/carts/items',
+        url: '/carts/add-item',
         method: 'POST',
         body: item,
       }),

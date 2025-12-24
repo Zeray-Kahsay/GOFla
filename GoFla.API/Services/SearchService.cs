@@ -3,18 +3,21 @@ using GoFla.API.Commons;
 using GoFla.API.Data;
 using GoFla.API.DTOs.Search;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace GoFla.API.Services;
 
-public class SearchService (AppDbContext _context, ILogger<SearchService> _logger) : ISearchService
+public class SearchService(AppDbContext _context, ILogger<SearchService> _logger) : ISearchService
 {
     public async Task<Result<SearchResultDto>> SearchAsync(
      SearchRequestDto dto,
      string? userId = null,
      CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(dto.Query))
+        _logger.LogInformation("SearchAsync called with Query='{Query}', UserId='{UserId}'", dto?.Query, userId);
+        if (string.IsNullOrWhiteSpace(dto?.Query))
         {
+            _logger.LogInformation("SearchAsync invalid query: '{Query}'", dto?.Query);
             return Result<SearchResultDto>.Failure("Search query is required", "INVALID_QUERY");
         }
 
@@ -23,9 +26,9 @@ public class SearchService (AppDbContext _context, ILogger<SearchService> _logge
         // Search restaurants
         var restaurantsQuery = _context.Restaurants
             .Where(r => r.IsActive && (
-                r.Name.ToLower().Contains(query) ||
-                r.Description.ToLower().Contains(query) ||
-                r.Address.ToLower().Contains(query)
+                r.Name.Contains(query, StringComparison.CurrentCultureIgnoreCase) ||
+                r.Description.Contains(query, StringComparison.CurrentCultureIgnoreCase) ||
+                r.Address.Contains(query, StringComparison.CurrentCultureIgnoreCase)
             ));
 
         var restaurants = await restaurantsQuery
@@ -53,9 +56,9 @@ public class SearchService (AppDbContext _context, ILogger<SearchService> _logge
         var menuItemsQuery = _context.MenuItems
             .Include(m => m.Restaurant)
             .Where(m => m.IsAvailable && m.Restaurant.IsActive && (
-                m.Name.ToLower().Contains(query) ||
-                m.Description.ToLower().Contains(query) ||
-                m.Category.ToLower().Contains(query)
+                m.Name.Contains(query, StringComparison.CurrentCultureIgnoreCase) ||
+                m.Description.Contains(query, StringComparison.CurrentCultureIgnoreCase) ||
+                m.Category.Contains(query, StringComparison.CurrentCultureIgnoreCase)
             ));
 
         if (dto.Category != null)
@@ -101,8 +104,10 @@ public class SearchService (AppDbContext _context, ILogger<SearchService> _logge
         string? userId = null,
         CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(dto.Query))
+        _logger.LogInformation("SearchRestaurantsAsync called with Query='{Query}', PageSize={PageSize}, UserId='{UserId}'", dto?.Query, dto?.PageSize, userId);
+        if (string.IsNullOrWhiteSpace(dto?.Query))
         {
+            _logger.LogInformation("SearchRestaurantsAsync invalid query: '{Query}'", dto?.Query);
             return Result<PagedResult<RestaurantSearchResultDto>>.Failure("Search query is required", "INVALID_QUERY");
         }
 
@@ -110,9 +115,9 @@ public class SearchService (AppDbContext _context, ILogger<SearchService> _logge
 
         var restaurantsQuery = _context.Restaurants
             .Where(r => r.IsActive && (
-                r.Name.ToLower().Contains(query) ||
-                r.Description.ToLower().Contains(query) ||
-                r.Address.ToLower().Contains(query)
+                r.Name.Contains(query, StringComparison.CurrentCultureIgnoreCase) ||
+                r.Description.Contains(query, StringComparison.CurrentCultureIgnoreCase) ||
+                r.Address.Contains(query, StringComparison.CurrentCultureIgnoreCase)
             ));
 
         // Apply filters
@@ -174,8 +179,10 @@ public class SearchService (AppDbContext _context, ILogger<SearchService> _logge
         SearchRequestDto dto,
         CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(dto.Query))
+        _logger.LogInformation("SearchMenuItemsAsync called with Query='{Query}', PageSize={PageSize}, Category='{Category}'", dto?.Query, dto?.PageSize, dto?.Category);
+        if (string.IsNullOrWhiteSpace(dto?.Query))
         {
+            _logger.LogInformation("SearchMenuItemsAsync invalid query: '{Query}'", dto?.Query);
             return Result<PagedResult<MenuItemSearchResultDto>>.Failure("Search query is required", "INVALID_QUERY");
         }
 
@@ -184,9 +191,9 @@ public class SearchService (AppDbContext _context, ILogger<SearchService> _logge
         var menuItemsQuery = _context.MenuItems
             .Include(m => m.Restaurant)
             .Where(m => m.IsAvailable && m.Restaurant.IsActive && (
-                m.Name.ToLower().Contains(query) ||
-                m.Description.ToLower().Contains(query) ||
-                m.Category.ToLower().Contains(query)
+                m.Name.Contains(query, StringComparison.CurrentCultureIgnoreCase) ||
+                m.Description.Contains(query, StringComparison.CurrentCultureIgnoreCase) ||
+                m.Category.Contains(query, StringComparison.CurrentCultureIgnoreCase)
             ));
 
         // Apply filters
@@ -242,6 +249,7 @@ public class SearchService (AppDbContext _context, ILogger<SearchService> _logge
 
     public async Task<Result<List<string>>> GetPopularSearchesAsync(CancellationToken cancellationToken = default)
     {
+        _logger.LogInformation("GetPopularSearchesAsync called");
         // This would typically come from a search analytics table
         // For now, return popular restaurant names
         var popularSearches = await _context.Restaurants
@@ -256,8 +264,10 @@ public class SearchService (AppDbContext _context, ILogger<SearchService> _logge
 
     public async Task<Result<List<string>>> GetSuggestionsAsync(string query, CancellationToken cancellationToken = default)
     {
+        _logger.LogInformation("GetSuggestionsAsync called with Query='{Query}'", query);
         if (string.IsNullOrWhiteSpace(query) || query.Length < 2)
         {
+            _logger.LogInformation("GetSuggestionsAsync returning empty suggestions for Query='{Query}'", query);
             return Result<List<string>>.Success(new List<string>());
         }
 

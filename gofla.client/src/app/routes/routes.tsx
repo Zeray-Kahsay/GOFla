@@ -10,6 +10,7 @@ import OrderDetailPage from "../../features/order/OrderDetailPage";
 import CheckoutPage from "../../features/checkout/CheckoutPage";
 import FavoritesPage from "../../features/favorite/FavoritesPage";
 import SearchPage from "../../features/search/SearchPage";
+import RestaurantPage from "../../features/restaurant/RestaurantPage";
 
 export const router = createBrowserRouter([
     {
@@ -25,6 +26,7 @@ export const router = createBrowserRouter([
             {path: '/profile', element: <ProfilePage />},
             {path: '/orders', element: <OrdersPage />},
             {path: '/orders/:id', element: <OrderDetailPage />},
+            {path: 'restaurant/:id', element: <RestaurantPage />},
             {path: '/checkout', element: <CheckoutPage />},
             {path: '/favorites', element: <FavoritesPage />},
             {path: '/profile', element: <ProfilePage />}

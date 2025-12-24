@@ -19,13 +19,18 @@ export const orderApi = apiSlice.injectEndpoints({
         url: '/orders',
         params,
       }),
-      providesTags: (result) =>
-        result
-          ? [
-              ...result.items.map(({ id }) => ({ type: 'Order' as const, id })),
-              { type: 'Order', id: 'LIST' },
-            ]
-          : [{ type: 'Order', id: 'LIST' }],
+      providesTags: (result) => {
+        const items = result?.items ?? [];
+
+        return [
+          ...items.map((order) => ({
+            type: "Order" as const,
+            id: order.id,
+          })),
+          {type: "Order" as const, id: "List"},
+        ];
+      },
+    
     }),
     getOrderById: builder.query<Order, number>({
       query: (id) => `/orders/${id}`,

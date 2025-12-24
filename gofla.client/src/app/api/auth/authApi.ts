@@ -32,6 +32,7 @@ export const authApi = apiSlice.injectEndpoints({
     }),
     getCurrentUser: builder.query<User, void>({
       query: () => '/auth/me',
+      transformResponse: (response: any) => response.data,
       providesTags: ['User'],
     }),
     externalLogin: builder.mutation<AuthResponse, { provider: string; accessToken: string }>({

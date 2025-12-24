@@ -130,13 +130,13 @@ public static class MappingExtensions
             Street = address.Street,
             City = address.City,
             State = address.State,
-            ZipCode = address.ZipCode,
+            CountryCode = address.CountryCode,
             IsDefault = address.IsDefault
         };
     }
 
     // Review mappings
-    public static ReviewDto ToDto(this Review review)
+    public static ReviewDto ToReviewDto(this Review review)
     {
         return new ReviewDto
         {
@@ -150,11 +150,11 @@ public static class MappingExtensions
             Title = review.Title,
             Comment = review.Comment,
             CreatedAt = review.CreatedAt,
-            Responses = review.Responses.Select(r => r.ToDto()).ToList()
+            Responses = review.Responses.Select(r => r.ToReviewResponseDto()).ToList()
         };
     }
 
-    public static ReviewResponseDto ToDto(this ReviewResponse response)
+    public static ReviewResponseDto ToReviewResponseDto(this ReviewResponse response)
     {
         return new ReviewResponseDto
         {
@@ -166,7 +166,7 @@ public static class MappingExtensions
     }
 
     // Favorite mappings
-    public static FavoriteDto ToDto(this Favorite favorite)
+    public static FavoriteDto ToFavoriteDto(this Favorite favorite)
     {
         return new FavoriteDto
         {

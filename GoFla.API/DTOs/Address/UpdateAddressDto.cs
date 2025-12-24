@@ -8,6 +8,8 @@ public record UpdateAddressDto
     public string Street { get; init; } = string.Empty;
     public string City { get; init; } = string.Empty;
     public string State { get; init; } = string.Empty;
-    public string ZipCode { get; init; } = string.Empty;
+    public string  CountryCode  { get; set; } = string.Empty;
+    public string  PostalCode  { get; set; } = string.Empty;
+    
     public bool IsDefault { get; init; }
 }

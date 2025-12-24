@@ -78,5 +78,17 @@ public class AddressesController (IAddressService addressService) : BaseControll
         return Ok(result);
     }
 
-    
+    [HttpPost("{id}/set-default")]
+    public async Task<IActionResult> SetDefaultAddress(int id, CancellationToken cancellationToken)
+    {
+        string userId = User.GetUserId() ?? string.Empty;
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized();
+
+        var result = await addressService.SetDefaultAsync(id, userId, cancellationToken);
+        return Ok(result);
+    }
+
+
+
 }

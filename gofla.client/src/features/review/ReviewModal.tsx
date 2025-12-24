@@ -106,7 +106,7 @@ export function ReviewModal({ restaurantId, orderId, isOpen, onClose }: ReviewMo
             <Button type="button" variant="outline" onClick={onClose} className="flex-1">
               Cancel
             </Button>
-            <Button type="submit" isLoading={isLoading} className="flex-1">
+            <Button type="submit" isLoading={isLoading} className="flex-1 bg-amber-500 hover:bg-amber-600">
               Submit Review
             </Button>
           </div>

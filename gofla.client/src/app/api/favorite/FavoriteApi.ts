@@ -1,7 +1,6 @@
 import type { Favorite } from "../../../types/favorite";
 import type { PagedResult } from "../../../types/pagedResult";
 import { apiSlice } from "../apiSlice";
-import { reviewApi } from "../review/ReviewApi";
 
 interface PaginationParams {
   cursor?: string;

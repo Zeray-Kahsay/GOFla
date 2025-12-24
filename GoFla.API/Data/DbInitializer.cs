@@ -67,6 +67,78 @@ public static class DbInitializer
           }
        },
          new Restaurant
+        {
+          Name = "Habesha Resto",
+          Description = "Delicious Habesha Dishes",
+          ImageUrl = "https://example.com/images/la-piazza.jpg",
+          Address = "12 Oslo Street, City",
+          Phone = "+4745454545",
+          DeliveryFee = 2.50m,
+          EstimatedDeliveryTime = 30,
+          IsActive = true,
+          CreatedAt = DateTime.UtcNow,
+          MenuItems = new List<MenuItem>
+          {
+            new() { Name = "Dero Wet", Description = "Chicken with spicy suace", Price = 9.99m, ImageUrl = "https://example.com/images/margherita.jpg", Category = "Pizza", IsAvailable = true, CreatedAt = DateTime.UtcNow },
+            new() { Name = "Tibis", Description = "Meat with Spicy tomato sauce, garlic, parsley", Price = 8.50m, ImageUrl = "https://example.com/images/penne.jpg", Category = "Pasta", IsAvailable = true, CreatedAt = DateTime.UtcNow },
+            new() { Name = "BeyeAynetu", Description = "Special selected vegitables with medium suace", Price = 5.50m, ImageUrl = "https://example.com/images/tiramisu.jpg", Category = "Dessert", IsAvailable = true, CreatedAt = DateTime.UtcNow }
+          }
+       },
+         new Restaurant
+        {
+          Name = "Grill Kebab",
+          Description = "Kebabs of different type",
+          ImageUrl = "https://example.com/images/la-piazza.jpg",
+          Address = "Nydalen near to StoroSenteret",
+          Phone = "+4745464849",
+          DeliveryFee = 2.50m,
+          EstimatedDeliveryTime = 30,
+          IsActive = true,
+          CreatedAt = DateTime.UtcNow,
+          MenuItems = new List<MenuItem>
+          {
+            new() { Name = "Margherita Pizza", Description = "Tomato, mozzarella, basil", Price = 9.99m, ImageUrl = "https://example.com/images/margherita.jpg", Category = "Pizza", IsAvailable = true, CreatedAt = DateTime.UtcNow },
+            new() { Name = "Penne Arrabbiata", Description = "Spicy tomato sauce, garlic, parsley", Price = 8.50m, ImageUrl = "https://example.com/images/penne.jpg", Category = "Pasta", IsAvailable = true, CreatedAt = DateTime.UtcNow },
+            new() { Name = "Tiramisu", Description = "Classic coffee mascarpone dessert", Price = 5.50m, ImageUrl = "https://example.com/images/tiramisu.jpg", Category = "Dessert", IsAvailable = true, CreatedAt = DateTime.UtcNow }
+          }
+       },
+         new Restaurant
+        {
+          Name = "La Piazza",
+          Description = "Authentic Neapolitan pizza and classic pastas.",
+          ImageUrl = "https://example.com/images/la-piazza.jpg",
+          Address = "12 Roma Street, City",
+          Phone = "+1-555-0101",
+          DeliveryFee = 2.50m,
+          EstimatedDeliveryTime = 30,
+          IsActive = true,
+          CreatedAt = DateTime.UtcNow,
+          MenuItems = new List<MenuItem>
+          {
+            new() { Name = "Margherita Pizza", Description = "Tomato, mozzarella, basil", Price = 9.99m, ImageUrl = "https://example.com/images/margherita.jpg", Category = "Pizza", IsAvailable = true, CreatedAt = DateTime.UtcNow },
+            new() { Name = "Penne Arrabbiata", Description = "Spicy tomato sauce, garlic, parsley", Price = 8.50m, ImageUrl = "https://example.com/images/penne.jpg", Category = "Pasta", IsAvailable = true, CreatedAt = DateTime.UtcNow },
+            new() { Name = "Tiramisu", Description = "Classic coffee mascarpone dessert", Price = 5.50m, ImageUrl = "https://example.com/images/tiramisu.jpg", Category = "Dessert", IsAvailable = true, CreatedAt = DateTime.UtcNow }
+          }
+       },
+         new Restaurant
+        {
+          Name = "La Piazza",
+          Description = "Authentic Neapolitan pizza and classic pastas.",
+          ImageUrl = "https://example.com/images/la-piazza.jpg",
+          Address = "12 Roma Street, City",
+          Phone = "+1-555-0101",
+          DeliveryFee = 2.50m,
+          EstimatedDeliveryTime = 30,
+          IsActive = true,
+          CreatedAt = DateTime.UtcNow,
+          MenuItems = new List<MenuItem>
+          {
+            new() { Name = "Margherita Pizza", Description = "Tomato, mozzarella, basil", Price = 9.99m, ImageUrl = "https://example.com/images/margherita.jpg", Category = "Pizza", IsAvailable = true, CreatedAt = DateTime.UtcNow },
+            new() { Name = "Penne Arrabbiata", Description = "Spicy tomato sauce, garlic, parsley", Price = 8.50m, ImageUrl = "https://example.com/images/penne.jpg", Category = "Pasta", IsAvailable = true, CreatedAt = DateTime.UtcNow },
+            new() { Name = "Tiramisu", Description = "Classic coffee mascarpone dessert", Price = 5.50m, ImageUrl = "https://example.com/images/tiramisu.jpg", Category = "Dessert", IsAvailable = true, CreatedAt = DateTime.UtcNow }
+          }
+       },
+         new Restaurant
        {
           Name = "Seoul Spice",
           Description = "Korean comfort food — bibimbap, Korean fried chicken, and more.",

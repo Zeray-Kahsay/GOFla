@@ -10,19 +10,33 @@ interface MenuItemsParams {
 
 export const menuItemApi = apiSlice.injectEndpoints({
     endpoints: (builder) => ({
-    getMenuItemsByRestaurant: builder.query<PagedResult<MenuItem>, MenuItemsParams>({
-      query: ({ restaurantId, ...params }) => ({
-        url: `/menuitems/restaurant/${restaurantId}`,
-        params,
-      }),
-      providesTags: (result, _error, { restaurantId }) =>
-        result
-          ? [
-              ...result.items.map(({ id }) => ({ type: 'MenuItem' as const, id })),
-              { type: 'MenuItem', id: `RESTAURANT-${restaurantId}` },
-            ]
-          : [{ type: 'MenuItem', id: `RESTAURANT-${restaurantId}` }],
-    }),
+      getMenuItemsByRestaurant: builder.query<PagedResult<MenuItem>, MenuItemsParams>({
+  query: ({ restaurantId, ...params }) => ({
+    url: `/menuitems/restaurant/${restaurantId}`,
+    params,
+  }),
+  transformResponse: (response: any) => response.data,
+  providesTags: (result, _error, { restaurantId }) => {
+    const items = result?.items ?? [];
+    return [
+      ...items.map(({ id }) => ({ type: "MenuItem" as const, id })),
+      { type: "MenuItem", id: `RESTAURANT-${restaurantId}` },
+    ];
+  },
+}),
+
+    // getMenuItemsByRestaurant: builder.query<PagedResult<MenuItem>, MenuItemsParams>({
+    //   query: ({ restaurantId, ...params }) => ({
+    //     url: `/menuitems/restaurant/${restaurantId}`,
+    //     params,
+    //   }),
+    //   providesTags: (result, _error, { restaurantId }) => {
+    //     const items = (result && (result as any).items) || (result && (result as any).data && (result as any).data.items) || [];
+    //     const tags = items.map(({ id }: any) => ({ type: 'MenuItem' as const, id }));
+    //     tags.push({ type: 'MenuItem', id: `RESTAURANT-${restaurantId}` });
+    //     return tags;
+    //   },
+    // }),
     getMenuItemById: builder.query<MenuItem, number>({
       query: (id) => `/menuitems/${id}`,
       providesTags: (_result, _error, id) => [{ type: 'MenuItem', id }],

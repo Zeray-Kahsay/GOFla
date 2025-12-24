@@ -20,7 +20,7 @@ public class ReviewService (
             return Result<ReviewDto>.Failure("Review not found", "NOT_FOUND");
         }
 
-        return Result<ReviewDto>.Success(review.ToDto());
+        return Result<ReviewDto>.Success(review.ToReviewDto());
     }
 
     public async Task<Result<PagedResult<ReviewDto>>> GetRestaurantReviewsAsync(
@@ -35,7 +35,7 @@ public class ReviewService (
             cancellationToken
         );
 
-        var dtos = pagedResult.Items.Select(r => r.ToDto()).ToList();
+        var dtos = pagedResult.Items.Select(r => r.ToReviewDto()).ToList();
 
         return Result<PagedResult<ReviewDto>>.Success(new PagedResult<ReviewDto>
         {
@@ -58,7 +58,7 @@ public class ReviewService (
             cancellationToken
         );
 
-        var dtos = pagedResult.Items.Select(r => r.ToDto()).ToList();
+        var dtos = pagedResult.Items.Select(r => r.ToReviewDto()).ToList();
 
         return Result<PagedResult<ReviewDto>>.Success(new PagedResult<ReviewDto>
         {
@@ -137,7 +137,7 @@ public class ReviewService (
 
         // Reload with details
         var reviewWithDetails = await reviewRepository.GetWithDetailsAsync(created.Id, cancellationToken);
-        return Result<ReviewDto>.Success(reviewWithDetails!.ToDto());
+        return Result<ReviewDto>.Success(reviewWithDetails!.ToReviewDto());
     }
 
     public async Task<Result<ReviewDto>> UpdateAsync(
@@ -165,7 +165,7 @@ public class ReviewService (
         await reviewRepository.UpdateAsync(review, cancellationToken);
 
         var updated = await reviewRepository.GetWithDetailsAsync(id, cancellationToken);
-        return Result<ReviewDto>.Success(updated!.ToDto());
+        return Result<ReviewDto>.Success(updated!.ToReviewDto());
     }
 
     public async Task<Result<bool>> DeleteAsync(int id, string userId, CancellationToken cancellationToken = default)
@@ -209,6 +209,6 @@ public class ReviewService (
         await reviewRepository.UpdateAsync(review, cancellationToken);
 
         var updated = await reviewRepository.GetWithDetailsAsync(reviewId, cancellationToken);
-        return Result<ReviewDto>.Success(updated!.ToDto());
+        return Result<ReviewDto>.Success(updated!.ToReviewDto());
     }
 }

@@ -57,7 +57,8 @@ public class AddressService(IRepository<Address> addressRepository, AppDbContext
             Street = dto.Street,
             City = dto.City,
             State = dto.State,
-            ZipCode = dto.ZipCode,
+            CountryCode = dto.CountryCode,
+            PostalCode = dto.PostalCode,
             IsDefault = dto.IsDefault,
             CreatedAt = DateTime.UtcNow
         };
@@ -91,7 +92,8 @@ public class AddressService(IRepository<Address> addressRepository, AppDbContext
         address.Street = dto.Street;
         address.City = dto.City;
         address.State = dto.State;
-        address.ZipCode = dto.ZipCode;
+        address.CountryCode = dto.CountryCode;
+        address.PostalCode = dto.PostalCode;
         address.IsDefault = dto.IsDefault;
 
         await addressRepository.UpdateAsync(address, cancellationToken);

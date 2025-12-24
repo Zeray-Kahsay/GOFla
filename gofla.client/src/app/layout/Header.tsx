@@ -1,7 +1,5 @@
 import { useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
-import { useCart } from "../../hooks/useCart";
-import { useAppDispatch } from "../store/store";
 import { logout } from "../store/slices/authSlice";
 import { Link } from "react-router-dom";
 import { openCart } from "../store/slices/cartSlice";
@@ -11,11 +9,19 @@ import { LoginModal } from "../../features/auth/LoginModal";
 import { RegisterModal } from "../../features/auth/RegisterModal";
 import { useAuthModal } from "../../hooks/useAuthModal";
 import { SearchBar } from "./SearchBar";
+import { useGetCartQuery } from "../api/cart/cartApi";
+import { useAppDispatch } from "../store/store";
 
 export function Header() {
   const dispatch = useAppDispatch();
   const { user, isAuthenticated } = useAuth();
-  const { itemCount } = useCart();
+  //const { itemCount } = useCart();
+  const {data: cart} = useGetCartQuery(undefined, {
+    skip: !isAuthenticated
+  });
+
+  const itemCount = cart?.totalItems ?? 0;
+ 
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const { 
     showLogin, 
@@ -62,7 +68,7 @@ export function Header() {
                   >
                     <ShoppingCart size={24} />
                     {itemCount > 0 && (
-                      <span className="absolute -top-1 -right-1 bg-primary-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                      <span className="absolute -top-1 -right-1 bg-primary-600 text-amber-800 text-xl font-bold rounded-full w-5 h-5 flex items-center justify-center">
                         {itemCount > 99 ? '99+' : itemCount}
                       </span>
                     )}
@@ -146,7 +152,7 @@ export function Header() {
                   </div>
                 </>
               ) : (
-                <Button onClick={openLogin} className="font-serif">Sign In</Button>
+                <Button onClick={openLogin} className="font-serif ">Sign In</Button>
               )}
 
               {/* Mobile Menu Toggle */}

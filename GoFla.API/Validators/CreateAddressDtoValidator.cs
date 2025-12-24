@@ -1,4 +1,5 @@
 using System;
+using System.Text.RegularExpressions;
 using FluentValidation;
 using GoFla.API.DTOs.Address;
 
@@ -24,8 +25,37 @@ public class CreateAddressDtoValidator : AbstractValidator<CreateAddressDto>
             .NotEmpty().WithMessage("State is required")
             .MaximumLength(50).WithMessage("State must not exceed 50 characters");
 
-        RuleFor(x => x.ZipCode)
-            .NotEmpty().WithMessage("Zip code is required")
-            .Matches(@"^\d{5}(-\d{4})?$").WithMessage("Invalid zip code format (e.g., 12345 or 12345-6789)");
+        RuleFor(x => x.CountryCode)
+            .NotEmpty()
+            .Length(2);
+
+        RuleFor(x => x.PostalCode)
+            .NotEmpty()
+            .MaximumLength(10);
+
+        RuleFor(x => x)
+            .Must(dto => IsValidPostalCode(dto.CountryCode, dto.PostalCode))
+            .WithMessage("Invalid postal code for selected country");
+
+
+
     }
+
+    private static bool IsValidPostalCode(string countryCode, string postalCode)
+    {
+        countryCode = countryCode.ToUpperInvariant();
+
+        return countryCode switch
+        {
+            "US" => Regex.IsMatch(postalCode, @"^\d{5}(-\d{4})?$"),
+            "NO" => Regex.IsMatch(postalCode, @"^\d{4}$"),
+            "DE" => Regex.IsMatch(postalCode, @"^\d{5}$"),
+            "GB" => Regex.IsMatch(postalCode,
+                     @"^[A-Z]{1,2}\d[A-Z\d]?\s?\d[A-Z]{2}$",
+                     RegexOptions.IgnoreCase),
+
+            _ => true // allow unknown countries
+        };
+    }
+
 }

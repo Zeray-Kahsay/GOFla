@@ -22,7 +22,7 @@ IRestaurantRepository restaurantRepository) : IFavoriteService
             cancellationToken
         );
 
-        var dtos = pagedResult.Items.Select(f => f.ToDto()).ToList();
+        var dtos = pagedResult.Items.Select(f => f.ToFavoriteDto()).ToList();
 
         return Result<PagedResult<FavoriteDto>>.Success(new PagedResult<FavoriteDto>
         {
@@ -70,7 +70,7 @@ IRestaurantRepository restaurantRepository) : IFavoriteService
 
         // Reload with restaurant details
         var created = await favoriteRepository.GetByUserAndRestaurantAsync(userId, restaurantId, cancellationToken);
-        return Result<FavoriteDto>.Success(created!.ToDto());
+        return Result<FavoriteDto>.Success(created!.ToFavoriteDto());
     }
 
     public async Task<Result<bool>> RemoveFavoriteAsync(

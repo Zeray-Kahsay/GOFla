@@ -3,7 +3,7 @@ import { Loader2 } from 'lucide-react';
 import clsx from 'clsx';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger' | 'amber';
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger' | 'amber' | 'destructive';
   size?: 'sm' | 'md' | 'lg';
   isLoading?: boolean;
 }
@@ -18,7 +18,8 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       outline: 'border-2 border-gray-300 bg-transparent hover:bg-gray-50 focus:ring-gray-500',
       ghost: 'bg-transparent hover:bg-gray-100 focus:ring-gray-500',
       danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500',
-      amber: 'bg-amber-500 text-white hover:bg-amber-600 focus:ring-amber-500'
+      amber: 'bg-amber-500 text-white hover:bg-amber-600 focus:ring-amber-500',
+      destructive: "bg-red-600 text-white hover:bg-red-700 active:bg-red-800 focus:ring-red-500"
     };
     
     const sizes = {

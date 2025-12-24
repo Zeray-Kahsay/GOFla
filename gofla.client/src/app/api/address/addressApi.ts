@@ -6,14 +6,16 @@ interface CreateAddressRequest {
   street: string;
   city: string;
   state: string;
-  zipCode: string;
-  isDefault: boolean;
+  countryCode: string;
+  postalCode: string;
+  //isDefault: boolean;
 }
 
 export const addressApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getAddresses: builder.query<Address[], void>({
       query: () => '/addresses',
+      transformResponse: (response: any) => response.data,
       providesTags: (result) =>
         result
           ? [

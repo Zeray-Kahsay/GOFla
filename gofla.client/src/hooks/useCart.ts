@@ -1,8 +1,6 @@
-import { useEffect } from "react";
 import { useGetCartQuery } from "../app/api/cart/cartApi";
 import { useAppDispatch } from "../app/store/store";
 import { useAuth } from "./useAuth";
-import { setItemCount } from "../app/store/slices/cartSlice";
 
 export function useCart(){
     const {isAuthenticated} = useAuth();
@@ -13,11 +11,13 @@ export function useCart(){
         refetchOnMountOrArgChange: true,
     })
 
-    useEffect(() => {
-        if (cart){
-            dispatch(setItemCount(cart.totalItems));
-        }
-    }, [cart, dispatch]);
+    console.log(cart);
+
+    // useEffect(() => {
+    //     if (cart){
+    //         dispatch(setItemCount(cart.totalItems));
+    //     }
+    // }, [cart, dispatch]);
 
     return {
         cart,

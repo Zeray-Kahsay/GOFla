@@ -66,7 +66,7 @@ export function MenuItemCard({ item, onAddToCart }: MenuItemCardProps) {
                 <Button
                   size="sm"
                   onClick={() => setShowDetails(true)}
-                  className="whitespace-nowrap"
+                  className="whitespace-nowrap bg-amber-600 hover:bg-amber-700"
                 >
                   Add to Cart
                 </Button>
@@ -75,14 +75,14 @@ export function MenuItemCard({ item, onAddToCart }: MenuItemCardProps) {
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                      className="p-1 rounded-full hover:bg-gray-100"
+                      className="p-1 rounded-full bg-amber-500 hover:bg-amber-600"
                     >
                       <Minus size={16} />
                     </button>
                     <span className="w-8 text-center font-medium">{quantity}</span>
                     <button
                       onClick={() => setQuantity(quantity + 1)}
-                      className="p-1 rounded-full hover:bg-gray-100"
+                      className="p-1 rounded-full bg-amber-500 hover:bg-amber-600"
                     >
                       <Plus size={16} />
                     </button>
@@ -91,6 +91,7 @@ export function MenuItemCard({ item, onAddToCart }: MenuItemCardProps) {
                     size="sm"
                     onClick={handleAddToCart}
                     isLoading={isLoading}
+                    className="bg-amber-500 hover:bg-amber-600"
                   >
                     Add {formatCurrency(item.price * quantity)}
                   </Button>
