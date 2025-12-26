@@ -4,9 +4,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Button } from "../../app/layout/ui/Button";
 import { Input } from "../../app/layout/ui/Input";
-import { useUpdateAddressMutation, useDeleteAddressMutation } from "../../app/api/address/addressApi";
+import { useUpdateAddressMutation, useDeleteAddressMutation, useSetDefaultAddressMutation } from "../../app/api/address/addressApi";
 import { toast } from "react-toastify";
 import type { Address } from "../../types/address";
+import { Check, Pencil, Trash2 } from "lucide-react";
+import { addressSchema } from "../../utils/validators/addressSchema";
 
 interface AddressCardProps {
   address: Address;
@@ -15,20 +17,21 @@ interface AddressCardProps {
 }
 
 // Zod schema
-const addressSchema = z.object({
-  label: z.string().min(1, "Label is required"),
-  street: z.string().min(1, "Street is required"),
-  city: z.string().min(1, "City is required"),
-  state: z.string().min(1, "State is required"),
-  postalCode: z.string().min(1, "Postal code is required"),
-  countryCode: z.string().min(1, "Country code is required"),
+// const addressSchema = z.object({
+//   label: z.string().min(1, "Label is required"),
+//   street: z.string().min(1, "Street is required"),
+//   city: z.string().min(1, "City is required"),
+//   state: z.string().min(1, "State is required"),
+//   postalCode: z.string().min(1, "Postal code is required"),
+//   countryCode: z.string().min(1, "Country code is required"),
   
-});
+// });
 
 export function AddressCard({ address, onSaved, onDeleted }: AddressCardProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [updateAddress, { isLoading: isUpdating }] = useUpdateAddressMutation();
   const [deleteAddress, { isLoading: isDeleting }] = useDeleteAddressMutation();
+  const [setDefaultAddress, {isLoading}] = useSetDefaultAddressMutation();
 
   const { register, handleSubmit, formState: { errors } } = useForm({
     defaultValues: {
@@ -42,6 +45,15 @@ export function AddressCard({ address, onSaved, onDeleted }: AddressCardProps) {
     },
     resolver: zodResolver(addressSchema),
   });
+
+  const handleSetDefault = async () => {
+    try {
+      await setDefaultAddress(address.id).unwrap();
+      toast.success("Default address updated")
+    } catch  {
+      toast.error("Failed to set default address");
+    }
+  }
 
   const onSubmit = async (data: z.infer<typeof addressSchema>) => {
     try {
@@ -85,18 +97,47 @@ export function AddressCard({ address, onSaved, onDeleted }: AddressCardProps) {
       </form>
     );
   }
-
-  return (
-    <div className="p-4 border rounded-lg space-y-1">
-      <div className="flex justify-between items-center">
-        <span className="font-medium">{address.label} {address.isDefault && "(Default)"}</span>
-        <div className="flex gap-2">
-          <Button size="sm" variant="outline" onClick={() => setIsEditing(true)}>Edit</Button>
-          <Button size="sm" variant="destructive" onClick={handleDelete} isLoading={isDeleting}>Delete</Button>
+     return (
+    <div
+      className={`p-4 rounded-lg border-2 transition ${
+        address.isDefault
+          ? "border-primary-600 bg-primary-50"
+          : "border-gray-200"
+      }`}
+    >
+      <div className="flex items-start justify-between">
+        <div>
+          <p className="font-medium">{address.label}</p>
+          <p className="text-sm text-gray-600">
+            {address.street}, {address.city}, {address.state}{" "}
+            {address.postalCode}
+          </p>
         </div>
+
+        {address.isDefault ? (
+          <span className="inline-flex items-center gap-1 text-sm font-medium text-primary-600">
+            <Check size={16} />
+            Default
+          </span>
+        ) : (
+          <Button
+            variant="secondary"
+            size="sm"
+            disabled={isLoading}
+            onClick={handleSetDefault}
+          >
+            Make default
+          </Button>
+        )}
+          <div className="flex gap-2 ml-1">
+             <Button size="sm" variant="outline" onClick={() => setIsEditing(true)}>
+               <Pencil size={18} />
+             </Button>
+             <Button size="sm" variant="amber" onClick={handleDelete} isLoading={isDeleting}>
+               <Trash2 size={18} />
+             </Button>
+          </div>
       </div>
-      <p className="text-sm text-gray-600">{address.street}, {address.city}, {address.state} {address.postalCode}</p>
-      <p className="text-sm text-gray-600">{address.countryCode}</p>
     </div>
   );
 }

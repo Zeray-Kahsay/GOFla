@@ -8,7 +8,7 @@ interface CreateAddressRequest {
   state: string;
   countryCode: string;
   postalCode: string;
-  //isDefault: boolean;
+  isDefault: boolean;
 }
 
 export const addressApi = apiSlice.injectEndpoints({
@@ -52,10 +52,13 @@ export const addressApi = apiSlice.injectEndpoints({
     }),
     setDefaultAddress: builder.mutation<void, number>({
       query: (id) => ({
-        url: `/addresses/${id}/set-default`,
-        method: 'PATCH',
+        url: `/addresses/${id}/setDefault-address`,
+        method: 'POST',
       }),
       invalidatesTags: [{ type: 'Address', id: 'LIST' }],
+    }),
+    checkDeliveryAddress: builder.query<{isDeliverable: boolean; reason?: string}, number>({
+      query: (id : number) => `addresses/${id}/deliveryAddress-check`,
     }),
   }),
 });
@@ -65,5 +68,6 @@ export const {
     useCreateAddressMutation,
     useUpdateAddressMutation,
     useDeleteAddressMutation,
-    useSetDefaultAddressMutation
+    useSetDefaultAddressMutation,
+    useCheckDeliveryAddressQuery,
 } = addressApi;

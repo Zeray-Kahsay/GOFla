@@ -20,6 +20,8 @@ public class AppDbContext : IdentityDbContext<User>
     public DbSet<Review> Reviews { get; set; }
     public DbSet<ReviewResponse> ReviewResponses { get; set; }
     public DbSet<Favorite> Favorites { get; set; }
+    public DbSet<DeliveryZone> DeliveryZones => Set<DeliveryZone>();
+    
 
 
     protected override void OnModelCreating(ModelBuilder builder)

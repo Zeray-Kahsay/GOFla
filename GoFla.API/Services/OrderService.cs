@@ -11,7 +11,8 @@ public class OrderService(
     IOrderRepository orderRepository,
     ICartRepository cartRepository,
     IRepository<Address> addressRepository,
-    IStripeService stripeService
+    IStripeService stripeService,
+    IDeliveryZoneService deliveryZoneService
 ) : IOrderService
 {
     public async Task<Result<OrderDto>> GetByIdAsync(int id, string userId, CancellationToken cancellationToken = default)
@@ -95,6 +96,21 @@ public class OrderService(
             return Result<OrderDto>.Failure("Invalid delivery address", "INVALID_ADDRESS");
         }
 
+        // validate delivery adderess if it's within the delivery zone
+        var isDeliverable = await deliveryZoneService.IsAddressDeliverableAsync(
+            address.CountryCode,
+            address.PostalCode,
+            cancellationToken
+        ) ;
+
+        if (!isDeliverable)
+        {
+            return Result<OrderDto>.Failure(
+                "Delivery is not available for this address",
+                "OUT_OF_DELIVERY_ZONE"
+            );
+        }
+
         // Calculate order totals
         var subTotal = cart.Items.Sum(i => i.MenuItem.Price * i.Quantity);
         var deliveryFee = cart.Items.First().MenuItem.Restaurant.DeliveryFee;
@@ -113,6 +129,7 @@ public class OrderService(
         {
             return Result<OrderDto>.Failure(paymentIntentResult.ErrorMessage!, paymentIntentResult.ErrorCode!);
         }
+
 
         // Create order
         var order = new Order

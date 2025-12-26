@@ -7,12 +7,15 @@ import {ToastContainer } from 'react-toastify'
 import { store } from './app/store/store.ts'
 import { router } from './app/routes/routes.tsx'
 import 'react-toastify/dist/ReactToastify.css';
+import { GoogleMapsProvider } from './app/providers/GoogleMapsProvider.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <Provider store={store}>
       <ToastContainer position="top-right" hideProgressBar theme="colored" />
+      <GoogleMapsProvider>
       <RouterProvider router={router}/>
+      </GoogleMapsProvider>
     </Provider>
   </StrictMode>,
 )

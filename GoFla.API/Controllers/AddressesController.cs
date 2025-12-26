@@ -78,7 +78,7 @@ public class AddressesController (IAddressService addressService) : BaseControll
         return Ok(result);
     }
 
-    [HttpPost("{id}/set-default")]
+    [HttpPost("{id}/setDefault-address")]
     public async Task<IActionResult> SetDefaultAddress(int id, CancellationToken cancellationToken)
     {
         string userId = User.GetUserId() ?? string.Empty;
@@ -87,6 +87,18 @@ public class AddressesController (IAddressService addressService) : BaseControll
 
         var result = await addressService.SetDefaultAsync(id, userId, cancellationToken);
         return Ok(result);
+    }
+
+    [HttpGet("{id}/deliveryAddress-check")]
+    public async Task<IActionResult> CheckDeliveryAddress(int id, CancellationToken cancellationToken)
+    {
+        string userId = User.GetUserId() ?? string.Empty;
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized();
+
+        var result = await addressService.CheckDeliveryAsync(id, userId, cancellationToken);
+
+        return HandleResult(result);
     }
 
 
