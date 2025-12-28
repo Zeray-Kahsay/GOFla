@@ -26,9 +26,9 @@ public class SearchService(AppDbContext _context, ILogger<SearchService> _logger
         // Search restaurants
         var restaurantsQuery = _context.Restaurants
             .Where(r => r.IsActive && (
-                r.Name.Contains(query, StringComparison.CurrentCultureIgnoreCase) ||
-                r.Description.Contains(query, StringComparison.CurrentCultureIgnoreCase) ||
-                r.Address.Contains(query, StringComparison.CurrentCultureIgnoreCase)
+                r.Name.ToLower().Contains(query) ||
+                r.Description.ToLower().Contains(query) ||
+                r.Address.ToLower().Contains(query)
             ));
 
         var restaurants = await restaurantsQuery
@@ -56,9 +56,8 @@ public class SearchService(AppDbContext _context, ILogger<SearchService> _logger
         var menuItemsQuery = _context.MenuItems
             .Include(m => m.Restaurant)
             .Where(m => m.IsAvailable && m.Restaurant.IsActive && (
-                m.Name.Contains(query, StringComparison.CurrentCultureIgnoreCase) ||
-                m.Description.Contains(query, StringComparison.CurrentCultureIgnoreCase) ||
-                m.Category.Contains(query, StringComparison.CurrentCultureIgnoreCase)
+                m.Name.ToLower().Contains(query) ||
+                m.Category.ToLower().Contains(query)
             ));
 
         if (dto.Category != null)
@@ -115,9 +114,9 @@ public class SearchService(AppDbContext _context, ILogger<SearchService> _logger
 
         var restaurantsQuery = _context.Restaurants
             .Where(r => r.IsActive && (
-                r.Name.Contains(query, StringComparison.CurrentCultureIgnoreCase) ||
-                r.Description.Contains(query, StringComparison.CurrentCultureIgnoreCase) ||
-                r.Address.Contains(query, StringComparison.CurrentCultureIgnoreCase)
+                r.Name.ToLower().Contains(query) ||
+                r.Description.ToLower().Contains(query) ||
+                r.Address.ToLower().Contains(query)
             ));
 
         // Apply filters
@@ -191,9 +190,9 @@ public class SearchService(AppDbContext _context, ILogger<SearchService> _logger
         var menuItemsQuery = _context.MenuItems
             .Include(m => m.Restaurant)
             .Where(m => m.IsAvailable && m.Restaurant.IsActive && (
-                m.Name.Contains(query, StringComparison.CurrentCultureIgnoreCase) ||
-                m.Description.Contains(query, StringComparison.CurrentCultureIgnoreCase) ||
-                m.Category.Contains(query, StringComparison.CurrentCultureIgnoreCase)
+                m.Name.ToLower().Contains(query) ||
+                m.Description.ToLower().Contains(query) ||
+                m.Category.ToLower().Contains(query)
             ));
 
         // Apply filters

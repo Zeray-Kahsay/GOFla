@@ -62,6 +62,8 @@ public class AddressService(
             State = dto.State,
             CountryCode = dto.CountryCode,
             PostalCode = dto.PostalCode,
+            Latitude = dto.Latitude,
+            Longitude = dto.Longitude,
             IsDefault = dto.IsDefault,
             CreatedAt = DateTime.UtcNow
         };
@@ -97,6 +99,8 @@ public class AddressService(
         address.State = dto.State;
         address.CountryCode = dto.CountryCode;
         address.PostalCode = dto.PostalCode;
+        address.Latitude = dto.Latitude;
+        address.Longitude = dto.Longitude;
         address.IsDefault = dto.IsDefault;
 
         await addressRepository.UpdateAsync(address, cancellationToken);

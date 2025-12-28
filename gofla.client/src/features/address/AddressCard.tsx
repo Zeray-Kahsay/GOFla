@@ -16,16 +16,6 @@ interface AddressCardProps {
   onDeleted?: () => void;
 }
 
-// Zod schema
-// const addressSchema = z.object({
-//   label: z.string().min(1, "Label is required"),
-//   street: z.string().min(1, "Street is required"),
-//   city: z.string().min(1, "City is required"),
-//   state: z.string().min(1, "State is required"),
-//   postalCode: z.string().min(1, "Postal code is required"),
-//   countryCode: z.string().min(1, "Country code is required"),
-  
-// });
 
 export function AddressCard({ address, onSaved, onDeleted }: AddressCardProps) {
   const [isEditing, setIsEditing] = useState(false);

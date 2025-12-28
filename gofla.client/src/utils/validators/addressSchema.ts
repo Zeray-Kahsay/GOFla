@@ -7,6 +7,8 @@ export const addressSchema = z.object({
   state: z.string().min(1, "State is required"),
   countryCode: z.string().length(2, "Country code must be 2 letters"),
   postalCode: z.string().min(2, "Postal code is required"),
+  latitude: z.number(),
+  longitude: z.number(),
 
   isDefault: z.boolean().default(false),
 });

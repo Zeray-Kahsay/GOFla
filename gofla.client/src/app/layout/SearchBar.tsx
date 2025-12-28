@@ -50,7 +50,7 @@ export function SearchBar() {
   };
 
   return (
-    <div className="relative w-full max-w-2xl hover:bg-amber-100">
+    <div className="relative w-full max-w-2xl hover:bg-amber-100 active:bg-amber-50">
       {/* SEARCH FORM */}
       <form onSubmit={handleSubmit} className="relative">
         {/* SEARCH ICON (left side) */}

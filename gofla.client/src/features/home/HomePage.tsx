@@ -34,17 +34,17 @@ export default function HomePage() {
     <div className="container mx-auto px-4 py-8">
       {/* Hero Section */}
       <section className="mb-12 text-center">
-        <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+        <h1 className="text-4xl  md:text-5xl font-bold font-serif text-amber-900 mb-4">
           Order Food from Your Favorite Restaurants
         </h1>
-        <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+        <p className="text-xl text-gray-600 max-w-2xl mx-auto font-serif">
           Fast delivery, great food. Order now and enjoy!
         </p>
       </section>
 
       {/* Categories */}
       <section className="mb-12">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">Popular Categories</h2>
+        <h2 className="text-2xl font-bold font-serif text-amber-900 mb-6">Popular Categories</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
           {['Pizza', 'Burger', 'Sushi', 'Habesha', 'Italian', 'Mexican'].map((category) => (
             <button
@@ -62,7 +62,7 @@ export default function HomePage() {
 
       {/* Restaurants */}
       <section>
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">All Restaurants</h2>
+        <h2 className="text-2xl font-bold-serif text-gray-900 mb-6">All Restaurants</h2>
         
         {items.length === 0 ? (
           <EmptyState
@@ -72,7 +72,7 @@ export default function HomePage() {
           />
         ) : (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 font-serif">
               {items.map((restaurant: Restaurant) => (
                 <RestaurantCard key={restaurant.id} restaurant={restaurant} />
               ))}

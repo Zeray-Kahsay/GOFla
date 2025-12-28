@@ -1,12 +1,14 @@
 using System;
+using GoFla.API.Data;
 using GoFla.API.DTOs.Address;
 using GoFla.API.Extensions;
 using GoFla.API.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace GoFla.API.Controllers;
 
-public class AddressesController (IAddressService addressService) : BaseController
+public class AddressesController (IAddressService addressService, AppDbContext context) : BaseController
 {
     [HttpGet]
     public async Task<IActionResult> GetUserAddresses(CancellationToken cancellationToken)
@@ -89,17 +91,61 @@ public class AddressesController (IAddressService addressService) : BaseControll
         return Ok(result);
     }
 
-    [HttpGet("{id}/deliveryAddress-check")]
-    public async Task<IActionResult> CheckDeliveryAddress(int id, CancellationToken cancellationToken)
+
+    [HttpGet("check")]
+    public async Task<IActionResult> CheckDelivery(
+    int addressId,
+    CancellationToken cancellationToken)
     {
-        string userId = User.GetUserId() ?? string.Empty;
+        var userId = User.GetUserId();
         if (string.IsNullOrEmpty(userId))
             return Unauthorized();
 
-        var result = await addressService.CheckDeliveryAsync(id, userId, cancellationToken);
+        var address = await context.Addresses
+            .FirstOrDefaultAsync(a => a.Id == addressId && a.UserId == userId);
 
-        return HandleResult(result);
+        if (address is null || address.Latitude == null || address.Longitude == null)
+            return Ok(new { isDeliverable = false });
+
+        const double restaurantLat = 59.9139;
+        const double restaurantLng = 10.7522;
+        const double maxKm = 10;
+
+        var distance = GeoDistanceKm(
+            address.Latitude.Value,
+            address.Longitude.Value,
+            restaurantLat,
+            restaurantLng
+        );
+
+        return Ok(new { isDeliverable = distance <= maxKm });
     }
+
+
+    private static double GeoDistanceKm(
+    double lat1, double lon1,
+    double lat2, double lon2)
+    {
+        const double R = 6371;
+        var dLat = DegreesToRadians(lat2 - lat1);
+        var dLon = DegreesToRadians(lon2 - lon1);
+
+        var a =
+            Math.Sin(dLat / 2) * Math.Sin(dLat / 2) +
+            Math.Cos(DegreesToRadians(lat1)) *
+            Math.Cos(DegreesToRadians(lat2)) *
+            Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
+
+        return R * 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+    }
+
+    private static double DegreesToRadians(double degrees)
+    {
+        return degrees * Math.PI / 180.0;
+    }
+
+
+
 
 
 

@@ -8,6 +8,8 @@ interface CreateAddressRequest {
   state: string;
   countryCode: string;
   postalCode: string;
+  latitude: number;
+  longitude: number;
   isDefault: boolean;
 }
 

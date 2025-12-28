@@ -1,13 +1,10 @@
-// CheckoutPage.tsx
 import { toast } from "react-toastify";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { MapPin, ShoppingCart } from "lucide-react";
-
 import { Button } from "../../app/layout/ui/Button";
 import { EmptyState } from "../../app/layout/ui/EmptyState";
 import { LoadingSpinner } from "../../app/layout/ui/LoadingSpinner";
-
 import { formatCurrency } from "../../utils/formatters";
 import { useGetCartQuery } from "../../app/api/cart/cartApi";
 import { useCreateOrderMutation } from "../../app/api/order/orderApi";
@@ -26,6 +23,9 @@ export default function CheckoutPage() {
   const { data: addresses, isLoading: addressesLoading } = useGetAddressesQuery();
   const [createOrder, { isLoading: orderLoading }] = useCreateOrderMutation();
   const { isDeliverable, isChecking } = useDeliveryAddressCheck(selectedAddressId);
+
+  console.log(isDeliverable);
+  console.log(selectedAddressId);
 
   // Auto-select first address
   useEffect(() => {
@@ -71,7 +71,7 @@ export default function CheckoutPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">Checkout</h1>
+      <h1 className="text-3xl font-bold font-serif text-gray-900 mb-8">Checkout</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* LEFT COLUMN */}
@@ -131,7 +131,7 @@ export default function CheckoutPage() {
         {/* RIGHT COLUMN */}
         <div className="lg:col-span-1">
           <div className="card p-6 sticky top-20">
-            <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
+            <h2 className="text-xl font-semibold font-serif mb-4">Order Summary</h2>
 
             <div className="space-y-3 mb-6">
               <div className="flex justify-between">

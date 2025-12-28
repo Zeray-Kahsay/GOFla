@@ -10,6 +10,9 @@ public record UpdateAddressDto
     public string State { get; init; } = string.Empty;
     public string  CountryCode  { get; set; } = string.Empty;
     public string  PostalCode  { get; set; } = string.Empty;
+
+    public double  Latitude  { get; init; }
+    public double  Longitude  { get; init; }
     
     public bool IsDefault { get; init; }
 }
