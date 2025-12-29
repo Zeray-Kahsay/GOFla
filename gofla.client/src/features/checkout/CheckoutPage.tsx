@@ -173,7 +173,8 @@ export default function CheckoutPage() {
       <AddAddressModal
         isOpen={showAddressModal}
         onClose={() => setShowAddressModal(false)}
-        onCreated={(id) => setSelectedAddressId(id)}
+        onSaved={(id) => setSelectedAddressId(id)}
+        mode= "create"
       />
     </div>
   );

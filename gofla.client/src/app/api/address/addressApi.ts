@@ -60,7 +60,7 @@ export const addressApi = apiSlice.injectEndpoints({
       invalidatesTags: [{ type: 'Address', id: 'LIST' }],
     }),
     checkDeliveryAddress: builder.query<{isDeliverable: boolean; reason?: string}, number>({
-      query: (id : number) => `addresses/${id}/deliveryAddress-check`,
+      query: (addressId : number) => `addresses/${addressId}/check-delivery-address`,
     }),
   }),
 });

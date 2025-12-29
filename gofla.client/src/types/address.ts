@@ -6,5 +6,7 @@ export interface Address {
   state: string
   countryCode: string
   postalCode: string
+  latitude: number
+  longitude: number
   isDefault: boolean
 }

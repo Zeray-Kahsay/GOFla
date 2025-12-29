@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GoFla.API.Controllers;
 
-public class AddressesController (IAddressService addressService, AppDbContext context) : BaseController
+public class AddressesController(IAddressService addressService, AppDbContext context) : BaseController
 {
     [HttpGet]
     public async Task<IActionResult> GetUserAddresses(CancellationToken cancellationToken)
@@ -67,7 +67,7 @@ public class AddressesController (IAddressService addressService, AppDbContext c
     }
 
     [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteAddress(int id, CancellationToken cancellationToken) 
+    public async Task<IActionResult> DeleteAddress(int id, CancellationToken cancellationToken)
     {
         string userId = User.GetUserId() ?? string.Empty;
         if (string.IsNullOrEmpty(userId))
@@ -92,7 +92,7 @@ public class AddressesController (IAddressService addressService, AppDbContext c
     }
 
 
-    [HttpGet("check")]
+    [HttpGet("{addressId}/check-delivery-address")]
     public async Task<IActionResult> CheckDelivery(
     int addressId,
     CancellationToken cancellationToken)

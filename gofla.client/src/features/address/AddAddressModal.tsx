@@ -1,23 +1,29 @@
-import { useCreateAddressMutation } from "../../app/api/address/addressApi";
+import { useCreateAddressMutation, useUpdateAddressMutation } from "../../app/api/address/addressApi";
 import { AddressAutocomplete } from "./AddressAutoComplete";
 import { addressSchema, type AddressFormData } from "../../utils/validators/addressSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import { Input } from "../../app/layout/ui/Input";
+import type { Address } from "../../types/address";
+import { useEffect } from "react";
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
-  onCreated: (addressId: number) => void;
+  onSaved: (addressId: number) => void;
+  initialData?: Address;
+  mode: "create" | "edit";
 }
 
-export function AddAddressModal({ isOpen, onClose, onCreated }: Props) {
-  const [createAddress, { isLoading }] = useCreateAddressMutation();
+export function AddAddressModal({ isOpen, onClose, onSaved, initialData }: Props) {
+  const [createAddress, { isLoading: isCreating }] = useCreateAddressMutation();
+  const [updateAddress, { isLoading: isUpdating }] = useUpdateAddressMutation();
+ 
 
   const form = useForm({
     resolver: zodResolver(addressSchema),
-    defaultValues: {
+    defaultValues: initialData ?? {
       label: "",
       street: "",
       city: "",
@@ -30,19 +36,41 @@ export function AddAddressModal({ isOpen, onClose, onCreated }: Props) {
     },
   });
 
+  useEffect(() => {
+  if (initialData) {
+    form.reset(initialData);
+  }
+}, [initialData, form]);
+
+
   if (!isOpen) return null;
 
   const onSubmit = async (data: AddressFormData) => {
-    try {
-      const address = await createAddress(data).unwrap();
-      console.log("FORM DATA", data); 
-      toast.success("Address Saved!");
-      onCreated(address.id);
-      onClose();
-    } catch {
-      toast.error("Failed Saving Address");
-    }
-  };
+  try {
+    const result = initialData
+      ? await updateAddress({ id: initialData.id, data }).unwrap()
+      : await createAddress(data).unwrap();
+
+    toast.success(initialData ? "Address updated" : "Address created");
+    onSaved(result.id);
+    onClose();
+  } catch {
+    toast.error("Failed to save address");
+  }
+};
+
+
+  // const onSubmit = async (data: AddressFormData) => {
+  //   try {
+  //     const address = await createAddress(data).unwrap();
+  //     console.log("FORM DATA", data); 
+  //     toast.success("Address Saved!");
+  //     onSaved(address.id);
+  //     onClose();
+  //   } catch {
+  //     toast.error("Failed Saving Address");
+  //   }
+  // };
 
   return (
     <>
@@ -116,10 +144,10 @@ export function AddAddressModal({ isOpen, onClose, onCreated }: Props) {
 
           <button
             type="submit"
-            disabled={isLoading}
+            disabled={isCreating || isUpdating}
             className="mt-4 w-full rounded bg-amber-500 hover:bg-amber-600 text-black py-2"
           >
-            {isLoading ? "Saving..." : "Add address"}
+            {isCreating || isUpdating ? "Saving..." : "Add address"}
           </button>
         </form>
       </div>
