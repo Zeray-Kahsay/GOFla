@@ -3,7 +3,7 @@ export interface Restaurant {
   name: string;
   description: string;
   imageUrl: string;
-  address: string;
+  addressDto: AddressDto;
   phone: string;
   deliveryFee: number;
   estimatedDeliveryTime: number;
@@ -11,4 +11,16 @@ export interface Restaurant {
   averageRating?: number;
   reviewCount?: number;
   isFavorite?: boolean;
+}
+
+export interface AddressDto {
+  id: number;
+  city: string;
+  countryCode: string;
+  label: string;
+  street: string;
+  postalCode: string;
+  state: string;
+  isDefault: boolean; 
+
 }

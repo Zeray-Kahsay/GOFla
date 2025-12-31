@@ -25,10 +25,11 @@ public class SearchService(AppDbContext _context, ILogger<SearchService> _logger
 
         // Search restaurants
         var restaurantsQuery = _context.Restaurants
+            .Include(r => r.Address)
             .Where(r => r.IsActive && (
                 r.Name.ToLower().Contains(query) ||
                 r.Description.ToLower().Contains(query) ||
-                r.Address.ToLower().Contains(query)
+                (r.Address.Street + " " + r.Address.City + " " + r.Address.State + " " + r.Address.PostalCode).ToLower().Contains(query)
             ));
 
         var restaurants = await restaurantsQuery
@@ -39,7 +40,7 @@ public class SearchService(AppDbContext _context, ILogger<SearchService> _logger
                 Name = r.Name,
                 Description = r.Description,
                 ImageUrl = r.ImageUrl,
-                Address = r.Address,
+                Address = $"{r.Address.Street} {r.Address.City} {r.Address.State} {r.Address.PostalCode}",
                 DeliveryFee = r.DeliveryFee,
                 EstimatedDeliveryTime = r.EstimatedDeliveryTime,
                 AverageRating = _context.Reviews
@@ -113,10 +114,11 @@ public class SearchService(AppDbContext _context, ILogger<SearchService> _logger
         var query = dto.Query.ToLower().Trim();
 
         var restaurantsQuery = _context.Restaurants
+            .Include(r => r.Address)
             .Where(r => r.IsActive && (
                 r.Name.ToLower().Contains(query) ||
                 r.Description.ToLower().Contains(query) ||
-                r.Address.ToLower().Contains(query)
+                (r.Address.Street + " " + r.Address.City + " " + r.Address.State + " " + r.Address.PostalCode).ToLower().Contains(query)
             ));
 
         // Apply filters
@@ -152,7 +154,7 @@ public class SearchService(AppDbContext _context, ILogger<SearchService> _logger
                 Name = r.Name,
                 Description = r.Description,
                 ImageUrl = r.ImageUrl,
-                Address = r.Address,
+                Address = $"{r.Address.Street} {r.Address.City} {r.Address.State} {r.Address.PostalCode}",
                 DeliveryFee = r.DeliveryFee,
                 EstimatedDeliveryTime = r.EstimatedDeliveryTime,
                 AverageRating = _context.Reviews

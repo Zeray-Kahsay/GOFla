@@ -11,7 +11,6 @@ namespace GoFla.API.Services;
 
 public class AddressService(
     IRepository<Address> addressRepository, 
-    IDeliveryZoneService deliveryZoneService, 
     AppDbContext context) : IAddressService
 {
     public async Task<Result<AddressDto>> GetByIdAsync(int id, string userId, CancellationToken cancellationToken = default)
@@ -167,30 +166,5 @@ public class AddressService(
         await context.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task<Result<DeliveryCheckResultDto>> CheckDeliveryAsync(int addressId, string userId, CancellationToken cancellationToken = default)
-    {
-        var address = await addressRepository.GetByIdAsync(addressId, cancellationToken);
-
-        if (address is null)
-        {
-            return Result<DeliveryCheckResultDto>.Failure("Address not found", "NOT_FOUND");
-        }
-
-        if (address.UserId != userId)
-        {
-            return Result<DeliveryCheckResultDto>.Failure("Access denied", "FORBIDDEN");
-        }
-
-        var isDeliverable = await deliveryZoneService.IsAddressDeliverableAsync(
-            address.CountryCode,
-            address.PostalCode,
-            cancellationToken
-        );
-
-        return Result<DeliveryCheckResultDto>.Success(new DeliveryCheckResultDto
-        {
-            IsDeliverable = isDeliverable,
-            Reason = isDeliverable ? null : "OUT_OF_DELIVERY_ZONE"
-        });
-    }
+    
 }

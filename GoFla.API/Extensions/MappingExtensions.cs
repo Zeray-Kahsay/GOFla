@@ -35,11 +35,13 @@ public static class MappingExtensions
             Name = restaurant.Name,
             Description = restaurant.Description,
             ImageUrl = restaurant.ImageUrl,
-            Address = restaurant.Address,
             Phone = restaurant.Phone,
             DeliveryFee = restaurant.DeliveryFee,
             EstimatedDeliveryTime = restaurant.EstimatedDeliveryTime,
-            IsActive = restaurant.IsActive
+            IsActive = restaurant.IsActive,
+            AddressDto = restaurant.Address is null
+            ? null!
+            : restaurant.Address.ToAddressDto()
         };
     }
 
@@ -130,7 +132,10 @@ public static class MappingExtensions
             Street = address.Street,
             City = address.City,
             State = address.State,
+            PostalCode = address.PostalCode,
             CountryCode = address.CountryCode,
+            Latitude = address.Latitude,
+            Longitude = address.Longitude,
             IsDefault = address.IsDefault
         };
     }
@@ -174,7 +179,7 @@ public static class MappingExtensions
             RestaurantId = favorite.RestaurantId,
             RestaurantName = favorite.Restaurant.Name,
             RestaurantImage = favorite.Restaurant.ImageUrl,
-            RestaurantAddress = favorite.Restaurant.Address,
+            RestaurantAddress = favorite.Restaurant.Address.Street,
             DeliveryFee = favorite.Restaurant.DeliveryFee,
             CreatedAt = favorite.CreatedAt
         };

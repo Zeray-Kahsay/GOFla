@@ -13,6 +13,7 @@ import { useGetRestaurantByIdQuery } from "../../app/api/restaurant/restaurantAp
 import { useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import { useParams } from "react-router-dom";
+import type { AddressDto } from "../../types/restaurant";
 
 export default function RestaurantPage() {
   const { id } = useParams<{ id: string }>();
@@ -75,6 +76,14 @@ export default function RestaurantPage() {
 
   const categories = ['all', ...Array.from(new Set(menuItems.map((item) => item.category)))];
 
+  const formatAddress = (address?: AddressDto) => 
+      address 
+        ? [address.street, address.postalCode, address.city]
+           .filter(Boolean)
+           .join(", ")
+        : "";
+
+
   return (
     <div>
       {/* Restaurant Header */}
@@ -106,7 +115,9 @@ export default function RestaurantPage() {
               </div>
               <div className="flex items-center gap-2">
                 <MapPin size={16} />
-                <span>{restaurant.address}</span>
+                <span>
+                  {formatAddress(restaurant.addressDto)}
+                </span>
               </div>
             </div>
           </div>

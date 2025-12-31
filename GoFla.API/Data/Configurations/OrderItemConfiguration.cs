@@ -39,7 +39,7 @@ public class OrderItemConfiguration : IEntityTypeConfiguration<OrderItem>
             .HasConstraintName("FK_OrderItems_Order");
 
         builder.HasOne(oi => oi.MenuItem)
-            .WithMany()
+            .WithMany(mi => mi.OrderItems)
             .HasForeignKey(oi => oi.MenuItemId)
             .OnDelete(DeleteBehavior.Restrict)
             .HasConstraintName("FK_OrderItems_MenuItem");

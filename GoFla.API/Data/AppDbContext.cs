@@ -21,7 +21,7 @@ public class AppDbContext : IdentityDbContext<User>
     public DbSet<ReviewResponse> ReviewResponses { get; set; }
     public DbSet<Favorite> Favorites { get; set; }
     public DbSet<DeliveryZone> DeliveryZones => Set<DeliveryZone>();
-    
+
 
 
     protected override void OnModelCreating(ModelBuilder builder)
@@ -71,6 +71,42 @@ public class AppDbContext : IdentityDbContext<User>
                 .WithOne(m => m.Restaurant)
                 .HasForeignKey(m => m.RestaurantId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(r => r.Address)
+                .WithMany()
+                .HasForeignKey(r => r.AddressId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // entity.HasOne(r => r.Owner)
+            //       .WithMany()
+            //       .HasForeignKey(r => r.OwnerId)
+            //       .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // Address config
+        builder.Entity<Address>(entity =>
+        {
+            entity.HasOne(a => a.User)
+                  .WithMany(u => u.Addresses)
+                  .HasForeignKey(a => a.UserId)
+                  .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // Order config
+        builder.Entity<OrderItem>(entity =>
+        {
+            entity.HasKey(oi => oi.Id);
+
+            entity.HasOne(oi => oi.Order)
+                  .WithMany(o => o.Items)
+                  .HasForeignKey(oi => oi.OrderId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(oi => oi.MenuItem)
+                  .WithMany(mi => mi.OrderItems)
+                  .HasForeignKey(oi => oi.MenuItemId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
         });
 
         // MenuItem configuration

@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GoFla.API.Controllers;
 
-public class AddressesController(IAddressService addressService, AppDbContext context) : BaseController
+public class AddressesController(IAddressService addressService, IDeliveryZoneService deliveryZoneService) : BaseController
 {
     [HttpGet]
     public async Task<IActionResult> GetUserAddresses(CancellationToken cancellationToken)
@@ -95,30 +95,23 @@ public class AddressesController(IAddressService addressService, AppDbContext co
     [HttpGet("{addressId}/check-delivery-address")]
     public async Task<IActionResult> CheckDelivery(
     int addressId,
+    [FromQuery] int restaurantId,
     CancellationToken cancellationToken)
     {
         var userId = User.GetUserId();
         if (string.IsNullOrEmpty(userId))
             return Unauthorized();
 
-        var address = await context.Addresses
-            .FirstOrDefaultAsync(a => a.Id == addressId && a.UserId == userId);
+        var result = await deliveryZoneService.CheckDeliveryAsync(addressId, userId, restaurantId, cancellationToken);
 
-        if (address is null || address.Latitude == null || address.Longitude == null)
-            return Ok(new { isDeliverable = false });
+        if (!result.IsSuccess)
+            return BadRequest(result);
 
-        const double restaurantLat = 59.9139;
-        const double restaurantLng = 10.7522;
-        const double maxKm = 10;
-
-        var distance = GeoDistanceKm(
-            address.Latitude.Value,
-            address.Longitude.Value,
-            restaurantLat,
-            restaurantLng
-        );
-
-        return Ok(new { isDeliverable = distance <= maxKm });
+        return Ok(new
+        {
+            isDeliverable = result.Data!.IsDeliverable,
+            reason = result.Data.Reason
+        });
     }
 
 

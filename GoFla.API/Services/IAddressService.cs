@@ -12,5 +12,5 @@ public interface IAddressService
     Task<Result<AddressDto>> UpdateAsync(int id, string userId, UpdateAddressDto dto, CancellationToken cancellationToken = default);
     Task<Result<bool>> DeleteAsync(int id, string userId, CancellationToken cancellationToken = default);
     Task<Result<bool>> SetDefaultAsync(int id, string userId, CancellationToken cancellationToken = default);
-    Task<Result<DeliveryCheckResultDto>> CheckDeliveryAsync(int addressId, string userId, CancellationToken cancellationToken = default);
+   
 }

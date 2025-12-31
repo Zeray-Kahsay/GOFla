@@ -89,6 +89,8 @@ public class OrderService(
             return Result<OrderDto>.Failure("Cannot order items from multiple restaurants", "MULTIPLE_RESTAURANTS");
         }
 
+        var restaurantId = restaurantIds.First();
+
         // Validate address
         var address = await addressRepository.GetByIdAsync(createOrderDto.DeliveryAddressId, cancellationToken);
         if (address is null || address.UserId != userId)
@@ -98,8 +100,9 @@ public class OrderService(
 
         // validate delivery adderess if it's within the delivery zone
         var isDeliverable = await deliveryZoneService.IsAddressDeliverableAsync(
-            address.CountryCode,
-            address.PostalCode,
+            address.Latitude,
+            address.Longitude,
+            restaurantId,
             cancellationToken
         ) ;
 

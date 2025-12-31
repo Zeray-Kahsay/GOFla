@@ -48,10 +48,10 @@ namespace GoFla.API.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<double?>("Latitude")
+                    b.Property<double>("Latitude")
                         .HasColumnType("float");
 
-                    b.Property<double?>("Longitude")
+                    b.Property<double>("Longitude")
                         .HasColumnType("float");
 
                     b.Property<string>("PostalCode")
@@ -67,7 +67,6 @@ namespace GoFla.API.Data.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
@@ -334,9 +333,6 @@ namespace GoFla.API.Data.Migrations
                     b.Property<int>("MenuItemId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("MenuItemId1")
-                        .HasColumnType("int");
-
                     b.Property<int>("OrderId")
                         .HasColumnType("int");
 
@@ -355,8 +351,6 @@ namespace GoFla.API.Data.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("MenuItemId");
-
-                    b.HasIndex("MenuItemId1");
 
                     b.HasIndex("OrderId");
 
@@ -412,15 +406,17 @@ namespace GoFla.API.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Address")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("AddressId")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<decimal>("DeliveryFee")
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<double>("DeliveryRadiusKm")
+                        .HasColumnType("float");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -440,6 +436,9 @@ namespace GoFla.API.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("OwnerId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<string>("Phone")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -448,6 +447,10 @@ namespace GoFla.API.Data.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AddressId");
+
+                    b.HasIndex("OwnerId");
 
                     b.ToTable("Restaurants");
                 });
@@ -789,8 +792,7 @@ namespace GoFla.API.Data.Migrations
                     b.HasOne("GoFla.API.Domain.User", "User")
                         .WithMany("Addresses")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("User");
                 });
@@ -888,15 +890,11 @@ namespace GoFla.API.Data.Migrations
             modelBuilder.Entity("GoFla.API.Domain.OrderItem", b =>
                 {
                     b.HasOne("GoFla.API.Domain.MenuItem", "MenuItem")
-                        .WithMany()
+                        .WithMany("OrderItems")
                         .HasForeignKey("MenuItemId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("FK_OrderItems_MenuItem");
-
-                    b.HasOne("GoFla.API.Domain.MenuItem", null)
-                        .WithMany("OrderItems")
-                        .HasForeignKey("MenuItemId1");
 
                     b.HasOne("GoFla.API.Domain.Order", "Order")
                         .WithMany("Items")
@@ -919,6 +917,23 @@ namespace GoFla.API.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("GoFla.API.Domain.Restaurant", b =>
+                {
+                    b.HasOne("GoFla.API.Domain.Address", "Address")
+                        .WithMany()
+                        .HasForeignKey("AddressId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("GoFla.API.Domain.User", "Owner")
+                        .WithMany()
+                        .HasForeignKey("OwnerId");
+
+                    b.Navigation("Address");
+
+                    b.Navigation("Owner");
                 });
 
             modelBuilder.Entity("GoFla.API.Domain.Review", b =>
