@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GoFla.API.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251229140834_Created")]
-    partial class Created
+    [Migration("20260102054842_UpdatedMigrations")]
+    partial class UpdatedMigrations
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -61,6 +61,9 @@ namespace GoFla.API.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("RestaurantId")
+                        .HasColumnType("int");
+
                     b.Property<string>("State")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -73,6 +76,10 @@ namespace GoFla.API.Data.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("RestaurantId")
+                        .IsUnique()
+                        .HasFilter("[RestaurantId] IS NOT NULL");
 
                     b.HasIndex("UserId");
 
@@ -440,6 +447,7 @@ namespace GoFla.API.Data.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("OwnerId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Phone")
@@ -450,8 +458,6 @@ namespace GoFla.API.Data.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("AddressId");
 
                     b.HasIndex("OwnerId");
 
@@ -792,10 +798,17 @@ namespace GoFla.API.Data.Migrations
 
             modelBuilder.Entity("GoFla.API.Domain.Address", b =>
                 {
+                    b.HasOne("GoFla.API.Domain.Restaurant", "Restaurant")
+                        .WithOne("Address")
+                        .HasForeignKey("GoFla.API.Domain.Address", "RestaurantId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
                     b.HasOne("GoFla.API.Domain.User", "User")
                         .WithMany("Addresses")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Restaurant");
 
                     b.Navigation("User");
                 });
@@ -924,17 +937,11 @@ namespace GoFla.API.Data.Migrations
 
             modelBuilder.Entity("GoFla.API.Domain.Restaurant", b =>
                 {
-                    b.HasOne("GoFla.API.Domain.Address", "Address")
-                        .WithMany()
-                        .HasForeignKey("AddressId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("GoFla.API.Domain.User", "Owner")
                         .WithMany()
-                        .HasForeignKey("OwnerId");
-
-                    b.Navigation("Address");
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("Owner");
                 });
@@ -1067,6 +1074,9 @@ namespace GoFla.API.Data.Migrations
 
             modelBuilder.Entity("GoFla.API.Domain.Restaurant", b =>
                 {
+                    b.Navigation("Address")
+                        .IsRequired();
+
                     b.Navigation("MenuItems");
                 });
 

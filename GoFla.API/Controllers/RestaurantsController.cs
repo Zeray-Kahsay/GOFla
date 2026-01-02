@@ -1,13 +1,14 @@
 using System;
 using GoFla.API.Commons;
 using GoFla.API.DTOs.Restaurants;
+using GoFla.API.Extensions;
 using GoFla.API.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GoFla.API.Controllers;
 
-public class RestaurantsController (IRestaurantService restaurantService) : BaseController
+public class RestaurantsController(IRestaurantService restaurantService) : BaseController
 {
     [HttpGet("{id}")]
     public async Task<IActionResult> GetRestaurantById(int id, CancellationToken cancellationToken)
@@ -29,7 +30,11 @@ public class RestaurantsController (IRestaurantService restaurantService) : Base
     [HttpPost]
     public async Task<IActionResult> CreateRestaurant([FromBody] CreateRestaurantDto dto, CancellationToken cancellationToken)
     {
-        var result = await restaurantService.CreateAsync(dto, cancellationToken);
+        var userId = User.GetUserId();
+        if (userId is null)
+            return Unauthorized("Unauthorized user cannot add restaurant");
+
+        var result = await restaurantService.CreateAsync(dto, userId, cancellationToken);
 
         return Ok(result);
 
@@ -61,5 +66,5 @@ public class RestaurantsController (IRestaurantService restaurantService) : Base
 
         return Ok(result);
     }
-    
+
 }

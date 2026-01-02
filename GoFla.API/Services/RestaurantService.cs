@@ -30,7 +30,7 @@ public class RestaurantService(IRestaurantRepository restaurantRepository) : IRe
              pageSize: paginationParams.PageSize,
              cancellationToken: cancellationToken,
              r => r.Address
-             
+
              );
 
         var dtoList = pagedResult.Items.Select(r => r.ToRestaurantDto()).ToList();
@@ -45,22 +45,25 @@ public class RestaurantService(IRestaurantRepository restaurantRepository) : IRe
     }
 
 
-    public async Task<Result<RestaurantDto>> CreateAsync(CreateRestaurantDto dto, CancellationToken cancellationToken = default)
+    public async Task<Result<RestaurantDto>> CreateAsync(CreateRestaurantDto dto, string ownerId, CancellationToken cancellationToken = default)
     {
         var restaurant = new Restaurant
         {
             Name = dto.Name,
             Description = dto.Description,
+            OwnerId = ownerId,
             Address = new Address
             {
                 Label = dto.AddressDto.Label,
                 Street = dto.AddressDto.Street,
                 City = dto.AddressDto.City,
                 State = dto.AddressDto.State,
+                PostalCode = dto.AddressDto.PostalCode,
                 CountryCode = dto.AddressDto.CountryCode,
                 Latitude = dto.AddressDto.Latitude ?? 0,
                 Longitude = dto.AddressDto.Longitude ?? 0,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                //UserId = ownerId,
             },
             Phone = dto.Phone,
             DeliveryFee = dto.DeliveryFee,

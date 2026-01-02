@@ -73,14 +73,14 @@ public class AppDbContext : IdentityDbContext<User>
                 .OnDelete(DeleteBehavior.Cascade);
 
             entity.HasOne(r => r.Address)
-                .WithMany()
-                .HasForeignKey(r => r.AddressId)
-                .OnDelete(DeleteBehavior.Restrict);
+                  .WithOne(a => a.Restaurant)
+                .HasForeignKey<Address>(a => a.RestaurantId)
+                .OnDelete(DeleteBehavior.Cascade);
 
-            // entity.HasOne(r => r.Owner)
-            //       .WithMany()
-            //       .HasForeignKey(r => r.OwnerId)
-            //       .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(r => r.Owner)
+                  .WithMany()
+                  .HasForeignKey(r => r.OwnerId)
+                  .OnDelete(DeleteBehavior.Restrict);
         });
 
         // Address config

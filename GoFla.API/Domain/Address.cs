@@ -21,9 +21,9 @@ public class Address
     public DateTime CreatedAt { get; set; }
 
     // Navigation prop
-    //public int RestaurantId { get; set; }
-    // public Restaurant? Restaurant { get; set; } = null!;
-     public string? UserId { get; set; } = string.Empty;
-    public User User { get; set; } = null!;
+    public int? RestaurantId { get; set; }
+     public Restaurant? Restaurant { get; set; } = null!;
+     public string? UserId { get; set; } 
+    public User? User { get; set; } = null!;
 
 }

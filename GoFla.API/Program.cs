@@ -182,6 +182,8 @@ builder.Services.AddScoped<IFavoriteService, FavoriteService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddScoped<ISearchService, SearchService>();
 builder.Services.AddScoped<IDeliveryZoneService, DeliveryZoneService>();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IUserContext, UserContext>();
 
 
 

@@ -1,3 +1,4 @@
+import type { CreateRestaurantRequest } from "../../../types/CreateRestaurantRequest";
 import type { PagedResult } from "../../../types/pagedResult";
 import type { Restaurant } from "../../../types/restaurant";
 import { apiSlice } from "../apiSlice";
@@ -27,10 +28,19 @@ export const restaurantApi = apiSlice.injectEndpoints({
       transformResponse: (response: any) => response.data as Restaurant,
       providesTags: (_result, _error, id) => [{ type: 'Restaurant', id }],
     }),
+    createRestaurant: builder.mutation<any, CreateRestaurantRequest>({
+      query: (body) => ({
+        url: "/restaurants",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["Restaurant"],
+    }),
   }),
 })
 
 export const {
     useGetRestaurantByIdQuery,
-    useGetRestaurantsQuery
+    useGetRestaurantsQuery,
+    useCreateRestaurantMutation,
 } = restaurantApi;

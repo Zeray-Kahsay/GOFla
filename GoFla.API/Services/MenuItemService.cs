@@ -7,7 +7,10 @@ using GoFla.API.Repositories;
 
 namespace GoFla.API.Services;
 
-public class MenuItemService(IRepository<MenuItem> menuRepository, IRestaurantRepository restaurantRepository) : IMenuItemService
+public class MenuItemService(
+    IRepository<MenuItem> menuRepository,
+     IRestaurantRepository restaurantRepository,
+     IUserContext userContext) : IMenuItemService
 {
     public async Task<Result<MenuItemDto>> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
@@ -78,6 +81,11 @@ public class MenuItemService(IRepository<MenuItem> menuRepository, IRestaurantRe
         {
             return Result<MenuItemDto>.Failure("Restaurant not found", "NOT_FOUND");
         }
+
+        // Ownership check
+        if (restaurant.OwnerId != userContext.UserId)
+             return Result<MenuItemDto>.Failure("Access Denied", "FORBIDDEN");
+
 
         var menuItem = new MenuItem
         {

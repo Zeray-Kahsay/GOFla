@@ -9,6 +9,8 @@ public static class DbInitializer
 {
   public static async Task Seed(UserManager<User> userManager, RoleManager<AppRole> roleManager, AppDbContext context)
   {
+
+    var users = new List<User>();
     if (!await userManager.Users.AnyAsync())
     {
 
@@ -26,7 +28,7 @@ public static class DbInitializer
         }
       }
 
-      // Seed admin
+      // Seed admin and users
       var admin = new User
       {
         FirstName = "Administrator",
@@ -43,7 +45,85 @@ public static class DbInitializer
         await userManager.CreateAsync(admin, "Pa$$w0rd1234");
         await userManager.AddToRolesAsync(admin, new[] { "Admin", "Customer" });
       }
+
+       users = new List<User>
+      {
+        new User
+        {
+          UserName = "owner@gmail.com",
+          Email = "owner@gmail.com",
+          FirstName = "Sara",
+          LastName = "Kim",
+          CreatedAt = DateTime.UtcNow
+        },
+        new User
+        {
+          UserName = "owner1@gmail.com",
+          Email = "owner1@gmail.com",
+          FirstName = "Sara",
+          LastName = "Kim",
+          CreatedAt = DateTime.UtcNow
+        },
+        new User
+        {
+          UserName = "owner2@gmail.com",
+          Email = "owner2@gmail.com",
+          FirstName = "Sara",
+          LastName = "Kim",
+          CreatedAt = DateTime.UtcNow
+        },
+        new User
+        {
+          UserName = "owner3@gmail.com",
+          Email = "owner3@gmail.com",
+          FirstName = "Sara",
+          LastName = "Kim",
+          CreatedAt = DateTime.UtcNow
+        },
+        new User
+        {
+          UserName = "owner14@gmail.com",
+          Email = "owner14@gmail.com",
+          FirstName = "Sara",
+          LastName = "Kim",
+          CreatedAt = DateTime.UtcNow
+        },
+        new User
+        {
+          UserName = "owner25@gmail.com",
+          Email = "owner25@gmail.com",
+          FirstName = "Sara",
+          LastName = "Kim",
+          CreatedAt = DateTime.UtcNow
+        },
+        new User
+        {
+          UserName = "owner36@gmail.com",
+          Email = "owner36@gmail.com",
+          FirstName = "Sara",
+          LastName = "Kim",
+          CreatedAt = DateTime.UtcNow
+        },
+        new User
+        {
+          UserName = "owner47@gmail.com",
+          Email = "owner47@gmail.com",
+          FirstName = "Sara",
+          LastName = "Kim",
+          CreatedAt = DateTime.UtcNow
+        },
+      };
+
+    foreach(var user in users)
+    {
+          if (await userManager.FindByEmailAsync(user.Email!) == null)
+          {
+            await userManager.CreateAsync(user, "Pa$$w0rd1234");
+           await userManager.AddToRolesAsync(user, new[] { "Customer" });   
+          }
+      }
     }
+
 
     if (!await context.Restaurants.AnyAsync() || !await context.Addresses.AnyAsync())
     {
@@ -61,7 +141,7 @@ public static class DbInitializer
                 Longitude = 10.7528,
                 IsDefault = true,
                 CreatedAt = DateTime.UtcNow,
-                UserId = null,
+                UserId = users[0].Id,
             },
             new Address
             {
@@ -75,7 +155,7 @@ public static class DbInitializer
                 Longitude = 10.7575,
                 IsDefault = true,
                 CreatedAt = DateTime.UtcNow,
-                UserId = null,
+                UserId = users[1].Id,
             },
             new Address
             {
@@ -88,7 +168,7 @@ public static class DbInitializer
               Longitude = 10.8482,
               IsDefault = true,
               CreatedAt = DateTime.UtcNow,
-              UserId = null,
+              UserId = users[2].Id,
             },
             new Address
             {
@@ -101,7 +181,7 @@ public static class DbInitializer
               Longitude = 10.8481,
               IsDefault = true,
               CreatedAt = DateTime.UtcNow,
-              UserId = null,
+              UserId = users[3].Id,
             },
              new Address
             {
@@ -114,7 +194,7 @@ public static class DbInitializer
               Longitude = 10.7482,
               IsDefault = true,
               CreatedAt = DateTime.UtcNow,
-              UserId = null,
+              UserId = users[4].Id,
             },
               new Address
             {
@@ -127,7 +207,7 @@ public static class DbInitializer
               Longitude = 10.9482,
               IsDefault = true,
               CreatedAt = DateTime.UtcNow,
-              UserId = null,
+              UserId = users[5].Id,
             },
               new Address
             {
@@ -140,7 +220,7 @@ public static class DbInitializer
               Longitude = 40.8482,
               IsDefault = true,
               CreatedAt = DateTime.UtcNow,
-              UserId = null,
+              UserId = users[6].Id,
             },
 
             };
@@ -158,7 +238,7 @@ public static class DbInitializer
           DeliveryRadiusKm = 10,
           IsActive = true,
           CreatedAt = DateTime.UtcNow,
-          OwnerId = null,
+          OwnerId = users[0].Id,
           MenuItems = new List<MenuItem>
           {
             new() { Name = "Margherita Pizza", Description = "Tomato, mozzarella, basil", Price = 9.99m, ImageUrl = "https://example.com/images/margherita.jpg", Category = "Pizza", IsAvailable = true, CreatedAt = DateTime.UtcNow },
@@ -178,7 +258,7 @@ public static class DbInitializer
           DeliveryRadiusKm = 10,
           IsActive = true,
           CreatedAt = DateTime.UtcNow,
-          OwnerId = null,
+          OwnerId = users[1].Id,
           MenuItems = new List<MenuItem>
           {
             new() { Name = "Dero Wet", Description = "Chicken with spicy suace", Price = 9.99m, ImageUrl = "https://example.com/images/margherita.jpg", Category = "Pizza", IsAvailable = true, CreatedAt = DateTime.UtcNow },
@@ -198,7 +278,7 @@ public static class DbInitializer
           DeliveryRadiusKm = 10,
           IsActive = true,
           CreatedAt = DateTime.UtcNow,
-          OwnerId = null,
+          OwnerId = users[2].Id,
           MenuItems = new List<MenuItem>
           {
             new() { Name = "Margherita Pizza", Description = "Tomato, mozzarella, basil", Price = 9.99m, ImageUrl = "https://example.com/images/margherita.jpg", Category = "Pizza", IsAvailable = true, CreatedAt = DateTime.UtcNow },
@@ -218,7 +298,7 @@ public static class DbInitializer
           DeliveryRadiusKm = 10,
           IsActive = true,
           CreatedAt = DateTime.UtcNow,
-          OwnerId = null,
+          OwnerId = users[3].Id,
           MenuItems = new List<MenuItem>
           {
             new() { Name = "Margherita Pizza", Description = "Tomato, mozzarella, basil", Price = 9.99m, ImageUrl = "https://example.com/images/margherita.jpg", Category = "Pizza", IsAvailable = true, CreatedAt = DateTime.UtcNow },
@@ -238,7 +318,7 @@ public static class DbInitializer
           DeliveryRadiusKm = 10,
           IsActive = true,
           CreatedAt = DateTime.UtcNow,
-          OwnerId = null,
+          OwnerId = users[4].Id,
           MenuItems = new List<MenuItem>
           {
             new() { Name = "Margherita Pizza", Description = "Tomato, mozzarella, basil", Price = 9.99m, ImageUrl = "https://example.com/images/margherita.jpg", Category = "Pizza", IsAvailable = true, CreatedAt = DateTime.UtcNow },
@@ -258,7 +338,7 @@ public static class DbInitializer
           DeliveryRadiusKm = 10,
           IsActive = true,
           CreatedAt = DateTime.UtcNow,
-          OwnerId = null,
+          OwnerId = users[5].Id,
           MenuItems = new List<MenuItem>
           {
             new () { Name = "Bibimbap", Description = "Mixed rice, vegetables, egg, gochujang", Price = 10.99m, ImageUrl = "https://example.com/images/bibimbap.jpg", Category = "Rice Bowls", IsAvailable = true, CreatedAt = DateTime.UtcNow },
@@ -277,7 +357,7 @@ public static class DbInitializer
         DeliveryRadiusKm = 10,
         IsActive = true,
         CreatedAt = DateTime.UtcNow,
-        OwnerId = null,
+        OwnerId = users[6].Id,
         MenuItems = new List<MenuItem>
         {
             new () { Name = "Falafel Bowl", Description = "Falafel, quinoa, tahini, greens", Price = 9.50m, ImageUrl = "https://example.com/images/falafel.jpg", Category = "Bowls", IsAvailable = true, CreatedAt = DateTime.UtcNow },

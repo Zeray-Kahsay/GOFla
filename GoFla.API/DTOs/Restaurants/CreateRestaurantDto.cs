@@ -12,4 +12,5 @@ public record CreateRestaurantDto
     public string Phone { get; init; } = string.Empty;
     public decimal DeliveryFee { get; init; }
     public int EstimatedDeliveryTime { get; init; }
+    public int  DeliveryRadiusKm { get; set; }
 }

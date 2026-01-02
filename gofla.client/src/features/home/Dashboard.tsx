@@ -6,8 +6,10 @@ import { useGetRestaurantsQuery } from "../../app/api/restaurant/restaurantApi";
 import { useState } from "react";
 import type { Restaurant } from "../../types/restaurant";
 import { useInfiniteScroll } from "../../hooks/useInfiniteScroll";
+import { Link } from "react-router-dom";
+import { Button } from "../../app/layout/ui/Button";
 
-export default function HomePage() {
+export default function Dashboard() {
   const [cursor, setCursor] = useState<string | undefined>();
   
   const { data, isLoading, isFetching } = useGetRestaurantsQuery({
@@ -41,6 +43,11 @@ export default function HomePage() {
           Fast delivery, great food. Order now and enjoy!
         </p>
       </section>
+      <div>
+        <Link to="restaurant/new">
+            <Button variant="amber" className= "font-serif mb-1.5"> Add Your Restaurant </Button>
+        </Link>
+      </div>
 
       {/* Categories */}
       <section className="mb-12">

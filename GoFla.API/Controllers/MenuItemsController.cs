@@ -43,6 +43,7 @@ public class MenuItemsController (IMenuItemService menuItemService) : BaseContro
         var result = await menuItemService.CreateAsync(dto, cancellationToken);
 
         return Ok(result);
+        // return result.Match(Ok, BadRequest); 
     }
 
     [Authorize]

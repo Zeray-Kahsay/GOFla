@@ -38,7 +38,7 @@ export function RestaurantCard({ restaurant }: RestaurantCardProps) {
   };
 
   return (
-    <Link to={`/restaurant/${restaurant.id}`} className="card hover:shadow-lg transition-shadow">
+    <Link to={`/restaurants/${restaurant.id}`} className="card hover:shadow-lg transition-shadow">
       <div className="relative h-48 overflow-hidden">
         <img
           src={restaurant.imageUrl}
