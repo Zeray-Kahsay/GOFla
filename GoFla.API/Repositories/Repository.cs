@@ -3,6 +3,7 @@ using System.Linq.Expressions;
 using System.Text;
 using GoFla.API.Commons;
 using GoFla.API.Data;
+using GoFla.API.Domain;
 using GoFla.API.Extensions;
 using Microsoft.EntityFrameworkCore;
 
@@ -52,48 +53,141 @@ public class Repository<T> : IRepository<T> where T : class
     Expression<Func<T, TKey>> orderBy,
     string? cursor,
     int pageSize,
+    bool descending = true,
     CancellationToken cancellationToken = default,
     params Expression<Func<T, object>>[] includes)
-    where TKey : IComparable<TKey>
+    where TKey : struct, IComparable<TKey>
     {
         IQueryable<T> query = _dbSet.AsQueryable();
 
-
-        // Apply includes
+        // Includes
         foreach (var include in includes)
         {
             query = query.Include(include);
         }
 
+        // Predicate
         if (predicate is not null)
+        {
             query = query.Where(predicate);
+        }
 
-        var parsedCursor = cursor is null
-            ? default
-            : (TKey)Convert.ChangeType(cursor, typeof(TKey));
+        // Parse cursor → TKey?
+        TKey? parsedCursor = null;
+        if (!string.IsNullOrWhiteSpace(cursor))
+        {
+            parsedCursor = (TKey)Convert.ChangeType(cursor, typeof(TKey));
+        }
 
+        // Apply cursor pagination (ordering + filtering + pageSize + 1)
         var items = await query
-            .AppyCursorPagination(orderBy, parsedCursor, pageSize)
+            .AppyCursorPagination(
+                orderBy,
+                parsedCursor,
+                pageSize,
+                descending)
             .ToListAsync(cancellationToken);
 
+        // Determine hasMore
         var hasMore = items.Count > pageSize;
         if (hasMore)
+        {
             items.RemoveAt(items.Count - 1);
+        }
+
+        // Next cursor
+        var orderByFunc = orderBy.Compile();
+        var nextCursor = hasMore
+            ? orderByFunc(items.Last()).ToString()
+            : null;
 
         return new PagedResult<T>
         {
             Items = items,
-            TotalCount = await _dbSet.CountAsync(cancellationToken),
+            TotalCount = await query.CountAsync(cancellationToken),
             HasMore = hasMore,
-            NextCursor = hasMore
-                ? items.Last() is null
-                    ? null
-                    : typeof(TKey)
-                        .GetProperty(orderBy.Body.ToString().Split('.').Last())?
-                        .GetValue(items.Last())?.ToString()
-                : null
+            NextCursor = nextCursor
         };
     }
+
+
+    // public async Task<PagedResult<T>> GetPagedAsync<TKey>(
+    // Expression<Func<T, bool>>? predicate,
+    // Expression<Func<T, TKey>> orderBy,
+    // string? cursor,
+    // int pageSize,
+    // bool descending = true,
+    // CancellationToken cancellationToken = default,
+    // params Expression<Func<T, object>>[] includes)
+    // where TKey : IComparable<TKey>
+    // {
+    //     IQueryable<T> query = _dbSet.AsQueryable();
+
+
+    //     // Apply includes
+    //     foreach (var include in includes)
+    //     {
+    //         query = query.Include(include);
+    //     }
+
+    //     if (predicate is not null)
+    //         query = query.Where(predicate);
+
+    //     query = descending
+    //         ? query.OrderByDescending(orderBy)
+    //         : query.OrderBy(orderBy);
+
+    //     DateTime parsedCursor;
+
+
+
+    //     var parsedCursor = cursor is null
+    //         ? default
+    //         : (TKey)Convert.ChangeType(cursor, typeof(TKey));
+
+    //     var orderByFunc = orderBy.Compile();
+
+    //     if (parsedCursor is not null)
+    //     {
+    //         query = descending
+    //           ? query.Where(e => orderByFunc(e).CompareTo(parsedCursor) < 0)
+    //           : query.Where(e => orderByFunc(e).CompareTo(parsedCursor) > 0);
+    //     }
+
+    //     DateTime
+    //     var items = await query
+    //         .AppyCursorPagination(orderBy, parsedCursor, pageSize, descending)
+    //         .ToListAsync(cancellationToken);
+
+    //     var hasMore = items.Count > pageSize;
+    //     if (hasMore)
+    //         items.RemoveAt(items.Count - 1);
+
+
+    //     return new PagedResult<T>
+    //     {
+    //         Items = items,
+    //         TotalCount = await query.CountAsync(cancellationToken),
+    //         HasMore = hasMore,
+    //         NextCursor = hasMore
+    //             ? orderByFunc(items.Last()).ToString()
+    //             : null
+    //     };
+
+        // return new PagedResult<T>
+        // {
+        //     Items = items,
+        //     TotalCount = await _dbSet.CountAsync(cancellationToken),
+        //     HasMore = hasMore,
+        //     NextCursor = hasMore
+        //         ? items.Last() is null
+        //             ? null
+        //             : typeof(TKey)
+        //                 .GetProperty(orderBy.Body.ToString().Split('.').Last())?
+        //                 .GetValue(items.Last())?.ToString()
+        //         : null
+        // };
+    //}
 
 
     // public virtual async Task<PagedResult<T>> GetPagedAsync<TKey>(Expression<Func<T, bool>>? predicate, Expression<Func<T, TKey>> orderBy, string? cursor, int pageSize, CancellationToken cancellationToken = default)

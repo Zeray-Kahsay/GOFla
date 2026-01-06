@@ -1,10 +1,10 @@
 import { Heart } from "lucide-react";
 import { LoadingSpinner } from "../../app/layout/ui/LoadingSpinner";
-import { RestaurantCard } from "../restaurant/RestaurantCard";
 import { EmptyState } from "../../app/layout/ui/EmptyState";
 import { useInfiniteScroll } from "../../hooks/useInfiniteScroll";
 import { useGetFavoritesQuery } from "../../app/api/favorite/FavoriteApi";
 import { useState } from "react";
+import RestaurantCard from "../restaurant/RestaurantCard";
 
 export default function FavoritesPage() {
   const [cursor, setCursor] = useState<string | undefined>();

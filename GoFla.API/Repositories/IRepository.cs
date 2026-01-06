@@ -13,9 +13,10 @@ Task<T?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
     Expression<Func<T, TKey>> orderBy,
     string? cursor,
     int pageSize,
+    bool descending,
     CancellationToken cancellationToken = default,
     params Expression<Func<T, object>>[] includes
-       ) where TKey : IComparable<TKey>;
+       ) where TKey : struct, IComparable<TKey>;
     Task<T> AddAsync(T entity, CancellationToken cancellationToken = default);
     Task UpdateAsync(T entity, CancellationToken cancellationToken = default);
     Task DeleteAsync(T entity, CancellationToken cancellationToken = default);

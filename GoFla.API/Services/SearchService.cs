@@ -154,6 +154,7 @@ public class SearchService(AppDbContext _context, ILogger<SearchService> _logger
                 Name = r.Name,
                 Description = r.Description,
                 ImageUrl = r.ImageUrl,
+                IsAcitve = r.IsActive,
                 Address = $"{r.Address.Street} {r.Address.City} {r.Address.State} {r.Address.PostalCode}",
                 DeliveryFee = r.DeliveryFee,
                 EstimatedDeliveryTime = r.EstimatedDeliveryTime,

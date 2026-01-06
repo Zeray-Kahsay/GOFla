@@ -32,6 +32,7 @@ public class MenuItemService(
         var pagedResult = await menuRepository.GetPagedAsync(
             predicate: mi => mi.RestaurantId == restaurantId && mi.IsAvailable,
             orderBy: mi => mi.Id,
+            descending: true,
             cursor: paginationParams.Cursor,
             pageSize: paginationParams.PageSize,
             cancellationToken: cancellationToken);
@@ -57,6 +58,7 @@ public class MenuItemService(
         var pagedResult = await menuRepository.GetPagedAsync(
             predicate: mi => mi.RestaurantId == restaurantId && mi.Category == category && mi.IsAvailable,
             orderBy: mi => mi.Id,
+            descending: true,
             cursor: paginationParams.Cursor,
             pageSize: paginationParams.PageSize,
             cancellationToken: cancellationToken);

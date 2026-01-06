@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { RestaurantCard } from "../restaurant/RestaurantCard";
 import { SearchFilters, type FilterValues } from "../../features/search/SearchFilters";
 import { useSearchParams } from "react-router-dom";
 import { Search } from "lucide-react";
@@ -7,6 +6,7 @@ import { MenuItemCard } from "../../features/menu/MenuItemCard";
 import { useLazySearchMenuItemsQuery, useLazySearchRestaurantsQuery } from "../../app/api/search/SearchApi";
 import { LoadingSpinner } from "../../app/layout/ui/LoadingSpinner";
 import { EmptyState } from "../../app/layout/ui/EmptyState";
+import RestaurantCard from "../restaurant/RestaurantCard";
 
 export default function SearchPage() {
   const [searchParams] = useSearchParams();

@@ -25,9 +25,10 @@ public class RestaurantService(IRestaurantRepository restaurantRepository) : IRe
     {
         var pagedResult = await restaurantRepository.GetPagedAsync(
              predicate: r => r.IsActive,
-             orderBy: r => r.Id,
+             orderBy: r => r.CreatedAt,
              cursor: paginationParams.Cursor,
              pageSize: paginationParams.PageSize,
+             descending: true,
              cancellationToken: cancellationToken,
              r => r.Address
 
@@ -70,7 +71,8 @@ public class RestaurantService(IRestaurantRepository restaurantRepository) : IRe
             EstimatedDeliveryTime = dto.EstimatedDeliveryTime,
             ImageUrl = string.Empty, // Will be updated via separate endpoint
             IsActive = true,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.UtcNow,
+
         };
 
         var created = await restaurantRepository.AddAsync(restaurant, cancellationToken);

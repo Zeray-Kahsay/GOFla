@@ -8,7 +8,7 @@ function App() {
     <>
   <Header />
 
-  <div>
+  <div className="min-h-screen bg-linear-to-br from-amber-50 via-neutral-50 to-amber-100">
     <Outlet />
   </div>
   

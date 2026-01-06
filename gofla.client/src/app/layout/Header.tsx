@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import { logout } from "../store/slices/authSlice";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { openCart } from "../store/slices/cartSlice";
 import { Heart, LogOut, Menu, ShoppingCart, User, X } from "lucide-react";
 import { Button } from "./ui/Button";
@@ -14,6 +14,7 @@ import { useAppDispatch } from "../store/store";
 
 export function Header() {
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
   //const { itemCount } = useCart();
   const {data: cart} = useGetCartQuery(undefined, {
@@ -34,6 +35,7 @@ export function Header() {
 
   const handleLogout = () => {
     dispatch(logout());
+    navigate("/");
     setShowMobileMenu(false);
   };
 
@@ -46,7 +48,7 @@ export function Header() {
             <Link to="/" className="flex items-center gap-2">
               <div className="w-10 h-10 bg-primary-600 rounded-lg flex items-center justify-center">
               </div>
-              <span className="text-xl font-bold text-gray-900 hidden sm:block">
+              <span className="text-xl font-bold text-gray-900 hidden sm:block font-serif">
                 GO-FLA
               </span>
             </Link>
@@ -97,12 +99,12 @@ export function Header() {
                         />
                       ) : (
                         <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center">
-                          <span className="text-primary-600 font-semibold text-sm">
+                          <span className="text-primary-600 font-semibold text-sm font-serif">
                             {user?.firstName.charAt(0)}{user?.lastName.charAt(0)}
                           </span>
                         </div>
                       )}
-                      <span className="hidden sm:block text-sm font-medium max-w-24 truncate">
+                      <span className="hidden sm:block text-sm font-medium max-w-24 truncate font-serif">
                         {user?.firstName}
                       </span>
                     </button>
@@ -110,40 +112,40 @@ export function Header() {
                     {/* Dropdown Menu */}
                     <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
                       <div className="px-4 py-3 border-b">
-                        <p className="text-sm font-semibold text-gray-900">
+                        <p className="text-sm font-semibold text-gray-900 font-serif">
                           {user?.firstName} {user?.lastName}
                         </p>
-                        <p className="text-xs text-gray-500 truncate">{user?.email}</p>
+                        <p className="text-xs text-gray-500 truncate font-serif">{user?.email}</p>
                       </div>
                       
                       <Link
                         to="/profile"
-                        className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                        className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 font-serif"
                       >
                         <User size={16} />
                         My Profile
                       </Link>
                       <Link
                         to="/orders"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 font-serif"
                       >
                         My Orders
                       </Link>
                       <Link
                         to="/favorites"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 sm:hidden"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 sm:hidden font-serif"
                       >
                         Favorites
                       </Link>
                       <Link
                         to="/addresses"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 font-serif"
                       >
                         Addresses
                       </Link>
                       <button
                         onClick={handleLogout}
-                        className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-50 flex items-center gap-2 border-t rounded-b-lg"
+                        className="w-full text-left px-4 py-2 text-sm font-serif text-red-600 hover:bg-gray-50 flex items-center gap-2 border-t rounded-b-lg"
                       >
                         <LogOut size={16} />
                         Logout
@@ -177,7 +179,7 @@ export function Header() {
               <nav className="space-y-2">
                 <Link
                   to="/"
-                  className="block px-4 py-2 text-gray-700 hover:bg-gray-50 rounded"
+                  className="block px-4 py-2 text-gray-700 hover:bg-gray-50 rounded font-serif"
                   onClick={() => setShowMobileMenu(false)}
                 >
                   Home
@@ -186,28 +188,28 @@ export function Header() {
                   <>
                     <Link
                       to="/orders"
-                      className="block px-4 py-2 text-gray-700 hover:bg-gray-50 rounded"
+                      className="block px-4 py-2 text-gray-700 hover:bg-gray-50 rounded font-serif"
                       onClick={() => setShowMobileMenu(false)}
                     >
                       My Orders
                     </Link>
                     <Link
                       to="/favorites"
-                      className="block px-4 py-2 text-gray-700 hover:bg-gray-50 rounded"
+                      className="block px-4 py-2 text-gray-700 hover:bg-gray-50 rounded font-serif"
                       onClick={() => setShowMobileMenu(false)}
                     >
                       Favorites
                     </Link>
                     <Link
                       to="/profile"
-                      className="block px-4 py-2 text-gray-700 hover:bg-gray-50 rounded"
+                      className="block px-4 py-2 text-gray-700 hover:bg-gray-50 rounded font-serif"
                       onClick={() => setShowMobileMenu(false)}
                     >
                       Profile
                     </Link>
                          <button
                         onClick={handleLogout}
-                        className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-50 flex items-center gap-2 border-t rounded-b-lg"
+                        className="w-full text-left font-serif px-4 py-2 text-lg text-red-600 hover:bg-gray-50 flex items-center gap-2 border-t rounded-b-lg"
                       >
                         <LogOut size={16} />
                         Logout

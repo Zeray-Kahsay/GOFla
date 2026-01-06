@@ -37,6 +37,10 @@ const LoginPage = () => {
           <p className="text-gray-600 text-center mb-8">Sign in to your account</p>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <label className="font-serif text-lg block mb-3">
+              Email
+               <span className="text-red-500 ml-0.5">*</span>
+            </label>
             <Input
               label="Email"
               type="email"

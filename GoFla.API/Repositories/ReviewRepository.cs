@@ -15,6 +15,7 @@ public class ReviewRepository : Repository<Review>, IReviewRepository
         return await GetPagedAsync(
             predicate: r => r.RestaurantId == restaurantId && r.IsApproved && !r.IsFlagged,
             orderBy: r => r.CreatedAt,
+            descending: true,
             cursor: cursor,
             pageSize: pageSize,
             cancellationToken: cancellationToken
@@ -27,6 +28,7 @@ public class ReviewRepository : Repository<Review>, IReviewRepository
         return await GetPagedAsync(
             predicate: r => r.UserId == userId,
             orderBy: r => r.CreatedAt,
+            descending: true,
             cursor: cursor,
             pageSize: pageSize,
             cancellationToken: cancellationToken

@@ -63,7 +63,8 @@ IRestaurantRepository restaurantRepository) : IFavoriteService
         {
             UserId = userId,
             RestaurantId = restaurantId,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.UtcNow,
+            
         };
 
         await favoriteRepository.AddAsync(favorite, cancellationToken);

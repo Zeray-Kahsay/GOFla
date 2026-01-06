@@ -25,6 +25,7 @@ public class OrderRepository : Repository<Order>, IOrderRepository
         return await GetPagedAsync(
         predicate: o => o.UserId == userId,
         orderBy: o => o.CreatedAt,
+        descending: true,
         cursor: cursor,
         pageSize: pageSize,
         cancellationToken: cancellationToken

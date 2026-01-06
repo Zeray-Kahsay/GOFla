@@ -14,4 +14,5 @@ public record RestaurantSearchResultDto
     public double AverageRating { get; init; }
     public int ReviewCount { get; init; }
     public bool IsFavorite { get; init; }
+    public bool  IsAcitve { get; set; }
 }
