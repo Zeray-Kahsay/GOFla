@@ -14,4 +14,5 @@ public record RestaurantDto
     public decimal DeliveryFee { get; init; }
     public int EstimatedDeliveryTime { get; init; }
     public bool IsActive { get; init; }
+    public bool  IsFavorite { get; set; }
 }

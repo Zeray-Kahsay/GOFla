@@ -49,13 +49,11 @@ export default function RestaurantCard({ restaurant }: RestaurantCardProps) {
           className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
         />
 
-          {restaurant.isActive !== false ? (
-          <span className="absolute top-3 left-3 rounded-full bg-green-600 px-3 py-1 text-xs text-white" >
-            Open
-          </span>
-        ):  <span className="absolute top-3 left-3 rounded-full bg-red-600 px-3 py-1 text-xs text-white" >
+          {restaurant.isActive === false && (
+          <span className="absolute top-3 left-3 rounded-full bg-red-600 px-3 py-1 text-xs text-white" >
             Closed
-          </span>}
+          </span>
+        )}
         {isAuthenticated && (
           <button
           type="button"

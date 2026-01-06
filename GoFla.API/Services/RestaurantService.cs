@@ -7,7 +7,11 @@ using GoFla.API.Repositories;
 
 namespace GoFla.API.Services;
 
-public class RestaurantService(IRestaurantRepository restaurantRepository) : IRestaurantService
+public class RestaurantService(
+    IRestaurantRepository restaurantRepository,
+    IFavoriteRepository favoriteRepository,
+    IUserContext userContext
+    ) : IRestaurantService
 {
     public async Task<Result<RestaurantDto>> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
@@ -33,8 +37,20 @@ public class RestaurantService(IRestaurantRepository restaurantRepository) : IRe
              r => r.Address
 
              );
+        
+        var restaurantIds = pagedResult.Items.Select(r => r.Id).ToList();
 
-        var dtoList = pagedResult.Items.Select(r => r.ToRestaurantDto()).ToList();
+        HashSet<int> favoriteIds = [];
+        var userId =  userContext.UserId;
+
+        if (!string.IsNullOrEmpty(userId))
+        {
+            favoriteIds = (await favoriteRepository
+             .GetFavoriteRestaurantIdsAsync(userId, restaurantIds, cancellationToken))
+             .ToHashSet();
+        }
+
+        var dtoList = pagedResult.Items.Select(r => r.ToRestaurantDto(favoriteIds)).ToList();
 
         return Result<PagedResult<RestaurantDto>>.Success(new PagedResult<RestaurantDto>
         {

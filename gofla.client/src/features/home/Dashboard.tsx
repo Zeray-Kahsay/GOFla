@@ -14,7 +14,7 @@ export default function Dashboard() {
   
   const { data, isLoading, isFetching } = useGetRestaurantsQuery({
     cursor,
-    pageSize: 3,
+    pageSize:10,
   });
 
   

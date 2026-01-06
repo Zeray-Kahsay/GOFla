@@ -17,6 +17,7 @@ public class FavoriteRepository : Repository<Favorite>, IFavoriteRepository
     {
         var query = _context.Favorites
             .Include(f => f.Restaurant)
+                .ThenInclude(r => r.Address)
             .Where(f => f.UserId == userId);
 
         if (!string.IsNullOrEmpty(cursor))
@@ -61,7 +62,10 @@ public class FavoriteRepository : Repository<Favorite>, IFavoriteRepository
     public async Task<Favorite?> GetByUserAndRestaurantAsync(string userId, int restaurantId, CancellationToken cancellationToken = default)
     {
         return await _context.Favorites
-            .FirstOrDefaultAsync(f => f.UserId == userId && f.RestaurantId == restaurantId, cancellationToken);
+            .Include(f => f.Restaurant)
+                .ThenInclude(r => r.Address)
+            .FirstOrDefaultAsync(f => f.UserId == userId && 
+                f.RestaurantId == restaurantId, cancellationToken);
     }
 
     public async Task<int> GetFavoriteCountAsync(int restaurantId, CancellationToken cancellationToken = default)
@@ -90,5 +94,13 @@ public class FavoriteRepository : Repository<Favorite>, IFavoriteRepository
         var bytes = Convert.FromBase64String(cursor);
         var json = Encoding.UTF8.GetString(bytes);
         return JsonSerializer.Deserialize<TKey>(json) ?? throw new InvalidOperationException("Failed to deserialize cursor value.");
+    }
+
+    public async Task<List<int>> GetFavoriteRestaurantIdsAsync(string userId, List<int> restaurantIds, CancellationToken cancellationToken = default)
+    {
+        return await _context.Favorites
+            .Where(f => f.UserId == userId && restaurantIds.Contains(f.RestaurantId))
+            .Select(f => f.RestaurantId)
+            .ToListAsync(cancellationToken);
     }
 }

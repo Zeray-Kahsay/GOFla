@@ -27,7 +27,7 @@ public static class MappingExtensions
     }
 
     // Restaurant mappings 
-    public static RestaurantDto ToRestaurantDto(this Restaurant restaurant)
+    public static RestaurantDto ToRestaurantDto(this Restaurant restaurant, HashSet<int>? favoriteIds = null)
     {
         return new RestaurantDto
         {
@@ -39,6 +39,7 @@ public static class MappingExtensions
             DeliveryFee = restaurant.DeliveryFee,
             EstimatedDeliveryTime = restaurant.EstimatedDeliveryTime,
             IsActive = restaurant.IsActive,
+            IsFavorite = favoriteIds?.Contains(restaurant.Id) ?? false,
             AddressDto = restaurant.Address is null
             ? null!
             : restaurant.Address.ToAddressDto()
@@ -177,10 +178,10 @@ public static class MappingExtensions
         {
             Id = favorite.Id,
             RestaurantId = favorite.RestaurantId,
-            RestaurantName = favorite.Restaurant.Name,
-            RestaurantImage = favorite.Restaurant.ImageUrl,
-            RestaurantAddress = favorite.Restaurant.Address.Street,
-            DeliveryFee = favorite.Restaurant.DeliveryFee,
+            RestaurantName = favorite.Restaurant.Name ?? string.Empty,
+            RestaurantImage = favorite.Restaurant.ImageUrl ?? string.Empty,
+            RestaurantAddress = favorite.Restaurant.Address.Street ?? string.Empty,
+            //DeliveryFee = favorite.Restaurant.DeliveryFee,
             CreatedAt = favorite.CreatedAt
         };
     }

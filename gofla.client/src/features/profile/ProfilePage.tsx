@@ -2,10 +2,12 @@ import { Mail, MapPin, User } from "lucide-react";
 import { Button } from "../../app/layout/ui/Button";
 import { useGetAddressesQuery } from "../../app/api/address/addressApi";
 import { useAuth } from "../../hooks/useAuth";
+import { useLazyGetFavoriteCountQuery } from "../../app/api/favorite/FavoriteApi";
 
 export default function ProfilePage() {
   const { user } = useAuth();
   const { data: addresses } = useGetAddressesQuery();
+  const {data: facoritesCount} = useLazyGetFavoriteCountQuery();
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -57,7 +59,7 @@ export default function ProfilePage() {
                       <p className="font-medium">{address.label}</p>
                       <p className="text-sm text-gray-600 mt-1">
                         {address.street}<br />
-                        {address.city}, {address.state} {address.zipCode}
+                        {address.city},  {address.postalCode}
                       </p>
                     </div>
                     {address.isDefault && (
@@ -83,7 +85,7 @@ export default function ProfilePage() {
               </div>
               <div>
                 <p className="text-sm text-gray-600">Favorite Restaurants</p>
-                <p className="text-2xl font-bold">{addresses?.length || 0}</p>
+                <p className="text-2xl font-bold">{facoritesCount?.length || 0}</p>
               </div>
               <div>
                 <p className="text-sm text-gray-600">Reviews Written</p>
