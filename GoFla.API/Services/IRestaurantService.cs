@@ -12,4 +12,7 @@ public interface IRestaurantService
     Task<Result<RestaurantDto>> UpdateAsync(int id, UpdateRestaurantDto dto, CancellationToken cancellationToken = default);
     Task<Result<bool>> DeleteAsync(int id, CancellationToken cancellationToken = default);
     Task<Result<bool>> ToggleActiveStatusAsync(int id, CancellationToken cancellationToken = default);
+    Task<Result<string>> UploadRestaurantImageAsync(int restaurantId, string ownerId, IFormFile file, CancellationToken cancellationToken);
+    Task<Result<bool>> RemoveRestaurantImageAsync(int restaurantId, string ownerId, CancellationToken cancellationToken = default);
+    Task<Result<List<RestaurantDto>>> GetMyRestaurantsAsync(string ownerId, CancellationToken cancellationToken = default);  
 }

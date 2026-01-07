@@ -15,6 +15,8 @@ public class Restaurant
     public int EstimatedDeliveryTime { get; set; } // in minutes
     public double DeliveryRadiusKm { get; set; } = 5;
 
+    public string  ImagePublicId  { get; set; } = string.Empty;
+
     // Navigation properties
     public string OwnerId { get; set; } = null!;
     public User Owner { get; set; } = null!;

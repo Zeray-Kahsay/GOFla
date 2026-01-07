@@ -47,10 +47,9 @@ export default function CreateRestaurantForm() {
       normalizePhone(data.phone);
       const result = await createRestaurant(data).unwrap();
       toast.success("Restaurant Added!")
-      
-      navigate(`/restaurants/${result.data.id}`);
-      //dispatch(restaurantApi.util.invalidateTags(['Restaurant']));
-      console.log(result.data.id); 
+      navigate(`/owner/restaurants/${result.data.id}/images`);
+      console.log("Created restaurant with ID:", result.data.id);
+      //navigate(`/restaurants/${result.data.id}`);
     } catch (error) {
       toast.error("Failed Adding Restaurant!")   
     }

@@ -10,13 +10,14 @@ namespace GoFla.API.Controllers;
 
 public class RestaurantsController(IRestaurantService restaurantService) : BaseController
 {
-    [HttpGet("{id}")]
+    [HttpGet("{id:int}")]
     public async Task<IActionResult> GetRestaurantById(int id, CancellationToken cancellationToken)
     {
         var result = await restaurantService.GetByIdAsync(id, cancellationToken);
 
         return Ok(result);
     }
+
 
     [HttpGet]
     public async Task<IActionResult> GetAllRestaurants([FromQuery] PaginationParams paginationParams, CancellationToken cancellationToken)
@@ -40,6 +41,7 @@ public class RestaurantsController(IRestaurantService restaurantService) : BaseC
 
     }
 
+
     [Authorize]
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateRestaurant(int id, [FromBody] UpdateRestaurantDto dto, CancellationToken cancellationToken)
@@ -48,6 +50,7 @@ public class RestaurantsController(IRestaurantService restaurantService) : BaseC
 
         return Ok(result);
     }
+
 
     [Authorize]
     [HttpDelete("{id}")]
@@ -58,6 +61,7 @@ public class RestaurantsController(IRestaurantService restaurantService) : BaseC
         return Ok(result);
     }
 
+
     [Authorize]
     [HttpPatch("{id}/toggle-active")]
     public async Task<IActionResult> ToggleRestaurantActiveStatus(int id, CancellationToken cancellationToken)
@@ -65,6 +69,54 @@ public class RestaurantsController(IRestaurantService restaurantService) : BaseC
         var result = await restaurantService.ToggleActiveStatusAsync(id, cancellationToken);
 
         return Ok(result);
+    }
+
+
+    [HttpPost("{restaurantId:int}/image")]
+    public async Task<IActionResult> UploadImage(int restaurantId, IFormFile file, CancellationToken cancellationToken)
+    {
+        if (file is null || file.Length == 0)
+            return BadRequest("No file provided");
+        
+        var userId = User.GetUserId();
+        if (userId is null)
+          return Unauthorized("Unauthorized user");
+
+        var result = await restaurantService.UploadRestaurantImageAsync(restaurantId, userId, file, cancellationToken);
+
+        return result.IsSuccess
+                ? Ok(result.Data)
+                : Problem(result.ErrorMessage);
+    }
+
+    [HttpDelete("{restaurantId:int}/image")]
+    public async Task<IActionResult> RemoveImage(int restaurantId, CancellationToken cancellationToken)
+    {
+        var userId = User.GetUserId();
+        if (userId is null)
+          return Unauthorized("Unauthorized user");
+
+        var result = await restaurantService.RemoveRestaurantImageAsync(restaurantId, userId, cancellationToken);
+
+        return result.IsSuccess
+                ? Ok(result.Data)
+                : Problem(result.ErrorMessage);
+    }
+
+
+    [Authorize]
+    [HttpGet("my-restaurants")]
+    public async Task<IActionResult> GetMyRestaurants(CancellationToken cancellationToken)
+    {
+        var userId = User.GetUserId();
+        if (userId is null)
+            return Unauthorized("Unauthorized user cannot access restaurants");
+
+        var result = await restaurantService.GetMyRestaurantsAsync(userId, cancellationToken);
+
+        return result.IsSuccess
+                ? Ok(result.Data)
+                : BadRequest(result.ErrorMessage);
     }
 
 }

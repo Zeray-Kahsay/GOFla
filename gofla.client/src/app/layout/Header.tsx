@@ -48,8 +48,8 @@ export function Header() {
             <Link to="/" className="flex items-center gap-2">
               <div className="w-10 h-10 bg-primary-600 rounded-lg flex items-center justify-center">
               </div>
-              <span className="text-xl font-bold text-gray-900 hidden sm:block font-serif">
-                GO-FLA
+              <span className="text-xl font-bold text-gray-900  font-serif">
+                RESTO-HUB
               </span>
             </Link>
 

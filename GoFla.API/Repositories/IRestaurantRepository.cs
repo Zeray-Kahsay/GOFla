@@ -15,4 +15,5 @@ public interface IRestaurantRepository : IRepository<Restaurant>
         int pageSize,
         CancellationToken cancellationToke = default
     );
+    Task<List<Restaurant>> GetByOwnerAsync(string ownerId, CancellationToken cancellationToken = default);
 }

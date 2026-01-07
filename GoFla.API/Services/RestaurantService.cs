@@ -10,7 +10,8 @@ namespace GoFla.API.Services;
 public class RestaurantService(
     IRestaurantRepository restaurantRepository,
     IFavoriteRepository favoriteRepository,
-    IUserContext userContext
+    IUserContext userContext,
+    IImageStorage imageStorage
     ) : IRestaurantService
 {
     public async Task<Result<RestaurantDto>> GetByIdAsync(int id, CancellationToken cancellationToken = default)
@@ -157,4 +158,57 @@ public class RestaurantService(
         return Result<bool>.Success(true);
     }
 
+    public async Task<Result<string>> UploadRestaurantImageAsync(int restaurantId, string ownerId, IFormFile file, CancellationToken cancellationToken)
+    {
+        var restaurant = await restaurantRepository.GetByIdAsync(restaurantId, cancellationToken);
+        if (restaurant is null)
+            return Result<string>.Failure("Restaurant not found", "NOT_FOUND");
+        
+        if (restaurant.OwnerId != ownerId)
+            return Result<string>.Failure("Access denied", "FORBIDDEN");
+        
+        var imageUrl = await imageStorage.UploadImageAsync(restaurantId, file, cancellationToken);
+
+        restaurant.ImageUrl = imageUrl;
+        await restaurantRepository.UpdateAsync(restaurant, cancellationToken);
+
+        return Result<string>.Success(imageUrl);
+    }
+
+    public async Task<Result<bool>> RemoveRestaurantImageAsync(int restaurantId, string ownerId, CancellationToken cancellationToken = default)
+    {
+        var restaurant = await restaurantRepository.GetByIdAsync(restaurantId, cancellationToken);
+
+        if (restaurant is null)
+            return Result<bool>.Failure("Restaurant not found", "NOT_FOUND");
+        
+        if (restaurant.OwnerId != ownerId)
+            return Result<bool>.Failure("Access denied", "FORBIDDEN");
+        
+        if (!string.IsNullOrWhiteSpace(restaurant.ImagePublicId))
+        {
+            await imageStorage.DeleteImageAsync(restaurant.ImagePublicId, cancellationToken);
+        }
+
+        restaurant.ImageUrl = string.Empty;
+        restaurant.ImagePublicId = string.Empty;
+
+        await restaurantRepository.UpdateAsync(restaurant, cancellationToken);
+
+        return Result<bool>.Success(true);
+    }
+
+    public async Task<Result<List<RestaurantDto>>> GetMyRestaurantsAsync(string ownerId, CancellationToken cancellationToken = default)
+    {
+       var restaurants = await restaurantRepository.GetByOwnerAsync(ownerId, cancellationToken);
+
+       if (restaurants.Count == 0)
+       {
+         return Result<List<RestaurantDto>>.Failure("No restaurants found", "NOT_FOUND");
+       }
+
+       return Result<List<RestaurantDto>>.Success(
+        restaurants.Select(r => r.ToRestaurantDto()).ToList()
+       );
+    }
 }

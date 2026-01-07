@@ -32,7 +32,6 @@ export default function RestaurantPage() {
     pageSize: 20,
   });
 
-  console.log(menuData?.items);
   const { data: ratingData } = useGetRestaurantRatingQuery(restaurantId);
   const { data: reviewsData, isFetching: reviewsFetching } = useGetRestaurantReviewsQuery({
     restaurantId,

@@ -11,6 +11,15 @@ public class RestaurantRepository : Repository<Restaurant>, IRestaurantRepositor
 {
     public RestaurantRepository(AppDbContext context) : base(context){}
 
+    public async Task<List<Restaurant>> GetByOwnerAsync(string ownerId, CancellationToken cancellationToken = default)
+    {
+        return await _dbSet
+            .Where(r => r.OwnerId == ownerId)
+            .Include(r => r.Address)
+            .OrderByDescending(r => r.CreatedAt)
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<PagedResult<Restaurant>> GetPagedWithDetailsAsync(
         Expression<Func<Restaurant,
          bool>> predicate, 
@@ -57,4 +66,6 @@ public class RestaurantRepository : Repository<Restaurant>, IRestaurantRepositor
             .Include(r => r.Address)
             .FirstOrDefaultAsync(r => r.Id == id, cancellationToken);
     }
+
+    
 }

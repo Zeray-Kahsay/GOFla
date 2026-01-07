@@ -184,6 +184,7 @@ builder.Services.AddScoped<ISearchService, SearchService>();
 builder.Services.AddScoped<IDeliveryZoneService, DeliveryZoneService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IUserContext, UserContext>();
+builder.Services.AddScoped<IImageStorage, ImageStorage>();
 
 
 

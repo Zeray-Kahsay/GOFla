@@ -48,7 +48,7 @@ export default function Dashboard() {
        </p>
        </div>
 
-        <Link to="/restaurant/new">
+        <Link to="/restaurants/new">
            <Button
             variant="amber"
             className="w-full sm:w-auto font-serif"

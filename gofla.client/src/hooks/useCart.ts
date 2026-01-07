@@ -11,7 +11,6 @@ export function useCart(){
         refetchOnMountOrArgChange: true,
     })
 
-    console.log(cart);
 
     // useEffect(() => {
     //     if (cart){

@@ -60,18 +60,6 @@ export function AddAddressModal({ isOpen, onClose, onSaved, initialData }: Props
 };
 
 
-  // const onSubmit = async (data: AddressFormData) => {
-  //   try {
-  //     const address = await createAddress(data).unwrap();
-  //     console.log("FORM DATA", data); 
-  //     toast.success("Address Saved!");
-  //     onSaved(address.id);
-  //     onClose();
-  //   } catch {
-  //     toast.error("Failed Saving Address");
-  //   }
-  // };
-
   return (
     <>
       {/* Backdrop */}
