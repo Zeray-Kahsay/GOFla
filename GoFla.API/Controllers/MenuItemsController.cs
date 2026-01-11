@@ -5,71 +5,78 @@ using GoFla.API.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
+
 namespace GoFla.API.Controllers;
 
-public class MenuItemsController (IMenuItemService menuItemService) : BaseController
+public class MenuItemsController(
+    IMenuQueryService menuQueryService,
+    IMenuManagementService menuManagementService) : BaseController
 {
-    [HttpGet("{id}")]
-    public async Task<IActionResult> GetMenuItemById(int id, CancellationToken cancellationToken)
-    {
-        var result = await menuItemService.GetByIdAsync(id, cancellationToken);
+    // CUSTOM ENDPOINTS 
 
-        return Ok(result);
+    //Get menu items for a restaurant - customer view
+    [HttpGet("restaurants/{restaurantId}/menu-items")]
+    public async Task<IActionResult> GetByRestaurant(int restaurantId, [FromQuery] PaginationParams paginationParams) 
+    {
+        return HandleResult(await menuQueryService.GetByRestaurantAsync(restaurantId, paginationParams));
+
     }
 
-    [HttpGet("restaurant/{restaurantId}")]
-    public async Task<IActionResult> GetMenuItemsByRestaurantId(int restaurantId, [FromQuery] PaginationParams paginationParams, CancellationToken cancellationToken)
+    // Get menu item by id - customer view
+    [HttpGet("menu-items/{id:int}")]
+    public async Task<IActionResult> GetById(int id)
     {
-        var result = await menuItemService.GetByRestaurantAsync(restaurantId, paginationParams, cancellationToken); 
-        return Ok(result);
+        return HandleResult(await menuQueryService.GetByIdAsync(id));
+
     }
 
-    [HttpGet("restaurant/{restaurantId}/category/{categoryId}")]
-    public async Task<IActionResult> GetByCategory(
-        int restaurantId, 
-        string category,
-         [FromQuery] PaginationParams paginationParams,
-          CancellationToken cancellationToken)
-    {
-        var result = await menuItemService.GetByCategoryAsync(restaurantId, category, paginationParams, cancellationToken);
+    //OWNER ENDPOINTS
 
-        return Ok(result);
+    // Get all menu items for owner dashboard
+    [Authorize]
+    [HttpGet("owner/restaurants/{restaurantId: int}/menu-items")]
+    public async Task<IActionResult> GetByRestaurantForOwner(int restaurantId, [FromQuery] PaginationParams paginationParams) // Good if return type is PaginatedList<MenuItemDto>
+    {
+        return HandleResult(await menuManagementService.GetAllByRestaurantAsync(restaurantId));
+        
     }
+
+    // Create a new menu item
 
     [Authorize]
-    [HttpPost]
-    public async Task<IActionResult> CreateMenuItem([FromBody] CreateMenuItemDto dto, CancellationToken cancellationToken)
+    [HttpPost("owner/menu-items")]
+    public async Task<IActionResult> Create(int restaurantId, [FromBody] CreateMenuItemDto createMenuItemDto)
     {
-        var result = await menuItemService.CreateAsync(dto, cancellationToken);
+        return HandleResult(await menuManagementService.CreateAsync(restaurantId, createMenuItemDto));
 
-        return Ok(result);
-        // return result.Match(Ok, BadRequest); 
     }
 
+    // Update an existing menu item
     [Authorize]
-    [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateMenuItem(int id, [FromBody] UpdateMenuItemDto dto, CancellationToken cancellationToken)
+    [HttpPut("owner/menu-items/{id:int}")]
+    public async Task<IActionResult> Update(int id, [FromBody] UpdateMenuItemDto updateMenuItemDto)
     {
-        var result = await menuItemService.UpdateAsync(id, dto, cancellationToken);
+        return HandleResult(await menuManagementService.UpdateAsync(id, updateMenuItemDto));
 
-        return Ok(result);
     }
 
+    // Delete a menu item
     [Authorize]
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteMenuItem(int id, CancellationToken cancellationToken)
+    [HttpDelete("owner/menu-items/{id:int}")]
+    public async Task<IActionResult> Delete(int id)
     {
-        var result = await menuItemService.DeleteAsync(id, cancellationToken);
-
-        return Ok(result);
+        return HandleResult(await menuManagementService.DeleteAsync(id)); 
+         
     }
 
+
+    // Toggle availability of a menu item
     [Authorize]
-    [HttpPatch("{id}/toggle-availability")]
-    public async Task<IActionResult> ToggleMenuItemAvailability(int id, CancellationToken cancellationToken)
+    [HttpPatch("owner/menu-items/{id:int}/toggle-availability")]
+    public async Task<IActionResult> ToggleAvailability(int id)
     {
-        var result = await menuItemService.ToggleAvailabilityAsync(id, cancellationToken);
-
-        return Ok(result);
+        return HandleResult(await menuManagementService.ToggleAvailabilityAsync(id));
+   
     }
+
 }

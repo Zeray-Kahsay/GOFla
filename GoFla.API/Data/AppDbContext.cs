@@ -10,6 +10,7 @@ public class AppDbContext : IdentityDbContext<User>
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
     public DbSet<Restaurant> Restaurants { get; set; } = null!;
+    public DbSet<Category> Categories { get; set; } = null!;
     public DbSet<MenuItem> MenuItems { get; set; } = null!;
     public DbSet<Cart> Carts { get; set; } = null!;
     public DbSet<CartItem> CartItems { get; set; } = null!;
@@ -83,6 +84,22 @@ public class AppDbContext : IdentityDbContext<User>
                   .OnDelete(DeleteBehavior.Restrict);
         });
 
+        // Category configuration
+        builder.Entity<Category>(entity =>
+        {
+            entity.Property(c => c.Name)
+                .IsRequired()
+                .HasMaxLength(100);
+            
+            entity.HasIndex(c => new {c.RestaurantId, c.Name})
+                .IsUnique();
+            
+            entity.HasMany(c => c.MenuItems)
+                .WithOne(m => m.Category)
+                .HasForeignKey(m => m.CategoryId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
         // Address config
         builder.Entity<Address>(entity =>
         {
@@ -113,10 +130,20 @@ public class AppDbContext : IdentityDbContext<User>
         builder.Entity<MenuItem>(entity =>
         {
             entity.Property(m => m.Price)
-                .HasColumnType("decimal(18,2)");
+                .HasPrecision(10, 2);
 
-            entity.HasIndex(m => m.RestaurantId);
-            entity.HasIndex(m => m.Category);
+            entity.HasIndex(m => m.RestaurantId); // for querying menu items by restaurant
+            entity.HasIndex(m => m.Category); // for querying menu items by category
+
+            entity.HasOne(m => m.Restaurant)
+                .WithMany(r => r.MenuItems)
+                .HasForeignKey(m => m.RestaurantId)
+                .OnDelete(DeleteBehavior.Cascade);
+            
+            entity.HasOne(m => m.Category)
+                .WithMany(c => c.MenuItems)
+                .HasForeignKey(m => m.CategoryId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
 
         // Cart configuration

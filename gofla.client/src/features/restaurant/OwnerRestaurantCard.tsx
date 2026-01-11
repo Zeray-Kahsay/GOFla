@@ -1,30 +1,43 @@
+
 import { Link } from "react-router-dom";
-import { Button } from "../../app/layout/ui/Button";
 import type { Restaurant } from "../../types/restaurant";
-import StatusBadge from "../../app/layout/ui/StatusBadge";
 
 export function OwnerRestaurantCard({ restaurant }: { restaurant: Restaurant }) {
   return (
-    <div className="rounded-xl border bg-white shadow-sm p-4 space-y-3">
+    <div className="rounded-2xl bg-white shadow-sm hover:shadow-md transition p-4">
+      <div className="relative h-40 overflow-hidden rounded-lg">
       <img
         src={restaurant.imageUrl || "/images/foodImage.avif"}
-        className="h-36 w-full rounded-lg object-cover"
+        className="h-full w-full object-cover"
       />
 
-      <div className="flex items-center justify-between">
-        <h3 className="font-semibold truncate">{restaurant.name}</h3>
-
-        <StatusBadge isOpen={restaurant.isActive} />
+       <span
+         className={`absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-medium
+            ${restaurant.isActive
+             ? "bg-green-100 text-green-700"
+             : "bg-gray-200 text-gray-600"}`}
+      >
+        {restaurant.isActive ? "Active" : "Inactive"}
+      </span>
+      <h3 className="text-lg font-semibold text-gray-900 truncate">
+        {restaurant.name}
+      </h3>
+        <p className="text-sm text-gray-500 line-clamp-2">
+        {restaurant.description}
+        </p>
       </div>
-
-      <div className="flex gap-2">
-        <Link to={`/owner/restaurants/${restaurant.id}/edit`}>
-          <Button size="sm" variant="outline">Edit</Button>
-        </Link>
-
-        <Link to={`/owner/restaurants/${restaurant.id}/menu`}>
-          <Button size="sm" variant="amber">Menu</Button>
-        </Link>
+      <div className="flex gap-2 pt-4">
+            <Link to={`/owner/restaurants/${restaurant.id}/images`}
+            className="flex-1 text-center rounded-lg border px-3 py-2 text-sm hover:bg-gray-50"
+            >
+              Image
+            </Link>
+            <Link
+              to={`/owner/restaurants/${restaurant.id}/menu`}
+              className="flex-1 text-center rounded-lg bg-amber-600 text-white px-3 py-2 text-sm hover:bg-amber-700"
+            >
+              Menu
+            </Link>
       </div>
     </div>
   );

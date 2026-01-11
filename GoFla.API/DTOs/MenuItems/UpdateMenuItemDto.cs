@@ -2,10 +2,14 @@ using System;
 
 namespace GoFla.API.DTOs.MenuItems;
 
-public record UpdateMenuItemDto
+public class UpdateMenuItemDto
 {
-    public string Name { get; init; } = string.Empty;
-    public string Description { get; init; } = string.Empty;
-    public decimal Price { get; init; }
-    public string Category { get; init; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    public decimal Price { get; set; }
+
+    public int CategoryId { get; set; }
+
+    public bool IsAvailable { get; set; } = true;
+    public string?  ImageUrl { get; set; }
 }

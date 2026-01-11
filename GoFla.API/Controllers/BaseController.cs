@@ -22,26 +22,30 @@ public class BaseController : ControllerBase
     protected IActionResult HandleResult<T>(Result<T> result)
     {
         if (result.IsSuccess)
-        {
             return Ok(result.Data);
-        }
 
         if (result.ValidationErrors != null)
         {
-            return BadRequest(new
-            {
-                message = result.ErrorMessage,
-                code = result.ErrorCode,
-                errors = result.ValidationErrors
-            });
+            return BadRequest(new ApiErrorResponse(
+                result.ErrorCode!,
+                result.ErrorMessage!,
+                result.ValidationErrors
+            ));
         }
+
+        var error = new ApiErrorResponse(
+            result.ErrorCode!,
+            result.ErrorMessage!,
+            result.ValidationErrors
+        );
 
         return result.ErrorCode switch
         {
-            "NOT_FOUND" => NotFound(new { message = result.ErrorMessage, code = result.ErrorCode }),
-            "UNAUTHORIZED" => Unauthorized(new { message = result.ErrorMessage, code = result.ErrorCode }),
-            "FORBIDDEN" => StatusCode(StatusCodes.Status403Forbidden, new { message = result.ErrorMessage, code = result.ErrorCode }),
-            _ => BadRequest(new { message = result.ErrorMessage, code = result.ErrorCode })
+            "NOT_FOUND" => NotFound(error),
+            "UNAUTHORIZED" => Unauthorized(error),
+            "FORBIDDEN" => StatusCode(StatusCodes.Status403Forbidden, error),
+            "BAD_REQUEST" => BadRequest(error),
+            _ => StatusCode(StatusCodes.Status500InternalServerError, error)
         };
     }
 }

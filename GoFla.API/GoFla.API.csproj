@@ -25,6 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="DTOs\Category\" />
     <Folder Include="DTOs\Favorites\" />
     <Folder Include="DTOs\Payment\" />
     <Folder Include="DTOs\Review\" />

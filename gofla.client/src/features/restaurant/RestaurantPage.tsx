@@ -80,7 +80,7 @@ export default function RestaurantPage() {
         ? [address.street, address.postalCode, address.city]
            .filter(Boolean)
            .join(", ")
-        : "";
+        : "Address not available";
 
 
   return (

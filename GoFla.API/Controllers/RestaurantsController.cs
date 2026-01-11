@@ -13,31 +13,25 @@ public class RestaurantsController(IRestaurantService restaurantService) : BaseC
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetRestaurantById(int id, CancellationToken cancellationToken)
     {
-        var result = await restaurantService.GetByIdAsync(id, cancellationToken);
-
-        return Ok(result);
+        return HandleResult(await restaurantService.GetByIdAsync(id, cancellationToken));
+    
     }
 
 
     [HttpGet]
     public async Task<IActionResult> GetAllRestaurants([FromQuery] PaginationParams paginationParams, CancellationToken cancellationToken)
     {
-        var result = await restaurantService.GetAllAsync(paginationParams, cancellationToken);
+        return HandleResult(await restaurantService.GetAllAsync(paginationParams, cancellationToken));
 
-        return Ok(result);
     }
 
     [Authorize]
     [HttpPost]
     public async Task<IActionResult> CreateRestaurant([FromBody] CreateRestaurantDto dto, CancellationToken cancellationToken)
     {
-        var userId = User.GetUserId();
-        if (userId is null)
-            return Unauthorized("Unauthorized user cannot add restaurant");
+       string userId = GetUserId();
 
-        var result = await restaurantService.CreateAsync(dto, userId, cancellationToken);
-
-        return Ok(result);
+        return HandleResult(await restaurantService.CreateAsync(dto, userId, cancellationToken));
 
     }
 
@@ -46,9 +40,8 @@ public class RestaurantsController(IRestaurantService restaurantService) : BaseC
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateRestaurant(int id, [FromBody] UpdateRestaurantDto dto, CancellationToken cancellationToken)
     {
-        var result = await restaurantService.UpdateAsync(id, dto, cancellationToken);
+        return HandleResult(await restaurantService.UpdateAsync(id, dto, cancellationToken));
 
-        return Ok(result);
     }
 
 
@@ -56,9 +49,8 @@ public class RestaurantsController(IRestaurantService restaurantService) : BaseC
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteRestaurant(int id, CancellationToken cancellationToken)
     {
-        var result = await restaurantService.DeleteAsync(id, cancellationToken);
+        return HandleResult(await restaurantService.DeleteAsync(id, cancellationToken));
 
-        return Ok(result);
     }
 
 
@@ -66,9 +58,8 @@ public class RestaurantsController(IRestaurantService restaurantService) : BaseC
     [HttpPatch("{id}/toggle-active")]
     public async Task<IActionResult> ToggleRestaurantActiveStatus(int id, CancellationToken cancellationToken)
     {
-        var result = await restaurantService.ToggleActiveStatusAsync(id, cancellationToken);
-
-        return Ok(result);
+        return HandleResult(await restaurantService.ToggleActiveStatusAsync(id, cancellationToken));
+        
     }
 
 
@@ -78,29 +69,19 @@ public class RestaurantsController(IRestaurantService restaurantService) : BaseC
         if (file is null || file.Length == 0)
             return BadRequest("No file provided");
         
-        var userId = User.GetUserId();
-        if (userId is null)
-          return Unauthorized("Unauthorized user");
+        string userId = GetUserId();
 
-        var result = await restaurantService.UploadRestaurantImageAsync(restaurantId, userId, file, cancellationToken);
+        return HandleResult(await restaurantService.UploadRestaurantImageAsync(restaurantId, userId, file, cancellationToken));
 
-        return result.IsSuccess
-                ? Ok(result.Data)
-                : Problem(result.ErrorMessage);
     }
 
     [HttpDelete("{restaurantId:int}/image")]
     public async Task<IActionResult> RemoveImage(int restaurantId, CancellationToken cancellationToken)
     {
-        var userId = User.GetUserId();
-        if (userId is null)
-          return Unauthorized("Unauthorized user");
+        var userId = GetUserId();
 
-        var result = await restaurantService.RemoveRestaurantImageAsync(restaurantId, userId, cancellationToken);
-
-        return result.IsSuccess
-                ? Ok(result.Data)
-                : Problem(result.ErrorMessage);
+        return HandleResult(await restaurantService.RemoveRestaurantImageAsync(restaurantId, userId, cancellationToken));
+      
     }
 
 
@@ -108,15 +89,11 @@ public class RestaurantsController(IRestaurantService restaurantService) : BaseC
     [HttpGet("my-restaurants")]
     public async Task<IActionResult> GetMyRestaurants(CancellationToken cancellationToken)
     {
-        var userId = User.GetUserId();
-        if (userId is null)
-            return Unauthorized("Unauthorized user cannot access restaurants");
+        var userId = GetUserId();
+       
 
-        var result = await restaurantService.GetMyRestaurantsAsync(userId, cancellationToken);
+        return HandleResult(await restaurantService.GetMyRestaurantsAsync(userId, cancellationToken));
 
-        return result.IsSuccess
-                ? Ok(result.Data)
-                : BadRequest(result.ErrorMessage);
     }
 
 }

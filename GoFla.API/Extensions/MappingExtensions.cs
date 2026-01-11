@@ -3,6 +3,7 @@ using GoFla.API.Domain;
 using GoFla.API.DTOs.Address;
 using GoFla.API.DTOs.Auth;
 using GoFla.API.DTOs.Cart;
+using GoFla.API.DTOs.Category;
 using GoFla.API.DTOs.Favorites;
 using GoFla.API.DTOs.MenuItems;
 using GoFla.API.DTOs.Orders;
@@ -56,10 +57,10 @@ public static class MappingExtensions
             Description = menuItem.Description,
             Price = menuItem.Price,
             ImageUrl = menuItem.ImageUrl,
-            Category = menuItem.Category,
+            CategoryId = menuItem.CategoryId,
+            CategoryName = menuItem.Category?.Name ?? string.Empty,
             IsAvailable = menuItem.IsAvailable,
             RestaurantId = menuItem.RestaurantId,
-            RestaurantName = menuItem.Restaurant?.Name ?? string.Empty
         };
     }
 
@@ -185,4 +186,24 @@ public static class MappingExtensions
             CreatedAt = favorite.CreatedAt
         };
     }
+
+    //Category mappings
+    public static CategoryDto ToCategoryDto(this Category category)
+    {
+        return new CategoryDto
+        {
+            Id = category.Id,
+            Name = category.Name,
+            SortOrder = category.SortOrder
+        };
+    }
+
+    // 
+    // public static int MapErrorCodeToStatusCode(this string errorCode) => errorCode switch
+    // {
+    //     "NOT_FOUND" => 404,
+    //     "FORBIDDEN" => 403,
+    //     "INVALID_CATEGORY" => 400,
+    //     _ => 500
+    // };
 }

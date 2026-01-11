@@ -1,11 +1,17 @@
 using System;
+using GoFla.API.Commons;
 using GoFla.API.Domain;
+using GoFla.API.DTOs.Category;
 
 namespace GoFla.API.Repositories;
 
 
-// Not used repo --- will be deleted 
-public interface IMenuItemRepository : IRepository<MenuItem>
+public interface IMenuItemRepository
 {
-    Task<bool> RestaurantExistsAsync(int restaurantId, CancellationToken ct);
+    Task<MenuItem?> GetByIdAsync(int id, CancellationToken cancellationToken);
+    Task<List<MenuItem>> GetByRestaurantAsync(int restaurantId, CancellationToken cancellationToken);
+    Task AddAsync(MenuItem item, CancellationToken cancellationToken);
+    Task UpdateAsync(MenuItem item, CancellationToken cancellationToken);
+    Task DeleteAsync(MenuItem item, CancellationToken cancellationToken);
 }
+

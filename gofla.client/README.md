@@ -42,11 +42,14 @@ PUT    /api/restaurants/{id} (auth)
 DELETE /api/restaurants/{id} (auth)
 
 # Menu Items
-GET    /api/menuitems/{id}
-GET    /api/menuitems/restaurant/{restaurantId}
-POST   /api/menuitems (auth)
-PUT    /api/menuitems/{id} (auth)
-DELETE /api/menuitems/{id} (auth)
+/api/restaurants/{restaurantId}/menu-items      → Customer & Owner (GET)
+/api/menu-items/{id}                             → Customer (GET)
+
+/api/owner/restaurants/{restaurantId}/menu-items → Owner (POST, GET ALL)
+/api/owner/menu-items/{id}                       → Owner (PUT, DELETE)
+/api/owner/menu-items/{id}/toggle                → Owner (PATCH)
+/api/owner/menu-items/{id}/image                 → Owner (POST)
+
 
 # Cart
 GET    /api/cart (auth)

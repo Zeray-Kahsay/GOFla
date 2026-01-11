@@ -28,7 +28,7 @@ public class ImageStorage : IImageStorage
     {
         if (!file.ContentType.StartsWith("image/"))
             throw new InvalidOperationException("Invalid image type");
-        
+
         await using var stream = file.OpenReadStream();
 
         var uploadParams = new ImageUploadParams
@@ -49,7 +49,7 @@ public class ImageStorage : IImageStorage
 
         if (result.StatusCode != HttpStatusCode.OK)
         {
-                throw new Exception("Cloudinary upload failed");
+            throw new Exception("Cloudinary upload failed");
         }
 
         return result.SecureUrl.ToString();
