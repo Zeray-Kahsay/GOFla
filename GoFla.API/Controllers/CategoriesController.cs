@@ -3,8 +3,8 @@ using GoFla.API.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GoFla.API.Controllers;
-
-public class CategoryController (
+// TODO: CATEGORIES CONTROLLER IMPLEMENTATION WILL BE UPDATED LATER
+public class CategoriesController (
     ICategoryService categoryService
 ) : BaseController
 {
