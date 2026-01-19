@@ -19,7 +19,7 @@ export default function Dashboard() {
 
   
   const { items, loadMoreRef } = useInfiniteScroll({
-    data: data?.items,
+    data: data?.items ?? [],
     hasMore: data?.hasMore || false,
     isLoading: isFetching,
     fetchMore: () => {
@@ -57,7 +57,7 @@ export default function Dashboard() {
           </Button>
        </Link>
      </div>
-      {/* Categories */}
+      {/* Categories --- will be replaced with data from API*/}
       <section className="mb-12">
         <h2 className="text-2xl font-serif font-semibold text-amber-900 tracking-tight mb-2.5">Popular Categories</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">

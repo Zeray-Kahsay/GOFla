@@ -20,36 +20,35 @@ public class GloabalExceptionHandler : IExceptionHandler
         
         var (statusCode, errorDto) = exception switch
         {
-            NotFoundException notFound => (StatusCodes.Status404NotFound, new ApiErrorDto
-            {
-                Message = notFound.Message,
-                ErrorCode = notFound.ErrorCode
-            }),
-            ValidationException validationEx => (StatusCodes.Status400BadRequest, new ApiErrorDto
-            {
-                Message = validationEx.Message,
-                ErrorCode = validationEx.ErrorCode,
-                ValidationErrors = validationEx.ValidationErrors
-            }),
-            UnauthorizedException unauthorizedEx => (StatusCodes.Status401Unauthorized, new ApiErrorDto
-            {
-                Message = unauthorizedEx.Message,
-                ErrorCode = unauthorizedEx.ErrorCode
-            }),
-            ForbiddenException forbiddenEx => (StatusCodes.Status403Forbidden, new ApiErrorDto
-            {
-                Message = forbiddenEx.Message,
-                ErrorCode = forbiddenEx.ErrorCode
-            }),
-           _ => (StatusCodes.Status500InternalServerError, new ApiErrorDto
-            {
-                Message = "An unexpected error occurred.",
-                ErrorCode = "INTERNAL_SERVER_ERROR",
-                StackTrace = _env.IsDevelopment() ? exception.StackTrace : null
-            })
+            NotFoundException notFound => (StatusCodes.Status404NotFound, new ApiErrorResponse(
+                notFound.Message,
+                notFound.ErrorCode,
+                null
+            )),
+            ValidationException validationEx => (StatusCodes.Status400BadRequest, new ApiErrorResponse(
+                validationEx.Message,
+                validationEx.ErrorCode,
+                validationEx.ValidationErrors
+            )),
+            UnauthorizedException unauthorizedEx => (StatusCodes.Status401Unauthorized, new ApiErrorResponse(
+                unauthorizedEx.Message,
+                unauthorizedEx.ErrorCode,
+                null
+            )),
+            ForbiddenException forbiddenEx => (StatusCodes.Status403Forbidden, new ApiErrorResponse(
+                forbiddenEx.Message,
+                forbiddenEx.ErrorCode,
+                null
+            )),
+           _ => (StatusCodes.Status500InternalServerError, new ApiErrorResponse(
+                "An unexpected error occurred.",
+                "INTERNAL_SERVER_ERROR",
+                null
+            )),
         };
 
         httpContext.Response.StatusCode = statusCode;
+        httpContext.Response.ContentType = "application/json";
         await httpContext.Response.WriteAsJsonAsync(errorDto, cancellationToken);
         
         return true;

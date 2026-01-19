@@ -16,7 +16,7 @@ public class MenuItemsController(
 
     //Get menu items for a restaurant - customer view
     [HttpGet("restaurants/{restaurantId}/menu-items")]
-    public async Task<IActionResult> GetByRestaurant(int restaurantId, [FromQuery] PaginationParams paginationParams) 
+    public async Task<IActionResult> GetByRestaurant(int restaurantId, [FromQuery] PaginationParams paginationParams)
     {
         return HandleResult(await menuQueryService.GetByRestaurantAsync(restaurantId, paginationParams));
 
@@ -34,18 +34,19 @@ public class MenuItemsController(
 
     // Get all menu items for owner dashboard
     [Authorize]
-    [HttpGet("owner/restaurants/{restaurantId: int}/menu-items")]
+    [HttpGet("owner/restaurants/{restaurantId:int}/menu-items")]
     public async Task<IActionResult> GetByRestaurantForOwner(int restaurantId, [FromQuery] PaginationParams paginationParams) // Good if return type is PaginatedList<MenuItemDto>
     {
         return HandleResult(await menuManagementService.GetAllByRestaurantAsync(restaurantId));
-        
+
     }
 
     // Create a new menu item
 
     [Authorize]
-    [HttpPost("owner/menu-items")]
-    public async Task<IActionResult> Create(int restaurantId, [FromBody] CreateMenuItemDto createMenuItemDto)
+    [HttpPost("owner/{restaurantId}/menu-items")]
+    [Consumes("multipart/form-data")]
+    public async Task<IActionResult> Create(int restaurantId, [FromForm] CreateMenuItemDto createMenuItemDto)
     {
         return HandleResult(await menuManagementService.CreateAsync(restaurantId, createMenuItemDto));
 
@@ -65,8 +66,8 @@ public class MenuItemsController(
     [HttpDelete("owner/menu-items/{id:int}")]
     public async Task<IActionResult> Delete(int id)
     {
-        return HandleResult(await menuManagementService.DeleteAsync(id)); 
-         
+        return HandleResult(await menuManagementService.DeleteAsync(id));
+
     }
 
 
@@ -76,7 +77,7 @@ public class MenuItemsController(
     public async Task<IActionResult> ToggleAvailability(int id)
     {
         return HandleResult(await menuManagementService.ToggleAvailabilityAsync(id));
-   
+
     }
 
 }

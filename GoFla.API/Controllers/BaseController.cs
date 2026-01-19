@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using GoFla.API.Commons;
+using GoFla.API.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GoFla.API.Controllers;
@@ -11,12 +12,14 @@ public class BaseController : ControllerBase
     protected string GetUserId()
     {
         return User.FindFirstValue(ClaimTypes.NameIdentifier)
-            ?? throw new UnauthorizedAccessException("User ID not found");
+                ?? throw new UnauthorizedException("User ID not found in token.");
+
     }
 
-    protected string? GetUserEmail()
+    protected string GetUserEmail()
     {
-        return User.FindFirstValue(ClaimTypes.Email);
+        return User.FindFirstValue(ClaimTypes.Email)
+            ?? throw new UnauthorizedException("User email not found in token.");
     }
 
     protected IActionResult HandleResult<T>(Result<T> result)

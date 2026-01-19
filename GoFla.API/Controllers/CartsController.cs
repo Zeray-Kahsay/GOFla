@@ -1,4 +1,5 @@
 using System;
+using GoFla.API.Commons;
 using GoFla.API.DTOs.Cart;
 using GoFla.API.Extensions;
 using GoFla.API.Services;
@@ -12,6 +13,10 @@ public class CartsController(ICartService cartService) : BaseController
     public async Task<IActionResult> GetUserCart(CancellationToken cancellationToken)
     {
         string userId = GetUserId();
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized(new ApiErrorResponse("UNAUTHORIZED", "User is not authenticated."));
+        }
         return HandleResult(await cartService.GetUserCartAsync(userId, cancellationToken));
     }
 

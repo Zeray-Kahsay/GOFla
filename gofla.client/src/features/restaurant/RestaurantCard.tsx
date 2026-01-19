@@ -44,7 +44,7 @@ export default function RestaurantCard({ restaurant }: RestaurantCardProps) {
       {/* IMAGE */}
       <div className="relative h-44 overflow-hidden">
         <img
-          src={restaurant.imageUrl || "/images/foodImage.avif"}
+          src={restaurant.imageUrl || "/images/img2.jpg"}
           alt={restaurant.name}
           className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
         />

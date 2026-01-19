@@ -83,7 +83,7 @@ public static class MappingExtensions
             Id = cartItem.Id,
             MenuItemId = cartItem.MenuItemId,
             Name = cartItem.MenuItem.Name,
-            ImageUrl = cartItem.MenuItem.ImageUrl,
+            ImageUrl = cartItem.MenuItem.ImageUrl ?? string.Empty,
             Price = cartItem.MenuItem.Price,
             Quantity = cartItem.Quantity,
             SpecialInstructions = cartItem.SpecialInstructions,

@@ -18,6 +18,9 @@ public class MenuManagementService(
         int restaurantId,
         CreateMenuItemDto dto)
     {
+        if (userContext.UserId is null)
+            return Result<MenuItemDto>.Failure("Unauthorized", "UNAUTHORIZED");
+            
         var restaurant = await restaurantRepository.GetByIdAsync(restaurantId);
         if (restaurant is null)
             return Result<MenuItemDto>.Failure("Restaurant not found", "NOT_FOUND");

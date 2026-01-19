@@ -6,12 +6,18 @@ import { OwnerRestaurantCard } from "./OwnerRestaurantCard";
 import RestaurantCardSkeleton from "./RestaurantCardSkeleton";
 import { Heart, Store } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
+import { useState } from "react";
+import AddMenuItemModal from "../../app/api/menuItem/AddMenuItemModal";
 
 export function OwnerRestaurantsPage() {
     const isAuthenticated = useAuth();
     const { data, isLoading } = useGetMyRestaurantsQuery(undefined, {
     skip: !isAuthenticated,
   });
+  const [showAddMenuModal, setShowAddMenuModal] = useState(false);
+  
+
+  const categories = [{categoryId: 1, categoryName: "Burger"}, {categoryId: 2, categoryName: "Pizza"}];
 
     
   if (isLoading) return <RestaurantCardSkeleton count={6} />;
@@ -51,12 +57,23 @@ export function OwnerRestaurantsPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {data!.map(r => (
-            <OwnerRestaurantCard key={r.id} restaurant={r} />
+            <OwnerRestaurantCard 
+            key={r.id} restaurant={r} 
+            onAddMenuItem={() => setShowAddMenuModal(true)}
+            />
           ))}
         </div>
       )}
       </div>
       </div>
+      {data?.map(res => (
+      <AddMenuItemModal 
+        restaurantId={res.id}
+        categories={categories}
+        isOpen={showAddMenuModal}
+        onClose={() => setShowAddMenuModal(false)}
+      />
+      ))}
     </div>
   );
 }

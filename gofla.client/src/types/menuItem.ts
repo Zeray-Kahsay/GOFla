@@ -4,8 +4,11 @@ export interface MenuItem {
   description: string;
   price: number;
   imageUrl: string;
-  category: string;
   isAvailable: boolean;
   restaurantId: number;
   restaurantName: string;
+
+  categoryId: number;
+  categoryName: string;
 }
+

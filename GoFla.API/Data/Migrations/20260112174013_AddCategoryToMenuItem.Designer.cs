@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GoFla.API.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260107040037_RestaurantImageAdded")]
-    partial class RestaurantImageAdded
+    [Migration("20260112174013_AddCategoryToMenuItem")]
+    partial class AddCategoryToMenuItem
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -144,6 +144,39 @@ namespace GoFla.API.Data.Migrations
                     b.ToTable("CartItems");
                 });
 
+            modelBuilder.Entity("GoFla.API.Domain.Category", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("RestaurantId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RestaurantId", "Name")
+                        .IsUnique();
+
+                    b.ToTable("Categories");
+                });
+
             modelBuilder.Entity("GoFla.API.Domain.DeliveryZone", b =>
                 {
                     b.Property<int>("Id")
@@ -204,9 +237,8 @@ namespace GoFla.API.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Category")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<int>("CategoryId")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -216,7 +248,6 @@ namespace GoFla.API.Data.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ImageUrl")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsAvailable")
@@ -227,7 +258,8 @@ namespace GoFla.API.Data.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("Price")
-                        .HasColumnType("decimal(18,2)");
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
 
                     b.Property<int>("RestaurantId")
                         .HasColumnType("int");
@@ -237,7 +269,7 @@ namespace GoFla.API.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Category");
+                    b.HasIndex("CategoryId");
 
                     b.HasIndex("RestaurantId");
 
@@ -847,6 +879,17 @@ namespace GoFla.API.Data.Migrations
                     b.Navigation("MenuItem");
                 });
 
+            modelBuilder.Entity("GoFla.API.Domain.Category", b =>
+                {
+                    b.HasOne("GoFla.API.Domain.Restaurant", "Restaurant")
+                        .WithMany()
+                        .HasForeignKey("RestaurantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Restaurant");
+                });
+
             modelBuilder.Entity("GoFla.API.Domain.Favorite", b =>
                 {
                     b.HasOne("GoFla.API.Domain.Restaurant", "Restaurant")
@@ -868,11 +911,19 @@ namespace GoFla.API.Data.Migrations
 
             modelBuilder.Entity("GoFla.API.Domain.MenuItem", b =>
                 {
+                    b.HasOne("GoFla.API.Domain.Category", "Category")
+                        .WithMany("MenuItems")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("GoFla.API.Domain.Restaurant", "Restaurant")
                         .WithMany("MenuItems")
                         .HasForeignKey("RestaurantId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Category");
 
                     b.Navigation("Restaurant");
                 });
@@ -1062,6 +1113,11 @@ namespace GoFla.API.Data.Migrations
             modelBuilder.Entity("GoFla.API.Domain.Cart", b =>
                 {
                     b.Navigation("Items");
+                });
+
+            modelBuilder.Entity("GoFla.API.Domain.Category", b =>
+                {
+                    b.Navigation("MenuItems");
                 });
 
             modelBuilder.Entity("GoFla.API.Domain.MenuItem", b =>

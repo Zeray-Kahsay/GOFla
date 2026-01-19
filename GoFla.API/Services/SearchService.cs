@@ -58,12 +58,12 @@ public class SearchService(AppDbContext _context, ILogger<SearchService> _logger
             .Include(m => m.Restaurant)
             .Where(m => m.IsAvailable && m.Restaurant.IsActive && (
                 m.Name.ToLower().Contains(query) ||
-                m.Category.ToLower().Contains(query)
+                m.Category.Name.ToLower().Contains(query)
             ));
 
         if (dto.Category != null)
         {
-            menuItemsQuery = menuItemsQuery.Where(m => m.Category == dto.Category);
+            menuItemsQuery = menuItemsQuery.Where(m => m.Category.Name == dto.Category);
         }
 
         if (dto.MinPrice.HasValue)
@@ -83,9 +83,9 @@ public class SearchService(AppDbContext _context, ILogger<SearchService> _logger
                 Id = m.Id,
                 Name = m.Name,
                 Description = m.Description,
-                ImageUrl = m.ImageUrl,
+                ImageUrl = m.ImageUrl ?? string.Empty,
                 Price = m.Price,
-                Category = m.Category,
+                Category = m.Category.Name,
                 RestaurantId = m.RestaurantId,
                 RestaurantName = m.Restaurant.Name
             })
@@ -195,13 +195,13 @@ public class SearchService(AppDbContext _context, ILogger<SearchService> _logger
             .Where(m => m.IsAvailable && m.Restaurant.IsActive && (
                 m.Name.ToLower().Contains(query) ||
                 m.Description.ToLower().Contains(query) ||
-                m.Category.ToLower().Contains(query)
+                m.Category.Name.ToLower().Contains(query)
             ));
 
         // Apply filters
         if (dto.Category != null)
         {
-            menuItemsQuery = menuItemsQuery.Where(m => m.Category == dto.Category);
+            menuItemsQuery = menuItemsQuery.Where(m => m.Category.Name == dto.Category);
         }
 
         if (dto.MinPrice.HasValue)
@@ -232,9 +232,9 @@ public class SearchService(AppDbContext _context, ILogger<SearchService> _logger
                 Id = m.Id,
                 Name = m.Name,
                 Description = m.Description,
-                ImageUrl = m.ImageUrl,
+                ImageUrl = m.ImageUrl ?? string.Empty,
                 Price = m.Price,
-                Category = m.Category,
+                Category = m.Category.Name,
                 RestaurantId = m.RestaurantId,
                 RestaurantName = m.Restaurant.Name
             })
@@ -282,8 +282,8 @@ public class SearchService(AppDbContext _context, ILogger<SearchService> _logger
             .ToListAsync(cancellationToken);
 
         var categories = await _context.MenuItems
-            .Where(m => m.IsAvailable && m.Category.ToLower().Contains(searchQuery))
-            .Select(m => m.Category)
+            .Where(m => m.IsAvailable && m.Category.Name.ToLower().Contains(searchQuery))
+            .Select(m => m.Category.Name)
             .Distinct()
             .Take(5)
             .ToListAsync(cancellationToken);

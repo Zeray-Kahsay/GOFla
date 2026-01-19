@@ -19,7 +19,7 @@ public static class MigrationsExtensions
             var roleManager = services.GetRequiredService<RoleManager<AppRole>>();
 
             await context.Database.MigrateAsync();
-            await DbInitializer.Seed(userManager, roleManager, context);
+            await DbInitializer.SeedDataAsync(userManager, roleManager, context);
 
         }
         catch (Exception ex)

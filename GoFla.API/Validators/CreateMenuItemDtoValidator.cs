@@ -20,11 +20,10 @@ public class CreateMenuItemDtoValidator : AbstractValidator<CreateMenuItemDto>
             .GreaterThan(0).WithMessage("Price must be greater than 0")
             .LessThan(10000).WithMessage("Price must be less than 10000");
 
-        RuleFor(x => x.Category)
-            .NotEmpty().WithMessage("Category is required")
-            .MaximumLength(50).WithMessage("Category must not exceed 50 characters");
+        RuleFor(x => x.CategoryId)
+            .GreaterThan(0).WithMessage("Category is required");
 
-        RuleFor(x => x.RestaurantId)
-            .GreaterThan(0).WithMessage("Valid restaurant ID is required");
+        // RuleFor(x => x.RestaurantId)
+        //     .GreaterThan(0).WithMessage("Valid restaurant ID is required");
     }
 }

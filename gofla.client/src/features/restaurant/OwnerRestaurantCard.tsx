@@ -1,8 +1,14 @@
 
 import { Link } from "react-router-dom";
 import type { Restaurant } from "../../types/restaurant";
+import { Button } from "../../app/layout/ui/Button";
 
-export function OwnerRestaurantCard({ restaurant }: { restaurant: Restaurant }) {
+interface OwnerRestaurantCardProps {
+  restaurant: Restaurant;
+  onAddMenuItem: () => void;
+}
+
+export function OwnerRestaurantCard({ restaurant, onAddMenuItem }: OwnerRestaurantCardProps) {
   return (
     <div className="rounded-2xl bg-white shadow-sm hover:shadow-md transition p-4">
       <div className="relative h-40 overflow-hidden rounded-lg">
@@ -32,12 +38,12 @@ export function OwnerRestaurantCard({ restaurant }: { restaurant: Restaurant }) 
             >
               Image
             </Link>
-            <Link
-              to={`/owner/restaurants/${restaurant.id}/menu`}
+            <Button
+              onClick={onAddMenuItem}
               className="flex-1 text-center rounded-lg bg-amber-600 text-white px-3 py-2 text-sm hover:bg-amber-700"
             >
-              Menu
-            </Link>
+             Add Menu
+            </Button>
       </div>
     </div>
   );

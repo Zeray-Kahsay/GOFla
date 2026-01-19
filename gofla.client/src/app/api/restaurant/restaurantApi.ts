@@ -17,7 +17,6 @@ export const restaurantApi = apiSlice.injectEndpoints({
         url: '/restaurants',
         params,
       }),
-      transformResponse: (response: any) => response.data as PagedResult<Restaurant>,
       providesTags: (result) => [
         ...(result?.items?.map(({ id }) => ({ type: 'Restaurant' as const, id })) ?? []),
         { type: 'Restaurant', id: 'LIST' },
@@ -25,7 +24,7 @@ export const restaurantApi = apiSlice.injectEndpoints({
     }),
     getRestaurantById: builder.query<Restaurant, number>({
       query: (id) => `/restaurants/${id}`,
-      transformResponse: (response: any) => response.data as Restaurant,
+      transformResponse: (response: any) => response,
       providesTags: (_result, _error, id) => [{ type: 'Restaurant', id }],
     }),
     createRestaurant: builder.mutation<any, CreateRestaurantRequest>({

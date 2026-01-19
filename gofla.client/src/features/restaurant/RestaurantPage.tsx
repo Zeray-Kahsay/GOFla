@@ -1,4 +1,5 @@
-import { Clock, DollarSign, MapPin, Star } from "lucide-react";
+import { Clock, DollarSign, MapPin, Star, Store } from "lucide-react";
+import { clsx as cn } from "clsx";
 import { Button } from "../../app/layout/ui/Button";
 import { LoadingSpinner } from "../../app/layout/ui/LoadingSpinner";
 import { Rating } from "../../app/layout/ui/Rating";
@@ -10,28 +11,36 @@ import { useInfiniteScroll } from "../../hooks/useInfiniteScroll";
 import { useGetRestaurantRatingQuery, useGetRestaurantReviewsQuery } from "../../app/api/review/ReviewApi";
 import { useGetMenuItemsByRestaurantQuery } from "../../app/api/menuItem/menuItemApi";
 import { useGetRestaurantByIdQuery } from "../../app/api/restaurant/restaurantApi";
-import { useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import { useParams } from "react-router-dom";
 import type { AddressDto } from "../../types/restaurant";
+import { EmptyState } from "../../app/layout/ui/EmptyState";
+import type { MenuItem } from "../../types/menuItem";
+import MenuCategorySkeleton from "../../app/layout/ui/MenuCategorySkeleton";
 
 export default function RestaurantPage() {
+  // Router & Auth Hooks
   const { id } = useParams<{ id: string }>();
   const { isAuthenticated } = useAuth();
-  const restaurantId = parseInt(id!);
-  
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const restaurantId = Number(id);
+  const categoryRefs = useRef<Record<number, HTMLElement | null>>({});
+
+  // State Hooks
+  const [selectedCategoryId, setSelectedCategoryId] = useState<number | 'all'>('all');
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [menuCursor, setMenuCursor] = useState<string | undefined>();
   const [reviewCursor, setReviewCursor] = useState<string | undefined>();
 
-  const { data: restaurant, isLoading: restaurantLoading } = useGetRestaurantByIdQuery(restaurantId);
+  // API Query Hooks
+  const { data: restaurant, isLoading: restaurantLoading } = useGetRestaurantByIdQuery(restaurantId, {
+    skip: !restaurantId,
+  });
   const { data: menuData, isFetching: menuFetching } = useGetMenuItemsByRestaurantQuery({
     restaurantId,
     cursor: menuCursor,
     pageSize: 20,
   });
-
   const { data: ratingData } = useGetRestaurantRatingQuery(restaurantId);
   const { data: reviewsData, isFetching: reviewsFetching } = useGetRestaurantReviewsQuery({
     restaurantId,
@@ -39,6 +48,7 @@ export default function RestaurantPage() {
     pageSize: 10,
   });
 
+  // Custom Hooks (data transformation)
   const { items: menuItems, loadMoreRef: menuLoadMoreRef } = useInfiniteScroll({
     data: menuData?.items,
     hasMore: menuData?.hasMore || false,
@@ -60,7 +70,95 @@ export default function RestaurantPage() {
       }
     },
   });
+    
+    const safeMenuItems = menuItems ?? [];
+    
+    // Side Effects
 
+  // Only activates when 'All' is selected
+  useEffect(() => {
+    if (selectedCategoryId !== 'all') return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries.find((e) => e.isIntersecting);
+        if (!visible) return;
+
+        const categoryId = Number(visible.target.getAttribute('data-category-id'));
+        if (!Number.isNaN(categoryId)){
+          setSelectedCategoryId(categoryId);
+        }
+      },
+      {
+        rootMargin: '-100px 0px -60px 0px',
+        threshold: 0.1,
+      }
+    );
+
+    Object.entries(categoryRefs.current).forEach(([id, el]) => {
+      if (el){
+        el.setAttribute('data-category-id', id);
+        observer.observe(el);
+      }
+    });
+
+    return () => observer.disconnect();
+  }, [safeMenuItems, selectedCategoryId]);
+
+  // Memoized Values
+  const categories = useMemo(() => {
+    const map = new Map<number, string>();
+
+    for (const item of safeMenuItems) {
+      map.set(item.categoryId, item.categoryName);
+    }
+
+    return [
+      { categoryId: 'all' as const, categoryName: 'All' },
+      ...Array.from(map.entries()).map(([categoryId, categoryName]) => ({ categoryId, categoryName })),
+    ];
+  }, [safeMenuItems]);
+
+  const filteredMenuItems = selectedCategoryId === 'all'
+    ? safeMenuItems
+    : safeMenuItems.filter((item) => item.categoryId === selectedCategoryId);
+
+  const itemsByCategory = useMemo(() => {
+    const map = new Map<number, MenuItem[]>();
+
+    for (const item of filteredMenuItems) {
+      if (!map.has(item.categoryId)) {
+        map.set(item.categoryId, []);
+      }
+      map.get(item.categoryId)!.push(item);
+    }
+    return map;
+  }, [filteredMenuItems])
+
+  const formatAddress = (address?: AddressDto) => 
+      address 
+        ? [address.street, address.postalCode, address.city]
+           .filter(Boolean)
+           .join(", ")
+        : "Address not available";
+      
+
+  const handleCategoryClick = (categoryId: number | 'all') => {
+    setSelectedCategoryId(categoryId);
+
+    if (categoryId === 'all'){
+      window.scrollTo({top: 0, behavior: 'smooth'});
+      return;
+    }
+
+    categoryRefs.current[categoryId]?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start'
+    });
+  };
+
+  
+  
   if (restaurantLoading) {
     return <LoadingSpinner fullScreen />;
   }
@@ -69,26 +167,13 @@ export default function RestaurantPage() {
     return <div>Restaurant not found</div>;
   }
 
-  const filteredMenuItems = selectedCategory === 'all'
-    ? menuItems
-    : menuItems.filter((item) => item.category === selectedCategory);
-
-  const categories = ['all', ...Array.from(new Set(menuItems.map((item) => item.category)))];
-
-  const formatAddress = (address?: AddressDto) => 
-      address 
-        ? [address.street, address.postalCode, address.city]
-           .filter(Boolean)
-           .join(", ")
-        : "Address not available";
-
 
   return (
     <div>
       {/* Restaurant Header */}
       <div className="relative h-64 md:h-80">
         <img
-          src={restaurant.imageUrl}
+          src={restaurant.imageUrl || '/images/img2.jpg'}
           alt={restaurant.name}
           className="w-full h-full object-cover"
         />
@@ -131,35 +216,78 @@ export default function RestaurantPage() {
           </div>
 
           {/* Category Filter */}
-          <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
-            {categories.map((category) => (
-              <button
-                key={category}
-                onClick={() => setSelectedCategory(category)}
-                className={`px-4 py-2 rounded-full whitespace-nowrap transition-colors ${
-                  selectedCategory === category
-                    ? 'bg-primary-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                {category === 'all' ? 'All' : category}
-              </button>
-            ))}
-          </div>
+         <div className="sticky top-16 z-30 bg-white border-b">
+           <div className="bg-white/95 backdrop-blur">     
+               <div className="container mx-auto px-4">
+                  <div className="relative flex gap-2 py-3 overflow-x-auto no-scrollbar">
+                      {categories.map((category) => (
+                        <button
+                        key={category.categoryId}
+                        onClick={() => handleCategoryClick(category.categoryId)}
+                        className={cn(
+                          "relative px-4 py-2 rounded-full whitespace-nowrap text-sm font-medium transition",
+                          selectedCategoryId === category.categoryId
+                          ? "bg-primary-600"
+                          : "text-gray-700 hover:bg-gray-900"
+                        )}
+                        >
+                            {category.categoryName}
+                            <span className="absolute -bottom-1 left-1/2 h-0.5 w-6 -translate-x-1/2 rounded-full bg-primary-600 transition-all duration-300"/>
+                          </button>
+                       ))}
+                   </div>
+                </div>
+               </div>
+         </div>
 
           {/* Menu Items */}
-          <div className="space-y-4">
-            {filteredMenuItems.map((item) => (
-              <MenuItemCard key={item.id} item={item} />
+          <div className="space-y-10" >
+            {Array.from(itemsByCategory.entries()).map(([categoryId, items]) => (
+              <section 
+                key={categoryId}
+                ref={(el) => { 
+                  categoryRefs.current[categoryId] = el
+                }}
+                className="scroll-mt-32"
+                >
+                <h3 className="text-xl font-semibold mb-4">
+                  {items[0]?.categoryName}
+                </h3>
+                  <div className="space-y-4">
+                    {items.map((item) => (
+                      <MenuItemCard
+                         key={item.id} 
+                         item={item}
+                         disabled={!item.isAvailable}
+                       />
+                    ))}
+                  </div>
+
+              </section>
             ))}
+
           </div>
 
           {menuData?.hasMore && (
             <div ref={menuLoadMoreRef} className="py-8 flex justify-center">
-              {menuFetching && <LoadingSpinner />}
+              {menuFetching && (
+                <div className="space-y-10" >
+                  {Array.from({length: 3}).map((_, i) => (
+                    <MenuCategorySkeleton key={i} />
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </section>
+
+        {!menuFetching && filteredMenuItems.length === 0 && (
+          <EmptyState 
+            icon={Store}
+            title="No menu items found"
+            description="There are no menu items available for the selected category."
+          />
+        )}
 
         {/* Reviews Section */}
         <section>

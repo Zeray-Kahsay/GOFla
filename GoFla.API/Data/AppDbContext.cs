@@ -133,7 +133,7 @@ public class AppDbContext : IdentityDbContext<User>
                 .HasPrecision(10, 2);
 
             entity.HasIndex(m => m.RestaurantId); // for querying menu items by restaurant
-            entity.HasIndex(m => m.Category); // for querying menu items by category
+            entity.HasIndex(m => m.CategoryId); // for querying menu items by category
 
             entity.HasOne(m => m.Restaurant)
                 .WithMany(r => r.MenuItems)

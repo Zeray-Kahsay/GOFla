@@ -6,13 +6,15 @@ import { useAddToCartMutation } from "../../app/api/cart/cartApi";
 import { useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import type { MenuItem } from "../../types/menuItem";
+import { clsx as cn } from "clsx";
 
 interface MenuItemCardProps {
   item: MenuItem;
+  disabled: boolean;
   onAddToCart?: () => void;
 }
 
-export function MenuItemCard({ item, onAddToCart }: MenuItemCardProps) {
+export function MenuItemCard({ item, onAddToCart, disabled }: MenuItemCardProps) {
   const { isAuthenticated } = useAuth();
   const [quantity, setQuantity] = useState(1);
   const [specialInstructions, setSpecialInstructions] = useState('');
@@ -20,9 +22,11 @@ export function MenuItemCard({ item, onAddToCart }: MenuItemCardProps) {
   const [addToCart, { isLoading }] = useAddToCartMutation();
 
   const handleAddToCart = async () => {
+    if (disabled) return;
     if (!isAuthenticated) {
       toast.info('Please login to add items to cart');
       return;
+
     }
 
     try {
@@ -43,65 +47,73 @@ export function MenuItemCard({ item, onAddToCart }: MenuItemCardProps) {
   };
 
   return (
-    <div className="card">
-      <div className="flex gap-4">
-        <img
-          src={item.imageUrl}
-          alt={item.name}
-          className="w-24 h-24 object-cover rounded-lg"
-        />
-        
-        <div className="flex-1">
-          <h3 className="text-lg font-semibold text-gray-900">{item.name}</h3>
-          <p className="text-sm text-gray-600 mt-1 line-clamp-2">{item.description}</p>
-          <p className="text-lg font-bold text-primary-600 mt-2">
-            {formatCurrency(item.price)}
-          </p>
-        </div>
-        
-        <div className="flex flex-col items-end justify-between">
-          {item.isAvailable ? (
-            <>
-              {!showDetails ? (
+    <div
+      className={cn(
+        "relative flex flex-col md:flex-row gap-4 rounded-xl border border-gray-200 bg-white p-4 transition-all duration-200 hover:shadow-lg hover:border-gray-300",
+        disabled && "opacity-50 pointer-events-none"
+      )}
+    >
+      {disabled && (
+        <span className="absolute top-2 right-2 rounded-full bg-red-600 px-3 py-1 text-sm font-semibold text-white" >
+          Sold out
+        </span>
+      )}
+      <img
+        src={item.imageUrl}
+        alt={item.name}
+        className="w-24 h-24 object-cover rounded-lg"
+      />
+      
+      <div className="flex-1">
+        <h3 className="text-lg font-semibold text-gray-900">{item.name}</h3>
+        <p className="text-sm text-gray-600 mt-1 line-clamp-2">{item.description}</p>
+        <p className="text-lg font-bold text-primary-600 mt-2">
+          {formatCurrency(item.price)}
+        </p>
+      </div>
+      
+      <div className="flex flex-col items-end justify-between">
+        {!disabled ? (
+          <>
+            {!showDetails ? (
+              <Button
+                size="sm"
+                onClick={() => setShowDetails(true)}
+                className="whitespace-nowrap bg-amber-600 hover:bg-amber-700"
+              >
+                Add to Cart
+              </Button>
+            ) : (
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                    className="p-1 rounded-full bg-amber-500 hover:bg-amber-600"
+                    aria-label="Decrease quantity"
+                  >
+                    <Minus size={16} />
+                  </button>
+                  <span className="w-8 text-center font-medium">{quantity}</span>
+                  <button
+                    onClick={() => setQuantity(quantity + 1)}
+                    className="p-1 rounded-full bg-amber-500 hover:bg-amber-600"
+                    aria-label="Increase quantity"
+                  >
+                    <Plus size={16} />
+                  </button>
+                </div>
                 <Button
                   size="sm"
-                  onClick={() => setShowDetails(true)}
-                  className="whitespace-nowrap bg-amber-600 hover:bg-amber-700"
+                  onClick={handleAddToCart}
+                  isLoading={isLoading}
+                  className="bg-amber-500 hover:bg-amber-600"
                 >
-                  Add to Cart
+                  Add {formatCurrency(item.price * quantity)}
                 </Button>
-              ) : (
-                <div className="flex flex-col gap-2">
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                      className="p-1 rounded-full bg-amber-500 hover:bg-amber-600"
-                    >
-                      <Minus size={16} />
-                    </button>
-                    <span className="w-8 text-center font-medium">{quantity}</span>
-                    <button
-                      onClick={() => setQuantity(quantity + 1)}
-                      className="p-1 rounded-full bg-amber-500 hover:bg-amber-600"
-                    >
-                      <Plus size={16} />
-                    </button>
-                  </div>
-                  <Button
-                    size="sm"
-                    onClick={handleAddToCart}
-                    isLoading={isLoading}
-                    className="bg-amber-500 hover:bg-amber-600"
-                  >
-                    Add {formatCurrency(item.price * quantity)}
-                  </Button>
-                </div>
-              )}
-            </>
-          ) : (
-            <span className="text-sm text-red-600">Unavailable</span>
-          )}
-        </div>
+              </div>
+            )}
+          </>
+        ) : null}
       </div>
       
       {showDetails && (
