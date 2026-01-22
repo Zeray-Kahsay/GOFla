@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router-dom";
-import { restaurantApi, useCreateRestaurantMutation } from "../../app/api/restaurant/restaurantApi";
+import { useCreateRestaurantMutation } from "../../app/api/restaurant/restaurantApi";
 import { AddressAutocomplete } from "../address/AddressAutoComplete";
 import { CreateRestaurantSchema, type CreateRestaurantFormValues } from "../../utils/validators/createRestaurantSchema";
 import { Input } from "../../app/layout/ui/Input";
@@ -196,7 +196,5 @@ export default function CreateRestaurantForm() {
     </form>
   );
 }
-function dispatch(arg0: any) {
-  throw new Error("Function not implemented.");
-}
+
 

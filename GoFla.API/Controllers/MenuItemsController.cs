@@ -34,7 +34,7 @@ public class MenuItemsController(
 
     // Get all menu items for owner dashboard
     [Authorize]
-    [HttpGet("owner/restaurants/{restaurantId:int}/menu-items")]
+    [HttpGet("owner/restaurants/{restaurantId}/get-menu-items")]
     public async Task<IActionResult> GetByRestaurantForOwner(int restaurantId, [FromQuery] PaginationParams paginationParams) // Good if return type is PaginatedList<MenuItemDto>
     {
         return HandleResult(await menuManagementService.GetAllByRestaurantAsync(restaurantId));
@@ -44,12 +44,20 @@ public class MenuItemsController(
     // Create a new menu item
 
     [Authorize]
-    [HttpPost("owner/{restaurantId}/menu-items")]
+    [HttpPost("owner/{restaurantId}/menu-items/create")]
     [Consumes("multipart/form-data")]
     public async Task<IActionResult> Create(int restaurantId, [FromForm] CreateMenuItemDto createMenuItemDto)
     {
         return HandleResult(await menuManagementService.CreateAsync(restaurantId, createMenuItemDto));
 
+    }
+
+    [Authorize]
+    [HttpPost("owner/menu-items/{menuItemId}/image")]
+    public async Task<IActionResult> UploadMenuItemImage(int menuItemId, IFormFile file)
+    {
+        var result = await menuManagementService.UploadImageAsync(menuItemId, file);
+        return HandleResult(result);
     }
 
     // Update an existing menu item

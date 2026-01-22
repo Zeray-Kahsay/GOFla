@@ -82,6 +82,11 @@ public class AppDbContext : IdentityDbContext<User>
                   .WithMany()
                   .HasForeignKey(r => r.OwnerId)
                   .OnDelete(DeleteBehavior.Restrict);
+                  
+            entity.HasMany(r => r.Categories)
+                  .WithOne(c => c.Restaurant)
+                  .HasForeignKey(c => c.RestaurantId)
+                  .OnDelete(DeleteBehavior.Cascade);
         });
 
         // Category configuration
@@ -90,10 +95,10 @@ public class AppDbContext : IdentityDbContext<User>
             entity.Property(c => c.Name)
                 .IsRequired()
                 .HasMaxLength(100);
-            
-            entity.HasIndex(c => new {c.RestaurantId, c.Name})
+
+            entity.HasIndex(c => new { c.RestaurantId, c.Name }) // No duplicate categories in the same resto
                 .IsUnique();
-            
+
             entity.HasMany(c => c.MenuItems)
                 .WithOne(m => m.Category)
                 .HasForeignKey(m => m.CategoryId)
@@ -134,12 +139,13 @@ public class AppDbContext : IdentityDbContext<User>
 
             entity.HasIndex(m => m.RestaurantId); // for querying menu items by restaurant
             entity.HasIndex(m => m.CategoryId); // for querying menu items by category
+            entity.HasIndex(m => new { m.RestaurantId, m.CategoryId }); // category filtering inside a resto
 
             entity.HasOne(m => m.Restaurant)
                 .WithMany(r => r.MenuItems)
                 .HasForeignKey(m => m.RestaurantId)
                 .OnDelete(DeleteBehavior.Cascade);
-            
+
             entity.HasOne(m => m.Category)
                 .WithMany(c => c.MenuItems)
                 .HasForeignKey(m => m.CategoryId)

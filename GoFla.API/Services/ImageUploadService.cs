@@ -8,11 +8,11 @@ using Microsoft.Extensions.Options;
 
 namespace GoFla.API.Services;
 
-public class ImageStorage : IImageStorage
+public class ImageUploadServie : IImageUploadService
 {
     private readonly Cloudinary _cloudinary;
 
-    public ImageStorage(IOptions<CloudinarySettings> options)
+    public ImageUploadServie(IOptions<CloudinarySettings> options)
     {
         var account = new Account(
             options.Value.CloudName,
@@ -24,7 +24,7 @@ public class ImageStorage : IImageStorage
     }
 
 
-    public async Task<string> UploadImageAsync(int restaurantId, IFormFile file, CancellationToken cancellationToken)
+    public async Task<string> UploadRestaurantImageAsync(int restaurantId, IFormFile file, CancellationToken cancellationToken)
     {
         if (!file.ContentType.StartsWith("image/"))
             throw new InvalidOperationException("Invalid image type");
@@ -47,10 +47,36 @@ public class ImageStorage : IImageStorage
 
         var result = await _cloudinary.UploadAsync(uploadParams, cancellationToken);
 
-        if (result.StatusCode != HttpStatusCode.OK)
+        EnsureSuccess(result);
+
+        return result.SecureUrl.ToString();
+    }
+
+
+    public async Task<string> UploadMenuItemImageAsync( int menuItemId, IFormFile file)
+    {
+        // Validate image
+        ValidateImage(file);
+
+        await using var stream = file.OpenReadStream();
+
+        var uploadParams = new ImageUploadParams
         {
-            throw new Exception("Cloudinary upload failed");
-        }
+            File = new FileDescription(file.FileName, stream),
+            Folder = $"menu-items",
+            PublicId = $"menu_item_{menuItemId}",
+            Overwrite = true,
+            Transformation = new Transformation()
+                .Width(600)
+                .Height(600)
+                .Crop("fill")
+                .Quality("auto")
+                .FetchFormat("auto")
+        };
+
+        var result = await _cloudinary.UploadAsync(uploadParams);
+
+        EnsureSuccess(result);
 
         return result.SecureUrl.ToString();
     }
@@ -69,4 +95,17 @@ public class ImageStorage : IImageStorage
 
         return Result<bool>.Success(true);
     }
+
+    private static void ValidateImage(IFormFile file)
+    {
+        if (file == null || !file.ContentType.StartsWith("image/"))
+            throw new InvalidOperationException("Invalid image type");
+    }
+
+    private static void EnsureSuccess(ImageUploadResult result)
+    {
+        if (result.StatusCode != HttpStatusCode.OK)
+            throw new Exception("Cloudinary upload failed");
+    }
+
 }

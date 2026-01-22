@@ -11,7 +11,7 @@ public class RestaurantService(
     IRestaurantRepository restaurantRepository,
     IFavoriteRepository favoriteRepository,
     IUserContext userContext,
-    IImageStorage imageStorage
+    IImageUploadService imageUploadService
     ) : IRestaurantService
 {
     public async Task<Result<RestaurantDto>> GetByIdAsync(int id, CancellationToken cancellationToken = default)
@@ -167,7 +167,7 @@ public class RestaurantService(
         if (restaurant.OwnerId != ownerId)
             return Result<string>.Failure("Access denied", "FORBIDDEN");
         
-        var imageUrl = await imageStorage.UploadImageAsync(restaurantId, file, cancellationToken);
+        var imageUrl = await imageUploadService.UploadRestaurantImageAsync(restaurantId, file, cancellationToken);
 
         restaurant.ImageUrl = imageUrl;
         await restaurantRepository.UpdateAsync(restaurant, cancellationToken);
@@ -187,7 +187,7 @@ public class RestaurantService(
         
         if (!string.IsNullOrWhiteSpace(restaurant.ImagePublicId))
         {
-            await imageStorage.DeleteImageAsync(restaurant.ImagePublicId, cancellationToken);
+            await imageUploadService.DeleteImageAsync(restaurant.ImagePublicId, cancellationToken);
         }
 
         restaurant.ImageUrl = string.Empty;

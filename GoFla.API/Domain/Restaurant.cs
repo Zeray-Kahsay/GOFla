@@ -25,4 +25,5 @@ public class Restaurant
     public Address Address { get; set; } = null!;
 
     public ICollection<MenuItem> MenuItems { get; set; } = [];
+    public ICollection<Category> Categories  { get; set; } = [];
 }

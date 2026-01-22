@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace GoFla.API.Controllers;
 // TODO: CATEGORIES CONTROLLER IMPLEMENTATION WILL BE UPDATED LATER
-public class CategoriesController (
+public class CategoriesController(
     ICategoryService categoryService
 ) : BaseController
 {
@@ -14,17 +14,17 @@ public class CategoriesController (
         [FromBody] CreateCategoryDto dto,
         CancellationToken cancellationToken)
     {
-       string ownerId = GetUserId();
+        string ownerId = GetUserId();
 
         return HandleResult(await categoryService.CreateAsync(
             restaurantId,
             ownerId,
             dto,
             cancellationToken));
-        
+
     }
 
-    [HttpGet]
+    [HttpGet("restaurants/{restaurantId}/categories")]
     public async Task<IActionResult> GetAllCategories(
         int restaurantId,
         CancellationToken cancellationToken)

@@ -12,7 +12,7 @@ export const categoryApi = apiSlice.injectEndpoints({
       number
     >({
       query: (restaurantId) =>
-        `/restaurants/${restaurantId}/categories`,
+        `/categories/restaurants/${restaurantId}/categories`,
       providesTags: (result, _err, restaurantId) =>
         result
           ? [

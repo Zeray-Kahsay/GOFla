@@ -46,4 +46,11 @@ public class CategoryRepository(AppDbContext context) : ICategoryRepository
     {
         return await context.SaveChangesAsync(cancellationToken) > 0;
     }
+
+    public async Task<Category?> GetByNameAsync(string categoryName, int restaurantId)
+    {
+        return await context.Categories.FirstOrDefaultAsync(c => 
+            c.RestaurantId == restaurantId &&
+            c.Name.ToLower() == categoryName.ToLower());
+    }
 }

@@ -6,6 +6,7 @@ namespace GoFla.API.Repositories;
 public interface ICategoryRepository
 {
     Task<Category?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
+    Task<Category?> GetByNameAsync(string categoryName, int restaurantId);
     Task<List<Category>> GetByRestaurantIdAsync(int restaurantId, CancellationToken cancellationToken = default);
     Task AddAsync(Category category, CancellationToken cancellationToken = default);
     Task UpdateAsync(Category category, CancellationToken cancellationToken = default);

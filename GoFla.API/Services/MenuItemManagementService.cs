@@ -10,8 +10,9 @@ namespace GoFla.API.Services;
 public class MenuManagementService(
     IRepository<MenuItem> menuRepository,
     IRestaurantRepository restaurantRepository,
-    IRepository<Category> categoryRepository,
-    IUserContext userContext
+    ICategoryRepository categoryRepo,
+    IUserContext userContext,
+    IImageUploadService imageUploadService
 ) : IMenuManagementService
 {
     public async Task<Result<MenuItemDto>> CreateAsync(
@@ -20,7 +21,7 @@ public class MenuManagementService(
     {
         if (userContext.UserId is null)
             return Result<MenuItemDto>.Failure("Unauthorized", "UNAUTHORIZED");
-            
+
         var restaurant = await restaurantRepository.GetByIdAsync(restaurantId);
         if (restaurant is null)
             return Result<MenuItemDto>.Failure("Restaurant not found", "NOT_FOUND");
@@ -28,24 +29,40 @@ public class MenuManagementService(
         if (restaurant.OwnerId != userContext.UserId)
             return Result<MenuItemDto>.Failure("Access denied", "FORBIDDEN");
 
-        var category = await categoryRepository.GetByIdAsync(dto.CategoryId);
-        if (category is null || category.RestaurantId != restaurantId)
-            return Result<MenuItemDto>.Failure("Invalid category", "INVALID_CATEGORY");
+        // Normalize category name
+        var categoryName = dto.CategoryName.Trim();
+
+        if (string.IsNullOrWhiteSpace(categoryName))
+            return Result<MenuItemDto>.Failure("Category name is required", "VALIDATION_ERROR");
+        // Get or create Category
+        var category = await categoryRepo.GetByNameAsync(dto.CategoryName, restaurantId);
+        if (category is null)
+        {
+            category = new Category
+            {
+                Name = categoryName,
+                RestaurantId = restaurantId
+            };
+
+            await categoryRepo.AddAsync(category);
+        }
+
 
         var item = new MenuItem
         {
             RestaurantId = restaurantId,
-            CategoryId = dto.CategoryId,
+            CategoryId = category.Id,
             Name = dto.Name,
             Description = dto.Description,
             Price = dto.Price,
             ImageUrl = string.Empty,
-            IsAvailable = true
+            IsAvailable = true,
+            CreatedAt = DateTime.UtcNow
         };
 
-        await menuRepository.AddAsync(item);
+        var created = await menuRepository.AddAsync(item);
 
-        return Result<MenuItemDto>.Success(item.ToMenuItemDto());
+        return Result<MenuItemDto>.Success(created.ToMenuItemDto());
     }
 
     public async Task<Result<MenuItemDto>> UpdateAsync(
@@ -119,6 +136,32 @@ public class MenuManagementService(
         var dtoItems = paged.Items.Select(mi => mi.ToMenuItemDto()).ToList();
 
         return Result<List<MenuItemDto>>.Success(dtoItems);
+    }
+
+    public async Task<Result<MenuItemDto>> UploadImageAsync(int menuItemId, IFormFile file)
+    {
+       if (userContext.UserId is null)
+            return Result<MenuItemDto>.Failure("Unauthorized", "UNAUTHORIZED");
+        
+        var item = await menuRepository.GetByIdAsync(menuItemId);
+        if (item is null)
+            return Result<MenuItemDto>.Failure("Menu item not found", "NOT_FOUND");
+        
+        var restaurant = await restaurantRepository.GetByIdAsync(item.RestaurantId);
+        if (restaurant is null)
+            return Result<MenuItemDto>.Failure("Restaurant not found", "NOT_FOUND");
+        
+        if (restaurant.OwnerId != userContext.UserId)
+            return Result<MenuItemDto>.Failure("Access denied", "FORBIDDEN");
+        
+        var imageUrl = await imageUploadService.UploadMenuItemImageAsync( menuItemId, file);
+
+        item.ImageUrl = imageUrl;
+        item.UpdatedAt = DateTime.UtcNow;
+
+        await menuRepository.UpdateAsync(item);
+
+        return Result<MenuItemDto>.Success(item.ToMenuItemDto());
     }
 }
 
