@@ -6,7 +6,14 @@ namespace GoFla.API.Services;
 
 public interface IMenuManagementService
 {
-    Task<Result<List<MenuItemDto>>> GetAllByRestaurantAsync(int restaurantId);
+    Task<Result<PagedResult<MenuItemDto>>> GetAllByRestaurantAsync(
+        int restaurantId,
+        PaginationParams paginationParams,
+        string? search = null,
+        int? categoryId = null,
+        bool? isAvailable = null,
+        CancellationToken cancellationToken = default
+    );
     Task<Result<MenuItemDto>> CreateAsync(int restaurantId, CreateMenuItemDto dto);
     Task<Result<MenuItemDto>> UploadImageAsync(int menuItemId, IFormFile file );
     Task<Result<MenuItemDto>> UpdateAsync(int id, UpdateMenuItemDto dto);

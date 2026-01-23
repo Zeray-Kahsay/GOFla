@@ -1,4 +1,4 @@
-using System;
+using Microsoft.EntityFrameworkCore;
 using GoFla.API.Commons;
 using GoFla.API.Domain;
 using GoFla.API.DTOs.MenuItems;
@@ -73,8 +73,17 @@ public class MenuManagementService(
         if (item is null)
             return Result<MenuItemDto>.Failure("Menu item not found", "NOT_FOUND");
 
-        if (item.Restaurant.OwnerId != userContext.UserId)
+        // Ownership check
+        var restaurant = await restaurantRepository.GetByIdAsync(item.RestaurantId);
+        if (restaurant is null)
+            return Result<MenuItemDto>.Failure("Restaurant not found", "NOT_FOUND");
+
+        if (restaurant.OwnerId != userContext.UserId)
             return Result<MenuItemDto>.Failure("Access denied", "FORBIDDEN");
+
+        var category = await categoryRepo.GetByIdAsync(dto.CategoryId);
+        if (category is null || category.RestaurantId != item.RestaurantId)
+            return Result<MenuItemDto>.Failure("Invalid category", "INVALID_CATEGORY");
 
         item.Name = dto.Name;
         item.Description = dto.Description;
@@ -92,7 +101,13 @@ public class MenuManagementService(
         var item = await menuRepository.GetByIdAsync(menuItemId);
         if (item is null)
             return Result<bool>.Failure("Menu item not found", "NOT_FOUND");
-        if (item.Restaurant.OwnerId != userContext.UserId)
+
+        // Ownership check
+        var restaurant = await restaurantRepository.GetByIdAsync(item.RestaurantId);
+        if (restaurant is null)
+            return Result<bool>.Failure("Restaurant not found", "NOT_FOUND");
+
+        if (restaurant.OwnerId != userContext.UserId)
             return Result<bool>.Failure("Access denied", "FORBIDDEN");
 
         await menuRepository.DeleteAsync(item);
@@ -105,6 +120,14 @@ public class MenuManagementService(
         if (item is null)
             return Result<bool>.Failure("Menu item not found", "NOT_FOUND");
 
+        // Ownership check
+        var restaurant = await restaurantRepository.GetByIdAsync(item.RestaurantId);
+        if (restaurant is null)
+            return Result<bool>.Failure("Restaurant not found", "NOT_FOUND");
+
+        if (restaurant.OwnerId != userContext.UserId)
+            return Result<bool>.Failure("Access denied", "FORBIDDEN");
+
         if (item.Restaurant.OwnerId != userContext.UserId)
             return Result<bool>.Failure("Access denied", "FORBIDDEN");
 
@@ -115,46 +138,77 @@ public class MenuManagementService(
         return Result<bool>.Success(item.IsAvailable);
     }
 
-    public async Task<Result<List<MenuItemDto>>> GetAllByRestaurantAsync(int restaurantId)
+    public async Task<Result<PagedResult<MenuItemDto>>> GetAllByRestaurantAsync(
+        int restaurantId,
+        PaginationParams paginationParams,
+        string? search = null,
+        int? categoryId = null,
+        bool? isAvailable = null,
+        CancellationToken cancellationToken = default)
     {
         var restaurant = await restaurantRepository.GetByIdAsync(restaurantId);
         if (restaurant is null)
-            return Result<List<MenuItemDto>>.Failure("Restaurant not found", "NOT_FOUND");
+            return Result<PagedResult<MenuItemDto>>.Failure("Restaurant not found", "NOT_FOUND");
+
+        if (userContext.UserId is null)
+            return Result<PagedResult<MenuItemDto>>.Failure("Unauthorized", "UNAUTHORIZED");
 
         if (restaurant.OwnerId != userContext.UserId)
-            return Result<List<MenuItemDto>>.Failure("Access denied", "FORBIDDEN");
+            return Result<PagedResult<MenuItemDto>>.Failure("Access denied", "FORBIDDEN");
+
+        // Normalize search
+        search = string.IsNullOrWhiteSpace(search) ? null : search.Trim().ToLower();
+
+        // Enforce limits
+        paginationParams = paginationParams with
+        {
+            PageSize = Math.Clamp(paginationParams.PageSize, 1, 50)
+        };
+
 
         var paged = await menuRepository.GetPagedAsync(
-            predicate: mi => mi.RestaurantId == restaurantId,
+            predicate: mi =>
+            mi.RestaurantId == restaurantId
+            && (isAvailable == null || mi.IsAvailable == isAvailable.Value)
+            && (categoryId == null || mi.CategoryId == categoryId.Value)
+            && (search == null
+                || EF.Functions.Like(mi.Name, $"%{search}")
+                || EF.Functions.Like(mi.Description, $"%{search}")), // mi.Description.ToLower().Contains(search)
             orderBy: mi => mi.CreatedAt,
             descending: true,
-            cursor: null,
-            pageSize: 1000,
+            cursor: paginationParams.Cursor,
+            pageSize: paginationParams.PageSize,
             includes: mi => mi.Category
         );
 
         var dtoItems = paged.Items.Select(mi => mi.ToMenuItemDto()).ToList();
 
-        return Result<List<MenuItemDto>>.Success(dtoItems);
+        return Result<PagedResult<MenuItemDto>>.Success(new PagedResult<MenuItemDto>
+        {
+            Items = dtoItems,
+            TotalCount = paged.TotalCount,
+            HasMore = paged.HasMore,
+            NextCursor = paged.NextCursor
+        });
     }
 
     public async Task<Result<MenuItemDto>> UploadImageAsync(int menuItemId, IFormFile file)
     {
-       if (userContext.UserId is null)
+        if (userContext.UserId is null)
             return Result<MenuItemDto>.Failure("Unauthorized", "UNAUTHORIZED");
-        
+
         var item = await menuRepository.GetByIdAsync(menuItemId);
         if (item is null)
             return Result<MenuItemDto>.Failure("Menu item not found", "NOT_FOUND");
-        
+
         var restaurant = await restaurantRepository.GetByIdAsync(item.RestaurantId);
         if (restaurant is null)
             return Result<MenuItemDto>.Failure("Restaurant not found", "NOT_FOUND");
-        
+
         if (restaurant.OwnerId != userContext.UserId)
             return Result<MenuItemDto>.Failure("Access denied", "FORBIDDEN");
-        
-        var imageUrl = await imageUploadService.UploadMenuItemImageAsync( menuItemId, file);
+
+        var imageUrl = await imageUploadService.UploadMenuItemImageAsync(menuItemId, file);
 
         item.ImageUrl = imageUrl;
         item.UpdatedAt = DateTime.UtcNow;

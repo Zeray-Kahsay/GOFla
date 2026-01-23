@@ -21,8 +21,7 @@ export const baseQueryWithReauth : BaseQueryFn = async (args: any, api: any, ext
     // Optionally implement token refresh logic here
     // For now, just log out the user
     api.dispatch(logout());
-
-    //window.location.href = '/login?expired=true';
+   // window.location.href = '/login?expired=true';
   }
 
   return result;

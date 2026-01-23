@@ -65,6 +65,7 @@ export function OwnerRestaurantsPage() {
           <Link to="/restaurants/new">
             <Button variant="amber">Add Restaurant</Button>
           </Link>
+  
         </header>
 
         {/* GRID */}

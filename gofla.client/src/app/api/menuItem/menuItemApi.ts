@@ -8,6 +8,15 @@ interface MenuItemsParams {
   pageSize?: number;
 }
 
+export type OwnerMenuItemsParams = {
+  restaurantId: number;
+  cursor?: string;
+  pageSize?: number;
+  search?: string;
+  categoryId?: number;
+  isAvailable?: boolean;
+}
+
 
 
 export const menuItemApi = apiSlice.injectEndpoints({
@@ -44,8 +53,13 @@ export const menuItemApi = apiSlice.injectEndpoints({
           const {data: created } = await queryFulfilled;
 
           dispatch(
-            menuItemApi.util.updateQueryData("getOwnerMenuItems", restaurantId, (draft) => {
-              draft.unshift(created) // add at top
+            menuItemApi.util.updateQueryData("getOwnerMenuItems", 
+              {restaurantId, 
+                cursor: undefined, 
+                pageSize: 20}, 
+                (draft) => {
+              draft.items.unshift(created) // add at top
+              draft.totalCount += 1;
             })
           )
         } catch {
@@ -68,16 +82,20 @@ export const menuItemApi = apiSlice.injectEndpoints({
         {type: "MenuItem", id: menuItemId},
       ],
     }),
-    getOwnerMenuItems: builder.query<MenuItem[], number>({
-      query: (restaurantId) => `/menuItems/owner/restaurants/${restaurantId}/get-menu-items`,
-      providesTags: (result, _err, restaurantId) => [
-        ...(result?.map((m) => ({type: "MenuItem" as const, id: m.id})) ?? []),
-        {type: "MenuItem", id: `OWNER_RESTAURANT_${restaurantId}`},
+    getOwnerMenuItems: builder.query<PagedResult<MenuItem>, OwnerMenuItemsParams>({
+      query: ({restaurantId, ...params}) => ({
+       url: `/menuItems/owner/restaurants/${restaurantId}/menu-items`,
+        params,
+      }),
+        
+      providesTags: (result, _err, arg) => [
+        ...(result?.items?.map((m) => ({type: "MenuItem" as const, id: m.id})) ?? []),
+        {type: "MenuItem", id: `OWNER_RESTAURANT_${arg.restaurantId}`},
       ],
     }),
-    updateMenuItem: builder.mutation<MenuItem, {restaurantId: number; menuItemId: number; data: {name: string; description: string; price: number; categoryName: string; isAvailable:Boolean}}>({
-      query: ({restaurantId, menuItemId, data}) => ({
-        url: `/menuItems/owner/${restaurantId}/menu-items/${menuItemId}`,
+    updateMenuItem: builder.mutation<MenuItem, {restaurantId: number; menuItemId: number; data: {name: string; description: string; price: number; categoryId: number; isAvailable:boolean}}>({
+      query: ({ menuItemId, data}) => ({
+        url: `/menuItems/owner/menu-items/${menuItemId}`,
         method: "PUT",
         body: data,
       }),
@@ -87,8 +105,8 @@ export const menuItemApi = apiSlice.injectEndpoints({
       ],
     }),
     deleteMenuItem: builder.mutation<boolean, {restaurantId: number; menuItemId: number}>({
-      query: ({restaurantId, menuItemId}) => ({
-        url: `/menuItems/owner/${restaurantId}/menu-items/${menuItemId}`,
+      query: ({menuItemId}) => ({
+        url: `/menuItems/owner/menu-items/${menuItemId}`,
         method: "DELETE",
       }),
       invalidatesTags: (_res, _err, {restaurantId}) => [
@@ -96,14 +114,27 @@ export const menuItemApi = apiSlice.injectEndpoints({
       ],
     }),
     toggleMenuItemAvailability: builder.mutation<boolean, {restaurantId: number; menuItemId: number}>({
-      query: ({restaurantId, menuItemId}) => ({
-        url: `/menuItems/owner/${restaurantId}/menu-items/${menuItemId}/toggle-availability`,
+      query: ({ menuItemId}) => ({
+        url: `/menuItems/owner/menu-items/${menuItemId}/toggle-availability`,
         method: "PATCH",
       }),
-      invalidatesTags: (_res, _err, {restaurantId, menuItemId}) => [
-        {type: "MenuItem", id: menuItemId},
-        {type: "MenuItem", id: `OWNER-RESTAURANT-${restaurantId}`},
-      ],
+      async onQueryStarted({restaurantId, menuItemId}, {dispatch, queryFulfilled}){
+        const patch = dispatch(
+          menuItemApi.util.updateQueryData(
+            "getOwnerMenuItems",
+             {restaurantId, pageSize: 24},
+             (draft) => {
+              const item = draft.items.find((x) => x.id === menuItemId);
+              if (item) item.isAvailable = !item.isAvailable;
+             }
+          )
+        );
+        try {
+          await queryFulfilled;
+        } catch {
+          patch.undo();
+        }
+      }
     }),
   }),
 });

@@ -12,6 +12,7 @@ public class MenuItemRepository(AppDbContext context) : IMenuItemRepository
     {
         return await context.MenuItems
             .Include(m => m.Restaurant)
+              .ThenInclude(r => r.Owner)
             .Include(m => m.Category)
             .FirstOrDefaultAsync(m => m.Id == id, cancellationToken);
     }

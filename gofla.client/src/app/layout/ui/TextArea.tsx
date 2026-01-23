@@ -5,7 +5,7 @@ type Props = {
   label?: string;
   registration?: UseFormRegisterReturn;
   placeholder?: string;
-  error?: FieldError;
+  error?: string | FieldError;
   helperText?: string;
   rows?: number;
   className?: string;
@@ -44,7 +44,9 @@ export const TextArea = ({
 
       <div className="min-h-5 text-xs">
         {error ? (
-          <p className="text-red-500">{error.message}</p>
+          <p className="text-red-500">
+            {typeof error === "string" ? error: error.message}
+            </p>
         ) : helperText ? (
           <p className="text-gray-400">{helperText}</p>
         ) : null}

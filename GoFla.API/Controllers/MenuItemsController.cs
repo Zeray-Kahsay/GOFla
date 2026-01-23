@@ -34,10 +34,24 @@ public class MenuItemsController(
 
     // Get all menu items for owner dashboard
     [Authorize]
-    [HttpGet("owner/restaurants/{restaurantId}/get-menu-items")]
-    public async Task<IActionResult> GetByRestaurantForOwner(int restaurantId, [FromQuery] PaginationParams paginationParams) // Good if return type is PaginatedList<MenuItemDto>
+    [HttpGet("owner/restaurants/{restaurantId}/menu-items")]
+    public async Task<IActionResult> GetByRestaurantForOwner(
+        int restaurantId, 
+        [FromQuery] PaginationParams paginationParams,
+        [FromQuery] string? search,
+        [FromQuery] int? categoryId,
+        [FromQuery] bool? isAvailable,
+        CancellationToken cancellationToken) 
     {
-        return HandleResult(await menuManagementService.GetAllByRestaurantAsync(restaurantId));
+        var result = await menuManagementService.GetAllByRestaurantAsync(
+            restaurantId,
+            paginationParams,
+            search,
+            categoryId,
+            isAvailable,
+            cancellationToken );
+        
+        return HandleResult(result);
 
     }
 
