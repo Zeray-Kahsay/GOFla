@@ -53,7 +53,7 @@ public class ImageUploadServie : IImageUploadService
     }
 
 
-    public async Task<string> UploadMenuItemImageAsync( int menuItemId, IFormFile file)
+    public async Task<string> UploadMenuItemImageAsync( int menuItemId, IFormFile file, CancellationToken cancellationToken)
     {
         // Validate image
         ValidateImage(file);

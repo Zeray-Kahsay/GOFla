@@ -36,12 +36,12 @@ public class MenuItemsController(
     [Authorize]
     [HttpGet("owner/restaurants/{restaurantId}/menu-items")]
     public async Task<IActionResult> GetByRestaurantForOwner(
-        int restaurantId, 
+        int restaurantId,
         [FromQuery] PaginationParams paginationParams,
         [FromQuery] string? search,
         [FromQuery] int? categoryId,
         [FromQuery] bool? isAvailable,
-        CancellationToken cancellationToken) 
+        CancellationToken cancellationToken)
     {
         var result = await menuManagementService.GetAllByRestaurantAsync(
             restaurantId,
@@ -49,8 +49,8 @@ public class MenuItemsController(
             search,
             categoryId,
             isAvailable,
-            cancellationToken );
-        
+            cancellationToken);
+
         return HandleResult(result);
 
     }
@@ -68,13 +68,15 @@ public class MenuItemsController(
 
     [Authorize]
     [HttpPost("owner/menu-items/{menuItemId}/image")]
-    public async Task<IActionResult> UploadMenuItemImage(int menuItemId, IFormFile file)
+    [RequestSizeLimit(50_000_000)]
+    [RequestFormLimits(MultipartBodyLengthLimit = 50_000_000)]
+    public async Task<IActionResult> UploadMenuItemImage(int menuItemId, IFormFile file, CancellationToken ct)
     {
-        var result = await menuManagementService.UploadImageAsync(menuItemId, file);
+        var result = await menuManagementService.UploadImageAsync(menuItemId, file, ct);
         return HandleResult(result);
     }
 
-    // Update an existing menu item
+    // Update an existing menu itemg
     [Authorize]
     [HttpPut("owner/menu-items/{id:int}")]
     public async Task<IActionResult> Update(int id, [FromBody] UpdateMenuItemDto updateMenuItemDto)

@@ -13,7 +13,8 @@ public interface IImageUploadService
 
     Task<string> UploadMenuItemImageAsync(
         int menuItemId,
-        IFormFile file
+        IFormFile file,
+        CancellationToken cancellationToken
     );
 
     Task<Result<bool>> DeleteImageAsync(

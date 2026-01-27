@@ -128,9 +128,6 @@ public class MenuManagementService(
         if (restaurant.OwnerId != userContext.UserId)
             return Result<bool>.Failure("Access denied", "FORBIDDEN");
 
-        if (item.Restaurant.OwnerId != userContext.UserId)
-            return Result<bool>.Failure("Access denied", "FORBIDDEN");
-
         item.IsAvailable = !item.IsAvailable;
         item.UpdatedAt = DateTime.UtcNow;
 
@@ -192,8 +189,14 @@ public class MenuManagementService(
         });
     }
 
-    public async Task<Result<MenuItemDto>> UploadImageAsync(int menuItemId, IFormFile file)
+    public async Task<Result<MenuItemDto>> UploadImageAsync(int menuItemId, IFormFile file, CancellationToken ct)
     {
+        if (file is null || file.Length == 0)
+            return Result<MenuItemDto>.Failure("Image file is required","INVALID_IMAGE");
+        
+        if (!file.ContentType.Contains("image"))
+            return Result<MenuItemDto>.Failure("Invalid image type", "INVALID_IMAGE");
+
         if (userContext.UserId is null)
             return Result<MenuItemDto>.Failure("Unauthorized", "UNAUTHORIZED");
 
@@ -208,7 +211,7 @@ public class MenuManagementService(
         if (restaurant.OwnerId != userContext.UserId)
             return Result<MenuItemDto>.Failure("Access denied", "FORBIDDEN");
 
-        var imageUrl = await imageUploadService.UploadMenuItemImageAsync(menuItemId, file);
+        var imageUrl = await imageUploadService.UploadMenuItemImageAsync(menuItemId, file, ct);
 
         item.ImageUrl = imageUrl;
         item.UpdatedAt = DateTime.UtcNow;

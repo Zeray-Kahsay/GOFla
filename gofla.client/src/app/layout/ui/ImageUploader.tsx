@@ -1,22 +1,33 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Image as ImageIcon } from "lucide-react";
 
 interface ImageUploaderProps {
   imageUrl?: string;
   onFileSelected: (file: File) => void;
   isUploading?: boolean;
+  isProcessing?: boolean;
+  progress?: number;
   error?: string;
+
 }
 
 
 export function ImageUploader({
   imageUrl,
   onFileSelected,
-  isUploading,
+  isUploading = false,
+  isProcessing = false,
+  progress,
   error,
 }: ImageUploaderProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!isUploading && progress === undefined){
+      setPreview(null);
+    }
+  }, [])
 
   const handleSelect = (file: File) => {
     setPreview(URL.createObjectURL(file));
@@ -42,9 +53,24 @@ export function ImageUploader({
           </div>
         )}
 
-        {isUploading && (
+        {isUploading && !isProcessing && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/40 text-white">
-            Uploading…
+            <span>
+            Uploading{progress !== undefined && `...${progress}%`}
+            </span>
+            {progress !== undefined && (
+              <div className="w-3/4 h-2 bg-white/30 rounded-full overflow-hidden" >
+                <div 
+                  className="h-full bg-amber-400 transition-all"
+                  style={{width: `${progress}%` }}
+                />
+              </div>
+            )}
+            {isProcessing && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/50 text-white" >
+                Processing image...
+              </div>
+            )}
           </div>
         )}
       </div>

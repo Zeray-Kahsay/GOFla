@@ -21,7 +21,7 @@ export type OwnerMenuItemsParams = {
 
 export const menuItemApi = apiSlice.injectEndpoints({
     endpoints: (builder) => ({
-    getMenuItemsByRestaurant: builder.query<PagedResult<MenuItem>, MenuItemsParams>({
+    getMenuItemsByRestaurant: builder.query<PagedResult<MenuItem>, MenuItemsParams>({ // customer view
     query: ({ restaurantId, ...params }) => ({
     url: `/menuItems/restaurants/${restaurantId}/menu-items`,
     params,
@@ -45,9 +45,9 @@ export const menuItemApi = apiSlice.injectEndpoints({
         method: "POST",
         body: formData,
       }),
-      invalidatesTags: (_result, _error, {restaurantId}) =>  [
-        {type: "MenuItem", id: `OWNER_RESTAUTAURANT_${restaurantId}`},
-      ],
+      // invalidatesTags: (_result, _error, {restaurantId}) =>  [
+      //   {type: "MenuItem", id: `OWNER_RESTAUTAURANT_${restaurantId}`},
+      // ],
       async onQueryStarted({restaurantId}, {dispatch, queryFulfilled}){
         try {
           const {data: created } = await queryFulfilled;
@@ -55,8 +55,8 @@ export const menuItemApi = apiSlice.injectEndpoints({
           dispatch(
             menuItemApi.util.updateQueryData("getOwnerMenuItems", 
               {restaurantId, 
-                cursor: undefined, 
-                pageSize: 20}, 
+
+                pageSize: 24}, 
                 (draft) => {
               draft.items.unshift(created) // add at top
               draft.totalCount += 1;
@@ -67,7 +67,7 @@ export const menuItemApi = apiSlice.injectEndpoints({
         }
       }
     }),
-    uploadMenuItemImage: builder.mutation<MenuItem, {menuItemId: number; file: File}>({
+    uploadMenuItemImage: builder.mutation<MenuItem, {menuItemId: number; file: File; restaurantId: number}>({
       query: ({menuItemId, file}) => {
         const fd = new FormData();
         fd.append("file", file)
@@ -78,9 +78,33 @@ export const menuItemApi = apiSlice.injectEndpoints({
           body: fd,
         };
       },
-      invalidatesTags: (_result, _error, {menuItemId}) => [
-        {type: "MenuItem", id: menuItemId},
-      ],
+      async onQueryStarted({ menuItemId, restaurantId}, {dispatch, queryFulfilled}){
+        const patch = dispatch(
+          menuItemApi.util.updateQueryData(
+            "getOwnerMenuItems",
+            {restaurantId, pageSize: 24},
+            (draft) => {
+              const item = draft.items.find(i => i.id === menuItemId);
+              if (item) item.imageUrl = "UPLOADING";
+            }
+          )
+        );
+        try {
+          const {data} = await queryFulfilled;
+          dispatch(
+            menuItemApi.util.updateQueryData(
+              "getOwnerMenuItems",
+              {restaurantId, pageSize: 24},
+              (draft) => {
+                const item = draft.items.find(i => i.id === menuItemId);
+                if (item) item.imageUrl = data.imageUrl;
+              }
+            )
+          );
+        } catch (error) {
+          patch.undo();
+        }
+      },
     }),
     getOwnerMenuItems: builder.query<PagedResult<MenuItem>, OwnerMenuItemsParams>({
       query: ({restaurantId, ...params}) => ({
@@ -109,7 +133,8 @@ export const menuItemApi = apiSlice.injectEndpoints({
         url: `/menuItems/owner/menu-items/${menuItemId}`,
         method: "DELETE",
       }),
-      invalidatesTags: (_res, _err, {restaurantId}) => [
+      invalidatesTags: (_res, _err, {restaurantId, menuItemId}) => [
+        {type: "MenuItem", id: menuItemId},
         {type: "MenuItem", id: `OWNER-RESTAURANT-${restaurantId}`},
       ],
     }),
@@ -118,6 +143,10 @@ export const menuItemApi = apiSlice.injectEndpoints({
         url: `/menuItems/owner/menu-items/${menuItemId}/toggle-availability`,
         method: "PATCH",
       }),
+      invalidatesTags: (_res, _err, {restaurantId, menuItemId}) => [
+        {type: "MenuItem", id: menuItemId},
+        {type: "MenuItem", id: `OWNER_RESTAURANT_${restaurantId}`},
+      ],
       async onQueryStarted({restaurantId, menuItemId}, {dispatch, queryFulfilled}){
         const patch = dispatch(
           menuItemApi.util.updateQueryData(
@@ -132,7 +161,7 @@ export const menuItemApi = apiSlice.injectEndpoints({
         try {
           await queryFulfilled;
         } catch {
-          patch.undo();
+          patch.undo(); // on error
         }
       }
     }),

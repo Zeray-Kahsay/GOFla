@@ -62,7 +62,7 @@ public class RestaurantsController(IRestaurantService restaurantService) : BaseC
         
     }
 
-
+    [Authorize]
     [HttpPost("{restaurantId:int}/image")]
     public async Task<IActionResult> UploadImage(int restaurantId, IFormFile file, CancellationToken cancellationToken)
     {

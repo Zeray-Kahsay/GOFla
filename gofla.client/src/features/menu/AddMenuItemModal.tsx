@@ -35,7 +35,7 @@ export function AddMenuItemModal({
   useGetCategoriesByRestaurantQuery(restaurantId, { skip: !restaurantId });
   const navigate = useNavigate();
 
-  const [image, setImage] = useState<File | null>(null);
+  const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
 
   const isLoading = isCreating || isUploading;
@@ -59,7 +59,7 @@ export function AddMenuItemModal({
   useEffect(() => {
     if (!isOpen) return;
     reset();
-    setImage(null);
+    setFile(null);
     setPreview(null);
   }, [isOpen, reset]);
 
@@ -87,7 +87,7 @@ export function AddMenuItemModal({
       return;
     }
 
-    setImage(file);
+    setFile(file);
     setPreview(URL.createObjectURL(file));
   };
 
@@ -99,22 +99,21 @@ export function AddMenuItemModal({
     fd.append("categoryName", values.categoryName);
     fd.append("isAvailable", String(values.isAvailable));
 
-    if (image) fd.append("image", image);
     try {
       const created = await createMenuItem({restaurantId, formData: fd}).unwrap();
-      if (image) {
+      if (file) {
         await uploadMenuItemImage({
           menuItemId: created.id,
-          file: image,
+          file: file,
+          restaurantId
         }).unwrap();
       }
-
       toast.success("Menu item created");
       onCreated?.();
       onClose();
       navigate(`/owner/restaurants/${restaurantId}/menu`);
       reset();
-      setImage(null);
+      setFile(null);
       setPreview(null);
     } catch (err: any) {
       const msg =
@@ -195,7 +194,7 @@ export function AddMenuItemModal({
               type="button"
               disabled={isLoading}
               onClick={() => {
-                setImage(null);
+                setFile(null);
                 setPreview(null);
               }}
               className="mt-2 text-xs text-red-600 hover:underline disabled:opacity-50"

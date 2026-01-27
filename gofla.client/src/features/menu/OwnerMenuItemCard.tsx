@@ -7,6 +7,8 @@ import {
   useDeleteMenuItemMutation,
   useToggleMenuItemAvailabilityMutation,
 } from "../../app/api/menuItem/menuItemApi";
+import { useState } from "react";
+import { EditMenuItemImageModal } from "./EditMenuItemImageModal";
 
 interface Props {
   item: MenuItem;
@@ -15,6 +17,7 @@ interface Props {
 }
 
 export function OwnerMenuItemCard({ item, restaurantId, onEdit }: Props) {
+  const [editingImageItem, setEditingImageItem] = useState<MenuItem | null>(null);
   const [deleteMenuItem, { isLoading: isDeleting }] = useDeleteMenuItemMutation();
   const [toggleAvailability, { isLoading: isToggling }] =
     useToggleMenuItemAvailabilityMutation();
@@ -54,6 +57,15 @@ export function OwnerMenuItemCard({ item, restaurantId, onEdit }: Props) {
             Unavailable
           </span>
         )}
+        <span  className="absolute top-3 right-3 rounded-full px-3 py-1 text-xs font-serif text-white">
+          <Button
+            size="sm"
+            variant="amber"
+            onClick={() => setEditingImageItem(item)}
+          >
+             <Pencil size={16} className="mr-2" />Image
+          </Button>
+        </span>
       </div>
 
       {/* Content */}
@@ -115,6 +127,13 @@ export function OwnerMenuItemCard({ item, restaurantId, onEdit }: Props) {
           </div>
         </div>
       </div>
+      {editingImageItem && (
+        <EditMenuItemImageModal 
+          item={editingImageItem}
+          isOpen
+          onClose={() => setEditingImageItem(null)}
+        />
+      )}
     </div>
   );
 }

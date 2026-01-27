@@ -10,6 +10,6 @@ public record CreateMenuItemDto
 
     public string CategoryName { get; set; } = string.Empty;
     public bool IsAvailable { get; set; } = true;
-    public IFormFile? Image { get; set; }
+  
    
 }

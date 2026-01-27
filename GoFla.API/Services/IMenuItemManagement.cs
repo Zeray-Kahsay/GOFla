@@ -15,7 +15,7 @@ public interface IMenuManagementService
         CancellationToken cancellationToken = default
     );
     Task<Result<MenuItemDto>> CreateAsync(int restaurantId, CreateMenuItemDto dto);
-    Task<Result<MenuItemDto>> UploadImageAsync(int menuItemId, IFormFile file );
+    Task<Result<MenuItemDto>> UploadImageAsync(int menuItemId, IFormFile file, CancellationToken ct );
     Task<Result<MenuItemDto>> UpdateAsync(int id, UpdateMenuItemDto dto);
     Task<Result<bool>> DeleteAsync(int id);
     Task<Result<bool>> ToggleAvailabilityAsync(int id);

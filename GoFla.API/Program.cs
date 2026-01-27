@@ -63,8 +63,13 @@ builder.Services.AddSwaggerGen(options =>
 // Configure file upload limits
 builder.Services.Configure<FormOptions>(options =>
 {
-    options.MultipartBodyLengthLimit = 10 * 1024 * 1024; // 10 MB
+    options.MultipartBodyLengthLimit = 50 * 1024 * 1024; // 10 MB
 });
+
+// builder.WebHost.ConfigureKestrel(options =>
+// {
+//     options.Limits.MaxRequestBodySize = 50 * 1024 * 1024;
+// });
 
 // Database
 builder.Services.AddDbContext<AppDbContext>(options =>
