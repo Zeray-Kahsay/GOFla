@@ -8,16 +8,17 @@ import { Store } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { useMemo, useState } from "react";
 import { AddMenuItemModal } from "../menu/AddMenuItemModal";
+import { RestaurantImageModal } from "./RestaurantImageModal";
+import type { Restaurant } from "../../types/restaurant";
 
 export function OwnerRestaurantsPage() {
   const { isAuthenticated } = useAuth();
-
   const { data: restaurants = [], isLoading } = useGetMyRestaurantsQuery(undefined, {
     skip: !isAuthenticated,
   });
-
   const [showAddMenuModal, setShowAddMenuModal] = useState(false);
   const [activeRestaurantId, setActiveRestaurantId] = useState<number | null>(null);
+  const [imageRestaurant, setImageRestaurant] = useState<Restaurant | null>(null);
 
   const activeRestaurant = useMemo(() => {
     if (!activeRestaurantId) return null;
@@ -75,6 +76,7 @@ export function OwnerRestaurantsPage() {
               key={r.id}
               restaurant={r}
               onAddMenuItem={() => handleOpenAddMenu(r.id)}
+              onEditImage={() => setImageRestaurant(r)}
             />
           ))}
         </div>
@@ -87,7 +89,13 @@ export function OwnerRestaurantsPage() {
             onClose={handleCloseAddMenu}
           />
         )}
+
       </div>
+      <RestaurantImageModal 
+        restaurant={imageRestaurant}
+        isOpen={!!imageRestaurant}
+        onClose={() => setImageRestaurant(null)}
+      />
     </div>
   );
 }

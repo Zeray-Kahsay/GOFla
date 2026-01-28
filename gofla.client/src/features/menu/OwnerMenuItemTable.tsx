@@ -2,6 +2,8 @@ import { Eye, EyeOff, Pencil, Trash2 } from "lucide-react";
 import type { MenuItem } from "../../types/menuItem";
 import { formatCurrency } from "../../utils/formatters";
 import { Button } from "../../app/layout/ui/Button";
+import { useState } from "react";
+import { EditMenuItemImageModal } from "./EditMenuItemImageModal";
 
 type Props = {
   items: MenuItem[];
@@ -13,6 +15,7 @@ type Props = {
 };
 
 export function OwnerMenuItemTable({ items, onEdit, onToggle, onDelete, busyId}: Props) {
+  const [editingImageItem, setEditingImageItem] = useState<MenuItem | null>(null)
   return (
     <div className="overflow-hidden rounded-2xl border bg-white shadow-sm">
       <div className="overflow-x-auto">
@@ -64,6 +67,13 @@ export function OwnerMenuItemTable({ items, onEdit, onToggle, onDelete, busyId}:
 
                 <td className="px-4 py-3 text-right">
                     <div className="inline-flex gap-2" >
+                       <Button 
+                         size="sm" variant="amber" 
+                         onClick={() => setEditingImageItem(item)}
+                         >
+                         Change Image
+                        </Button>
+
                        <Button size="sm" variant="outline" onClick={() => onEdit(item)}>
                          <Pencil size={16} className="mr-2" />
                          Edit
@@ -94,6 +104,13 @@ export function OwnerMenuItemTable({ items, onEdit, onToggle, onDelete, busyId}:
           </tbody>
         </table>
       </div>
+         {editingImageItem && (
+              <EditMenuItemImageModal 
+                item={editingImageItem}
+                isOpen
+                onClose={() => setEditingImageItem(null)}
+              />
+            )}
     </div>
   );
 }

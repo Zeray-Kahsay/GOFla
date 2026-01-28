@@ -1,22 +1,28 @@
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import type { Restaurant } from "../../types/restaurant";
 import { Button } from "../../app/layout/ui/Button";
 import { ImageIcon, Plus, ChevronRight } from "lucide-react";
 
 interface OwnerRestaurantCardProps {
-  restaurant: Restaurant;
+  restaurant: Restaurant | null;
   onAddMenuItem: () => void;
+  onEditImage: () => void;
 }
 
 export function OwnerRestaurantCard({
   restaurant,
   onAddMenuItem,
+  onEditImage,
 }: OwnerRestaurantCardProps) {
   const navigate = useNavigate();
 
   const handleNavigate = () => {
-    navigate(`/owner/restaurants/${restaurant.id}/menu`);
+    if (!restaurant) return;
+
+    navigate(`/owner/restaurants/${restaurant?.id}/menu`);
   };
+
+  if (!restaurant) return;
 
   return (
     <div
@@ -72,21 +78,18 @@ export function OwnerRestaurantCard({
         {/* ACTIONS */}
         <div className="mt-4 flex gap-2">
           {/* Image button */}
-          <Link
-            to={`/owner/restaurants/${restaurant.id}/images`}
-            onClick={(e) => e.stopPropagation()}
-            className="flex-1"
-          >
-            <Button
+          <Button
               type="button"
               variant="outline"
               className="w-full justify-center"
-              onClick={(e) => e.stopPropagation()}
+              onClick={(e) => {
+                e.stopPropagation()
+                onEditImage()
+              }}
             >
               <ImageIcon size={16} className="mr-2" />
               Image
             </Button>
-          </Link>
 
           {/* Add menu item */}
           <Button
@@ -95,7 +98,7 @@ export function OwnerRestaurantCard({
               e.stopPropagation();
               onAddMenuItem();
             }}
-            className="flex-1 bg-amber-600 hover:bg-amber-700"
+            className=" bg-amber-600 hover:bg-amber-700 w-full"
           >
             <Plus size={16} className="mr-2" />
             Add Menu
