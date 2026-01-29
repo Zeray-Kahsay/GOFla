@@ -106,7 +106,7 @@ public static class MappingExtensions
             Tax = order.Tax,
             TotalAmount = order.TotalAmount,
             PaymentStatus = order.PaymentStatus.ToString(),
-            DeliveryAddress = order.DeliveryAddress.ToAddressDto(),
+            //DeliveryAddress = order.DeliveryAddress.ToAddressDto(),
             Items = order.Items.Select(i => i.ToOrderItemDto()).ToList(),
             CreatedAt = order.CreatedAt
         };
@@ -116,10 +116,10 @@ public static class MappingExtensions
     {
         return new OrderItemDto
         {
-            Id = orderItem.Id,
-            Name = orderItem.MenuItem?.Name ?? string.Empty,
+            Id = orderItem.MenuItemId,
+           // Name = orderItem.MenuItem?.Name ?? string.Empty,
             Quantity = orderItem.Quantity,
-            Price = orderItem.Price,
+            //Price = orderItem.Price,
             SpecialInstructions = orderItem.SpecialInstructions
         };
     }

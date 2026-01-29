@@ -6,24 +6,22 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GoFla.API.Repositories;
 
-public class OrderRepository : Repository<Order>, IOrderRepository
+public class OrderRepository(AppDbContext context) : Repository<Order>(context), IOrderRepository
 {
-    public OrderRepository(AppDbContext context) : base(context) { }
-
     public async Task<Order?> GetByOrderNumberAsync(string orderNumber, CancellationToken cancellationToken = default)
     {
         return await _dbSet
            .Include(o => o.Items)
-               .ThenInclude(oi => oi.MenuItem)
+           //.ThenInclude(oi => oi.MenuItem)
            .Include(o => o.Restaurant)
-           .Include(o => o.DeliveryAddress)
+           //.Include(o => o.DeliveryAddress)
            .FirstOrDefaultAsync(o => o.OrderNumber == orderNumber, cancellationToken);
     }
 
     public async Task<PagedResult<Order>> GetUserOrdersAsync(string userId, string? cursor, int pageSize, CancellationToken cancellationToken = default)
     {
         return await GetPagedAsync(
-        predicate: o => o.UserId == userId,
+        predicate: o => o.CustomerId == userId,
         orderBy: o => o.CreatedAt,
         descending: true,
         cursor: cursor,
@@ -36,9 +34,14 @@ public class OrderRepository : Repository<Order>, IOrderRepository
     {
         return await _dbSet
            .Include(o => o.Items)
-               .ThenInclude(oi => oi.MenuItem)
+           //.ThenInclude(oi => oi.MenuItem)
            .Include(o => o.Restaurant)
-           .Include(o => o.DeliveryAddress)
+           //.Include(o => o.DeliveryAddress)
            .FirstOrDefaultAsync(o => o.Id == id, cancellationToken);
+    }
+
+    public async Task<bool> SaveChangesAsync(CancellationToken ct)
+    {
+        return await context.SaveChangesAsync(ct) > 0;
     }
 }

@@ -11,7 +11,7 @@ public class MenuItem
     public string? ImageUrl { get; set; } = string.Empty;
 
     public bool IsAvailable { get; set; } = true;
-    
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAt { get; set; }
 
@@ -23,5 +23,4 @@ public class MenuItem
     public Category Category { get; set; } = null!;
 
     public ICollection<CartItem> CartItems { get; set; } = [];
-    public ICollection<OrderItem> OrderItems { get; set; } = [];
 }

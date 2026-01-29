@@ -7,9 +7,9 @@ using GoFla.API.Repositories;
 
 namespace GoFla.API.Services;
 
-public class ReviewService (
+public class ReviewService(
     IReviewRepository reviewRepository,
-     IRestaurantRepository restaurantRepository, 
+     IRestaurantRepository restaurantRepository,
      IOrderRepository orderRepository) : IReviewService
 {
     public async Task<Result<ReviewDto>> GetByIdAsync(int id, CancellationToken cancellationToken = default)
@@ -115,7 +115,7 @@ public class ReviewService (
         if (dto.OrderId.HasValue)
         {
             var order = await orderRepository.GetByIdAsync(dto.OrderId.Value, cancellationToken);
-            if (order == null || order.UserId != userId || order.RestaurantId != dto.RestaurantId)
+            if (order == null || order.CustomerId != userId || order.RestaurantId != dto.RestaurantId)
             {
                 return Result<ReviewDto>.Failure("Invalid order", "INVALID_ORDER");
             }

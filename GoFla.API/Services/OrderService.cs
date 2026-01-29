@@ -12,9 +12,23 @@ public class OrderService(
     ICartRepository cartRepository,
     IRepository<Address> addressRepository,
     IStripeService stripeService,
-    IDeliveryZoneService deliveryZoneService
+    IDeliveryZoneService deliveryZoneService,
+    UserContext userContext
 ) : IOrderService
 {
+
+    public async Task<Result<CreateOrderResponse>> CreateOrderAsync(CreateOrderRequest dto, CancellationToken ct)
+    {
+        if (userContext.UserId is null)
+            return Result<CreateOrderResponse>.Failure("Unauthorized", "UNAUTHORIZED");
+        
+        var userId = userContext.UserId;
+
+        //1. Load cart
+        var cartItems = await cartRepository.GetUserCartAsync
+    }
+
+
     public async Task<Result<OrderDto>> GetByIdAsync(int id, string userId, CancellationToken cancellationToken = default)
     {
         var order = await orderRepository.GetWithDetailsAsync(id, cancellationToken);
@@ -23,7 +37,7 @@ public class OrderService(
             return Result<OrderDto>.Failure("Order not found", "NOT_FOUND");
         }
 
-        if (order.UserId != userId)
+        if (order.CustomerId != userId)
         {
             return Result<OrderDto>.Failure("Access denied", "FORBIDDEN");
         }
@@ -41,7 +55,7 @@ public class OrderService(
             return Result<OrderDto>.Failure("Order not found", "NOT_FOUND");
         }
 
-        if (order.UserId != userId)
+        if (order.CustomerId != userId)
         {
             return Result<OrderDto>.Failure("Access denied", "FORBIDDEN");
         }
@@ -73,113 +87,113 @@ public class OrderService(
 
 
 
-    public async Task<Result<OrderDto>> CreateOrderAsync(string userId, CreateOrderDto createOrderDto, CancellationToken cancellationToken = default)
-    {
-        // Get user's cart
-        var cart = await cartRepository.GetUserCartAsync(userId, cancellationToken);
-        if (cart is null || !cart.Items.Any())
-        {
-            return Result<OrderDto>.Failure("Cart is empty", "Cart_EMPTY");
-        }
+    // public async Task<Result<OrderDto>> CreateOrderAsync(string userId, CreateOrderDto createOrderDto, CancellationToken cancellationToken = default)
+    // {
+    //     // Get user's cart
+    //     var cart = await cartRepository.GetUserCartAsync(userId, cancellationToken);
+    //     if (cart is null || !cart.Items.Any())
+    //     {
+    //         return Result<OrderDto>.Failure("Cart is empty", "Cart_EMPTY");
+    //     }
 
-        // Validate all items are from same restaurant
-        var restaurantIds = cart.Items.Select(i => i.MenuItem.RestaurantId).Distinct().ToList();
-        if (restaurantIds.Count > 1)
-        {
-            return Result<OrderDto>.Failure("Cannot order items from multiple restaurants", "MULTIPLE_RESTAURANTS");
-        }
+    //     // Validate all items are from same restaurant
+    //     var restaurantIds = cart.Items.Select(i => i.MenuItem.RestaurantId).Distinct().ToList();
+    //     if (restaurantIds.Count > 1)
+    //     {
+    //         return Result<OrderDto>.Failure("Cannot order items from multiple restaurants", "MULTIPLE_RESTAURANTS");
+    //     }
 
-        var restaurantId = restaurantIds.First();
+    //     var restaurantId = restaurantIds.First();
 
-        // Validate address
-        var address = await addressRepository.GetByIdAsync(createOrderDto.DeliveryAddressId, cancellationToken);
-        if (address is null || address.UserId != userId)
-        {
-            return Result<OrderDto>.Failure("Invalid delivery address", "INVALID_ADDRESS");
-        }
+    //     // Validate address
+    //     var address = await addressRepository.GetByIdAsync(createOrderDto.DeliveryAddressId, cancellationToken);
+    //     if (address is null || address.UserId != userId)
+    //     {
+    //         return Result<OrderDto>.Failure("Invalid delivery address", "INVALID_ADDRESS");
+    //     }
 
-        // validate delivery adderess if it's within the delivery zone
-        var isDeliverable = await deliveryZoneService.IsAddressDeliverableAsync(
-            address.Latitude,
-            address.Longitude,
-            restaurantId,
-            cancellationToken
-        ) ;
+    //     // validate delivery adderess if it's within the delivery zone
+    //     var isDeliverable = await deliveryZoneService.IsAddressDeliverableAsync(
+    //         address.Latitude,
+    //         address.Longitude,
+    //         restaurantId,
+    //         cancellationToken
+    //     ) ;
 
-        if (!isDeliverable)
-        {
-            return Result<OrderDto>.Failure(
-                "Delivery is not available for this address",
-                "OUT_OF_DELIVERY_ZONE"
-            );
-        }
+    //     if (!isDeliverable)
+    //     {
+    //         return Result<OrderDto>.Failure(
+    //             "Delivery is not available for this address",
+    //             "OUT_OF_DELIVERY_ZONE"
+    //         );
+    //     }
 
-        // Calculate order totals
-        var subTotal = cart.Items.Sum(i => i.MenuItem.Price * i.Quantity);
-        var deliveryFee = cart.Items.First().MenuItem.Restaurant.DeliveryFee;
-        var tax = subTotal * 0.10m;
-        var totalAmount = subTotal + deliveryFee + tax;
+    //     // Calculate order totals
+    //     var subTotal = cart.Items.Sum(i => i.MenuItem.Price * i.Quantity);
+    //     var deliveryFee = cart.Items.First().MenuItem.Restaurant.DeliveryFee;
+    //     var tax = subTotal * 0.10m;
+    //     var totalAmount = subTotal + deliveryFee + tax;
 
-        // Create payment intent with stripe 
-        var paymentIntentResult = await stripeService.CreatePaymentIntentAsync(
-            totalAmount,
-            userId,
-            createOrderDto.PaymentMethodId,
-            cancellationToken
-        );
+    //     // Create payment intent with stripe 
+    //     var paymentIntentResult = await stripeService.CreatePaymentIntentAsync(
+    //         totalAmount,
+    //         userId,
+    //         createOrderDto.PaymentMethodId,
+    //         cancellationToken
+    //     );
 
-        if (!paymentIntentResult.IsSuccess)
-        {
-            return Result<OrderDto>.Failure(paymentIntentResult.ErrorMessage!, paymentIntentResult.ErrorCode!);
-        }
+    //     if (!paymentIntentResult.IsSuccess)
+    //     {
+    //         return Result<OrderDto>.Failure(paymentIntentResult.ErrorMessage!, paymentIntentResult.ErrorCode!);
+    //     }
 
 
-        // Create order
-        var order = new Order
-        {
-            OrderNumber = GenerateOrderNumber(),
-            UserId = userId,
-            RestaurantId = restaurantIds.First(),
-            Status = OrderStatus.Pending,
-            SubTotal = subTotal,
-            DeliveryFee = deliveryFee,
-            Tax = tax,
-            TotalAmount = totalAmount,
-            StripePaymentIntentId = paymentIntentResult.Data,
-            PaymentStatus = PaymentStatus.Processing,
-            DeliveryAddressId = createOrderDto.DeliveryAddressId,
-            CreatedAt = DateTime.UtcNow
-        };
+    //     // Create order
+    //     var order = new Order
+    //     {
+    //         OrderNumber = GenerateOrderNumber(),
+    //         CustomerId = userId,
+    //         RestaurantId = restaurantIds.First(),
+    //         Status = OrderStatus.PendingPayment,
+    //         SubTotal = subTotal,
+    //         DeliveryFee = deliveryFee,
+    //         Tax = tax,
+    //         TotalAmount = totalAmount,
+    //         PaymentIntentId = paymentIntentResult.Data,
+    //         PaymentStatus = PaymentStatus.Pending,
+    //         //DeliveryAddressId = createOrderDto.DeliveryAddressId,
+    //         CreatedAt = DateTime.UtcNow
+    //     };
 
-        // Add order items
-        foreach (var cartItem in cart.Items)
-        {
-            order.Items.Add(new OrderItem
-            {
-                MenuItemId = cartItem.MenuItemId,
-                Quantity = cartItem.Quantity,
-                Price = cartItem.MenuItem.Price,
-                SpecialInstructions = cartItem.SpecialInstructions
-            });
-        }
+    //     // Add order items
+    //     foreach (var cartItem in cart.Items)
+    //     {
+    //         order.Items.Add(new OrderItem
+    //         {
+    //             MenuItemId = cartItem.MenuItemId,
+    //             Quantity = cartItem.Quantity,
+    //             UnitPrice = cartItem.MenuItem.Price,
+    //             SpecialInstructions = cartItem.SpecialInstructions!
+    //         });
+    //     }
 
-        var createdOrder = await orderRepository.AddAsync(order, cancellationToken);
+    //     var createdOrder = await orderRepository.AddAsync(order, cancellationToken);
 
-        // clear cart after successful order creation
-        cart.Items.Clear();
-        cart.UpdatedAt = DateTime.UtcNow;
-        await cartRepository.UpdateAsync(cart, cancellationToken);
+    //     // clear cart after successful order creation
+    //     cart.Items.Clear();
+    //     cart.UpdatedAt = DateTime.UtcNow;
+    //     await cartRepository.UpdateAsync(cart, cancellationToken);
 
-        // Reload order with all details
-        var orderWithDetails = await orderRepository.GetWithDetailsAsync(createdOrder.Id, cancellationToken);
+    //     // Reload order with all details
+    //     var orderWithDetails = await orderRepository.GetWithDetailsAsync(createdOrder.Id, cancellationToken);
 
-        if (orderWithDetails is null)
-        {
-            return Result<OrderDto>.Failure("Failed to retrieve created order", "ORDER_RETRIEVAL_FAILED");
-        }
+    //     if (orderWithDetails is null)
+    //     {
+    //         return Result<OrderDto>.Failure("Failed to retrieve created order", "ORDER_RETRIEVAL_FAILED");
+    //     }
 
-        return Result<OrderDto>.Success(orderWithDetails.ToOrderDto());
-    }
+    //     return Result<OrderDto>.Success(orderWithDetails.ToOrderDto());
+    // }
 
 
 
@@ -191,24 +205,24 @@ public class OrderService(
             return Result<bool>.Failure("Order not found", "NOT_FOUND");
         }
 
-        if (order.UserId != userId)
+        if (order.CustomerId != userId)
         {
             return Result<bool>.Failure("Access denied", "FORBIDDEN");
         }
 
-        if (order.Status != OrderStatus.Pending && order.Status != OrderStatus.Confirmed)
+        if (order.Status != OrderStatus.PendingPayment && order.Status != OrderStatus.Paid)
         {
             return Result<bool>.Failure("Order cannot be cancelled at this stage", "CANNOT_CANCEL");
         }
 
         order.Status = OrderStatus.Cancelled;
-        order.UpdatedAt = DateTime.UtcNow;
+        order.CancelledAt = DateTime.UtcNow;
 
         // Refund payment if already processed
-        if (order.PaymentStatus == PaymentStatus.Succeeded && !string.IsNullOrEmpty(order.StripePaymentIntentId))
+        if (order.PaymentStatus == PaymentStatus.Succeeded && !string.IsNullOrEmpty(order.PaymentIntentId))
         {
             var refundResult = await stripeService.RefundPaymentAsync(
-                order.StripePaymentIntentId,
+                order.PaymentIntentId!,
                 cancellationToken
             );
 
@@ -240,7 +254,7 @@ public class OrderService(
             return Result<OrderDto>.Failure("Invalid order status", "INVALID_STATUS");
         }
         order.Status = newStatus;
-        order.UpdatedAt = DateTime.UtcNow;
+        order.CompletedAt = DateTime.UtcNow;
 
         await orderRepository.UpdateAsync(order, cancellationToken);
 
@@ -255,4 +269,6 @@ public class OrderService(
         var random = new Random().Next(1000, 9999);
         return $"ORD-{timestamp}-{random}";
     }
+
+
 }

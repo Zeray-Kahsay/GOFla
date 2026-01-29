@@ -1,5 +1,5 @@
 using GoFla.API.Domain;
-using GoFla.API.Data.Configurations;
+using GoFla.API.Data.FluentConfigurations;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,13 +15,12 @@ public class AppDbContext : IdentityDbContext<User>
     public DbSet<Cart> Carts { get; set; } = null!;
     public DbSet<CartItem> CartItems { get; set; } = null!;
     public DbSet<Order> Orders { get; set; } = null!;
-    public DbSet<OrderItem> OrderItems { get; set; } = null!;
     public DbSet<Address> Addresses { get; set; } = null!;
     public DbSet<RefreshToken> RefreshTokens { get; set; } = null!;
     public DbSet<Review> Reviews { get; set; }
     public DbSet<ReviewResponse> ReviewResponses { get; set; }
     public DbSet<Favorite> Favorites { get; set; }
-    public DbSet<DeliveryZone> DeliveryZones => Set<DeliveryZone>();
+    public DbSet<DeliveryZone> DeliveryZones {get; set; }
 
 
 
@@ -33,8 +32,8 @@ public class AppDbContext : IdentityDbContext<User>
         builder.Entity<User>(entity =>
         {
             entity.HasMany(u => u.Orders)
-                .WithOne(o => o.User)
-                .HasForeignKey(o => o.UserId)
+                .WithOne(o => o.Customer)
+                .HasForeignKey(o => o.CustomerId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             entity.HasMany(u => u.Addresses)
@@ -114,22 +113,6 @@ public class AppDbContext : IdentityDbContext<User>
                   .OnDelete(DeleteBehavior.Restrict);
         });
 
-        // Order config
-        builder.Entity<OrderItem>(entity =>
-        {
-            entity.HasKey(oi => oi.Id);
-
-            entity.HasOne(oi => oi.Order)
-                  .WithMany(o => o.Items)
-                  .HasForeignKey(oi => oi.OrderId)
-                  .OnDelete(DeleteBehavior.Cascade);
-
-            entity.HasOne(oi => oi.MenuItem)
-                  .WithMany(mi => mi.OrderItems)
-                  .HasForeignKey(oi => oi.MenuItemId)
-                  .OnDelete(DeleteBehavior.Restrict);
-
-        });
 
         // MenuItem configuration
         builder.Entity<MenuItem>(entity =>
@@ -222,10 +205,7 @@ public class AppDbContext : IdentityDbContext<User>
         builder.ApplyConfiguration(new OrderConfiguration());
 
         // OrderItem configuration
-        builder.ApplyConfiguration(new OrderItemConfiguration());
     }
-
-
 
 }
 

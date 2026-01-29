@@ -9,4 +9,8 @@ public interface IOrderRepository : IRepository<Order>
     Task<Order?> GetWithDetailsAsync(int id, CancellationToken cancellationToken = default);
     Task<PagedResult<Order>> GetUserOrdersAsync(string userId, string? cursor, int pageSize, CancellationToken cancellationToken = default);
     Task<Order?> GetByOrderNumberAsync(string orderNumber, CancellationToken cancellationToken = default);
+
+    // new 
+    //Task AddAsync(Order order, CancellationToken ct);
+    Task<bool> SaveChangesAsync(CancellationToken ct);
 }
