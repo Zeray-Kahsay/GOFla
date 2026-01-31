@@ -36,5 +36,7 @@ public class Order
     public DateTime? CompletedAt { get; set; }
     public DateTime? CancelledAt { get; set; }
 
+    public DateTime PaymentExpiresAt  { get; set; }
+
     public ICollection<OrderItem> Items { get; set; } = new List<OrderItem>();
 }

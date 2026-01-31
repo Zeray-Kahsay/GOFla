@@ -20,42 +20,39 @@ public class StripeService : IStripeService
         StripeConfiguration.ApiKey = _stripeSettings.SecretKey;
     }
 
-    public async Task<Result<string>> CreatePaymentIntentAsync(decimal amount, string userId, string? paymentMehtodId, CancellationToken cancellationToken = default)
+    public async Task<Result<StripeIntentResult>> CreatePaymentIntentAsync(decimal amount, string currency, string orderNumber, CancellationToken ct)
     {
         try
         {
             var options = new PaymentIntentCreateOptions
             {
                 Amount = (long)(amount * 100),
-                Currency = "usd",
+                Currency = currency,
                 AutomaticPaymentMethods = new PaymentIntentAutomaticPaymentMethodsOptions
                 {
-                    Enabled = true,
+                    Enabled = true
                 },
                 Metadata = new Dictionary<string, string>
                 {
-                    { "userId",  userId },
+                    {"orderNumber", orderNumber}
                 }
+
             };
 
-            if (!string.IsNullOrEmpty(paymentMehtodId))
-            {
-                options.PaymentMethod = paymentMehtodId;
-                options.Confirm = true;
-            }
-
             var service = new PaymentIntentService();
-            var paymentIntent = await service.CreateAsync(options, cancellationToken: cancellationToken);
+            var intent = await service.CreateAsync(options, cancellationToken: ct);
 
-            return Result<string>.Success(paymentIntent.Id);
-        }
-        catch (StripeException ex)
-        {
+            return Result<StripeIntentResult>.Success(new StripeIntentResult(intent.Id, intent.ClientSecret));
             
-            _logger.LogError(ex, "Stripe payment intent creation failed");
-            return Result<string>.Failure(ex.Message, "PAYMENT_INTENT_CREATION_FAILED");
+            
         }
+        catch (Exception ex)
+        {
+            return Result<StripeIntentResult>.Failure("Stripe error: " + ex.Message, "STRIPE_ERROR" );
+        }
+        
     }
+
 
 
     public async Task<Result<bool>> ConfirmPaymentAsync(string paymentIntentId, CancellationToken cancellationToken = default)
@@ -200,6 +197,22 @@ public class StripeService : IStripeService
         {
             _logger.LogError(ex, "Stripe detaching payment method failed");
             return Result<bool>.Failure(ex.Message, "DETACH_PAYMENT_METHOD_FAILED");
+        }
+    }
+
+    public async Task<Result<bool>> CancelPaymentIntentAsync(string paymentIntentId, CancellationToken ct = default)
+    {
+        try
+        {
+            var service = new PaymentIntentService();
+
+            await service.CancelAsync(paymentIntentId, null);
+
+            return Result<bool>.Success(true);
+        }
+        catch (StripeException ex)
+        {
+            return Result<bool>.Failure(ex.Message, "STRIPE_ERROR");
         }
     }
 }

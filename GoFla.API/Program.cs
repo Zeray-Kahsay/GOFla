@@ -8,6 +8,7 @@ using GoFla.API.Extensions;
 using GoFla.API.Middleware;
 using GoFla.API.Repositories;
 using GoFla.API.Services;
+using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Identity;
@@ -18,6 +19,8 @@ using Microsoft.OpenApi;
 
 
 var builder = WebApplication.CreateBuilder(args);
+
+
 
 // Add services to the container
 builder.Services.AddControllers();
@@ -173,6 +176,12 @@ builder.Services.AddCors(options =>
     });
 });
 
+// Hangfire config
+builder.Services.AddHangfire(config =>
+{
+    config.UseSqlServerStorage(builder.Configuration.GetConnectionString("DefaultConnection"));
+});
+
 // Exception Handler
 builder.Services.AddExceptionHandler<GloabalExceptionHandler>();
 builder.Services.AddProblemDetails();
@@ -207,6 +216,9 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IUserContext, UserContext>();
 builder.Services.AddScoped<IImageUploadService, ImageUploadServie>();
 
+
+// Hangfire 
+builder.Services.AddHangfireServer();
 
 
 // Global fluent validation configuration
