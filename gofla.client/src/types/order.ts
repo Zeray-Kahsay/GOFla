@@ -1,8 +1,8 @@
+import type { OrderStatus } from "../constants/orderStatus";
+import type { PaymentStatus } from "../constants/paymentStatus";
+import type { Address } from "./address";
+import type { OrderItem } from "./orderItem";
 
-import { OrderStatus } from "../../constants/orderStatus";
-import type { PaymentStatus } from "../../constants/paymentStatus";
-import type { Address } from "../../types/address";
-import type { OrderItem } from "../../types/orderItem";
 
 export interface Order {
   id: number;

@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
+using Stripe;
 
 
 
@@ -108,7 +109,9 @@ var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSetting
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 
 // Stripe Configuration
-builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("StripeSettings"));
+builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
+var stripeSettings = builder.Configuration.GetSection("Stripe").Get<StripeSettings>();
+StripeConfiguration.ApiKey = stripeSettings!.SecretKey;
 
 // Cloudinary Configuration
 builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("CloudinarySettings"));
@@ -209,16 +212,21 @@ builder.Services.AddScoped<IAddressService, AddressService>();
 builder.Services.AddScoped<IStripeService, StripeService>();
 builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
 builder.Services.AddScoped<IFavoriteService, FavoriteService>();
-builder.Services.AddScoped<IReviewService, ReviewService>();
+builder.Services.AddScoped<IReviewService, GoFla.API.Services.ReviewService>();
 builder.Services.AddScoped<ISearchService, SearchService>();
 builder.Services.AddScoped<IDeliveryZoneService, DeliveryZoneService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IUserContext, UserContext>();
 builder.Services.AddScoped<IImageUploadService, ImageUploadServie>();
+builder.Services.AddScoped<StripePaymentGateway>();
+builder.Services.AddScoped<IPaymentGatewayFactory, PaymentGatewayFactory>();
 
 
 // Hangfire 
 builder.Services.AddHangfireServer();
+
+// SignalR
+builder.Services.AddSignalR();
 
 
 // Global fluent validation configuration
@@ -245,6 +253,7 @@ app.UseAuthorization();
 app.UseExceptionHandler();
 
 app.MapControllers();
+app.MapHub<OrderHub>("/hubs/orders");
 
 await app.MigrateDatabase(); // Extension method to migrate database and seed data
 

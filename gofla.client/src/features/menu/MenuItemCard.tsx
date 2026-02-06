@@ -41,8 +41,15 @@ export function MenuItemCard({ item, onAddToCart, disabled }: MenuItemCardProps)
       setSpecialInstructions('');
       setShowDetails(false);
       onAddToCart?.();
-    } catch (error) {
-      toast.error('Failed to add to cart');
+    } catch (error : any) {
+      const code = error?.data?.errorCode;
+      
+      if (code === "MULTIPLE_RESTAURANTS"){
+        toast.error("You can only order from one restaurant at a time");
+      } else {
+
+        toast.error(error?.data.message || 'Failed to add to cart');
+      }
     }
   };
 
@@ -59,7 +66,7 @@ export function MenuItemCard({ item, onAddToCart, disabled }: MenuItemCardProps)
         </span>
       )}
       <img
-        src={item.imageUrl}
+        src={item.imageUrl || "/images/foodImage.avif"}
         alt={item.name}
         className="w-24 h-24 object-cover rounded-lg"
       />
@@ -87,6 +94,7 @@ export function MenuItemCard({ item, onAddToCart, disabled }: MenuItemCardProps)
               <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-2">
                   <button
+                    disabled={isLoading}
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
                     className="p-1 rounded-full bg-amber-500 hover:bg-amber-600"
                     aria-label="Decrease quantity"
@@ -95,6 +103,7 @@ export function MenuItemCard({ item, onAddToCart, disabled }: MenuItemCardProps)
                   </button>
                   <span className="w-8 text-center font-medium">{quantity}</span>
                   <button
+                    disabled={isLoading}
                     onClick={() => setQuantity(quantity + 1)}
                     className="p-1 rounded-full bg-amber-500 hover:bg-amber-600"
                     aria-label="Increase quantity"

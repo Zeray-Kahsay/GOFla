@@ -71,8 +71,9 @@ public static class MappingExtensions
         return new CartDto
         {
             Id = cart.Id,
+            RestaurantId = cart.RestaurantId ?? 0, // need to be required in FLUENT CONFIG
             Items = items,
-            SubTotal = items.Sum(i => i.ItemTotal),
+            SubTotal = items.Sum(i => i.ItemTotalPrice),
             TotalItems = items.Sum(i => i.Quantity)
         };
     }
@@ -84,10 +85,10 @@ public static class MappingExtensions
             MenuItemId = cartItem.MenuItemId,
             Name = cartItem.MenuItem.Name,
             ImageUrl = cartItem.MenuItem.ImageUrl ?? string.Empty,
-            Price = cartItem.MenuItem.Price,
+            UnitPrice = cartItem.MenuItem.Price,
             Quantity = cartItem.Quantity,
             SpecialInstructions = cartItem.SpecialInstructions,
-            ItemTotal = cartItem.MenuItem.Price * cartItem.Quantity,
+            ItemTotalPrice = cartItem.MenuItem.Price * cartItem.Quantity,
             RestaurantName = cartItem.MenuItem.Restaurant?.Name ?? string.Empty
         };
     }

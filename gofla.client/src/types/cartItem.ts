@@ -8,4 +8,5 @@ export interface CartItem {
   specialInstructions?: string;
   itemTotal: number;
   restaurantName: string;
+  restaurantId: number;
 }

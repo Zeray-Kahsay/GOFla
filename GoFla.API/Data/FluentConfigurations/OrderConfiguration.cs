@@ -22,11 +22,12 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
         builder.Property(o => o.Tax).HasPrecision(18, 2);
         builder.Property(o => o.TotalAmount).HasPrecision(18, 2);
 
-        builder.Property(o => o.PaymentIntentId).HasMaxLength(255);
+        builder.Property(o => o.ExternalPaymentId).HasMaxLength(255);
 
         builder.Property(o => o.Status).HasConversion<string>();
 
         builder.Property(o => o.PaymentStatus).HasConversion<string>();
+        builder.Property(o => o.PaymentProvider).HasConversion<string>();
 
         builder.Property(o => o.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
 

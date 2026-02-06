@@ -16,12 +16,12 @@ export function Header() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
-  //const { itemCount } = useCart();
   const {data: cart} = useGetCartQuery(undefined, {
-    skip: !isAuthenticated
+    refetchOnMountOrArgChange: true,
   });
 
   const itemCount = cart?.totalItems ?? 0;
+
  
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const { 

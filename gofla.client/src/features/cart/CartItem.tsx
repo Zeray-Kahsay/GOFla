@@ -3,25 +3,32 @@ import { formatCurrency } from "../../utils/formatters";
 import { toast } from "react-toastify";
 import { useRemoveCartItemMutation, useUpdateCartItemMutation } from "../../app/api/cart/cartApi";
 import type { CartItem as CartItemType } from '../../types/cartItem';
+import { useState } from "react";
 
 interface CartItemProps {
   item: CartItemType;
 }
 
 export function CartItem({ item }: CartItemProps) {
+  const [localLoading, setLocalLoading] = useState(false);
   const [updateCartItem, { isLoading: isUpdating }] = useUpdateCartItemMutation();
   const [removeCartItem, { isLoading: isRemoving }] = useRemoveCartItemMutation();
 
+
+
   const handleUpdateQuantity = async (newQuantity: number) => {
-    if (newQuantity < 1) return;
-    
+    if (newQuantity < 1 || localLoading) return;
+
+    setLocalLoading(true);
     try {
       await updateCartItem({
         cartItemId: item.id,
-        data: { quantity: newQuantity },
+       quantity: newQuantity,
       }).unwrap();
-    } catch (error) {
-      toast.error('Failed to update quantity');
+    } catch (error: any) {
+      toast.error(error?.data?.message || 'Failed to update quantity');
+    } finally {
+      setLocalLoading(false);
     }
   };
 
@@ -29,8 +36,8 @@ export function CartItem({ item }: CartItemProps) {
     try {
       await removeCartItem(item.id).unwrap();
       toast.success('Item removed from cart');
-    } catch (error) {
-      toast.error('Failed to remove item');
+    } catch (error : any) {
+      toast.error(error?.data?.message || 'Failed to remove item');
     }
   };
 
@@ -65,7 +72,7 @@ export function CartItem({ item }: CartItemProps) {
         <div className="flex items-center gap-2">
           <button
             onClick={() => handleUpdateQuantity(item.quantity - 1)}
-            disabled={isUpdating || item.quantity <= 1}
+            disabled={isUpdating || item.quantity <= 1 || localLoading}
             className="p-1 rounded-full hover:bg-gray-100 disabled:opacity-50"
           >
             <Minus size={16} />
@@ -73,11 +80,14 @@ export function CartItem({ item }: CartItemProps) {
           <span className="w-8 text-center font-medium">{item.quantity}</span>
           <button
             onClick={() => handleUpdateQuantity(item.quantity + 1)}
-            disabled={isUpdating}
+            disabled={isUpdating || localLoading}
             className="p-1 rounded-full hover:bg-gray-100"
           >
             <Plus size={16} />
           </button>
+          <span className={`w-8 text-center font-medium ${isUpdating ? "opacity-50" : ""}`}>
+              {item.quantity}
+          </span>
         </div>
       </div>
     </div>

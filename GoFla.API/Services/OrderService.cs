@@ -3,6 +3,7 @@ using GoFla.API.Domain;
 using GoFla.API.DTOs.Orders;
 using GoFla.API.Repositories;
 using Hangfire;
+using Microsoft.AspNetCore.SignalR;
 using Stripe;
 
 
@@ -13,11 +14,15 @@ public class OrderService(
     IRestaurantRepository restaurantRepository,
     ICartRepository cartRepository,
     IRepository<Domain.Address> addressRepository,
-    IStripeService stripeService,
     IDeliveryZoneService deliveryZoneService, // check if the address is deliverable --- TODO
-    IUserContext userContext
+    IUserContext userContext,
+    IPaymentGatewayFactory paymentGatewayFactory,
+    IHubContext<OrderHub> hub
 ) : IOrderService
+   
 {
+
+    
 
     public async Task<Result<CreateOrderResponse>> CreateOrderFromCartAsync(CreateOrderRequest dto, CancellationToken ct)
     {
@@ -112,13 +117,26 @@ public class OrderService(
           TimeSpan.FromMinutes(15));
 
         // Create Stripe payment intent
-        var paymentResult = await stripeService.CreatePaymentIntentAsync(order.TotalAmount, "usd", order.OrderNumber, ct);
+        var gateway = paymentGatewayFactory.GetGateway(PaymentProvider.Stripe);
+        var paymentResult = await gateway.CreatePaymentIntentAsync(order, ct);
 
         if (!paymentResult.IsSuccess)
-            return Result<CreateOrderResponse>.Failure(paymentResult.ErrorMessage!, paymentResult.ErrorCode!);
+            return Result<CreateOrderResponse>.Failure("Payment creation failed", "PAYMENT_FAILED");
 
-        order.PaymentIntentId = paymentResult.Data!.IntentId;
+        order.ExternalPaymentId = paymentResult.Data!.ExternalPaymentId;
+        order.PaymentProvider = paymentResult.Data!.Provider;
+
         order.PaymentStatus = PaymentStatus.Pending;
+
+        var result = ChangeOrderStatus(order, OrderStatus.Paid);
+        if (!result.IsSuccess)
+            return Result<CreateOrderResponse>.Failure("Failed order status change", "FAILED_ORDER_STATUS_CHANGE");
+        
+        // Persist order status
+        await orderRepository.UpdateAsync(order, ct);
+
+        // Notify clients
+        await NotifyOrderStatusChanged(order);
 
 
         // Clear cart
@@ -327,7 +345,7 @@ public class OrderService(
         order.PaymentStatus = PaymentStatus.Succeeded;
         //order.Status = OrderStatus.Paid;
         ChangeOrderStatus(order, OrderStatus.Paid);
-      
+
 
         await orderRepository.UpdateAsync(order, ct);
     }
@@ -371,17 +389,17 @@ public class OrderService(
 
     private static readonly Dictionary<OrderStatus, OrderStatus[]> AllowedTransitions = new()
    {
-    { OrderStatus.PendingPayment, new[] { OrderStatus.Paid, OrderStatus.Cancelled } },
-    { OrderStatus.Paid, new[] { OrderStatus.Confirmed, OrderStatus.Cancelled } },
-    { OrderStatus.Confirmed, new[] { OrderStatus.Preparing } },
-    { OrderStatus.Preparing, new[] { OrderStatus.OutForDelivery } },
-    { OrderStatus.OutForDelivery, new[] { OrderStatus.Delivered } },
-    {OrderStatus.Delivered, Array.Empty<OrderStatus>()},
-    {OrderStatus.Cancelled, Array.Empty<OrderStatus>()},
-    {OrderStatus.PaymentFailed, Array.Empty<OrderStatus>()}
+        { OrderStatus.PendingPayment, new[] { OrderStatus.Paid, OrderStatus.Cancelled } },
+        { OrderStatus.Paid, new[] { OrderStatus.Confirmed, OrderStatus.Cancelled } },
+        { OrderStatus.Confirmed, new[] { OrderStatus.Confirmed } },
+        { OrderStatus.Preparing, new[] { OrderStatus.OutForDelivery } },
+        { OrderStatus.OutForDelivery, new[] { OrderStatus.Delivered } },
+        {OrderStatus.Delivered, Array.Empty<OrderStatus>()},
+        {OrderStatus.Cancelled, Array.Empty<OrderStatus>()},
+        {OrderStatus.PaymentFailed, Array.Empty<OrderStatus>()}
   };
 
-  private Result<bool> ChangeOrderStatus(Order order, OrderStatus newStatus)
+    private static Result<bool> ChangeOrderStatus(Order order, OrderStatus newStatus)
     {
         if (!AllowedTransitions.TryGetValue(order.Status, out var allowed) ||
         !allowed.Contains(newStatus))
@@ -392,43 +410,40 @@ public class OrderService(
         }
 
         order.Status = newStatus;
+        var now = DateTime.UtcNow;
 
-        switch(newStatus)
+        switch (newStatus)
         {
-            case OrderStatus.Paid: 
-                order.PaidAt = DateTime.UtcNow;
-                break;
-            
-            case OrderStatus.Delivered:
-                order.CompletedAt = DateTime.UtcNow;
-                break;
-            
-            case OrderStatus.Cancelled: 
-                order.CancelledAt = DateTime.UtcNow;
-                break;
-            
-            case OrderStatus.Confirmed:
-                order.CancelledAt = DateTime.UtcNow;
-                break;
-            case OrderStatus.OutForDelivery:
-                order.CancelledAt = DateTime.UtcNow;
-                break;
-            case OrderStatus.PaymentFailed:
-                order.CancelledAt = DateTime.UtcNow;
-                break;
-            case OrderStatus.PendingPayment:
-                order.CancelledAt = DateTime.UtcNow;
-                break;
-            case OrderStatus.Preparing:
-                order.CancelledAt = DateTime.UtcNow;
-                break;
-            case OrderStatus.Ready:
-                order.CancelledAt = DateTime.UtcNow;
+            case OrderStatus.Paid:
+                order.PaidAt = now;
                 break;
 
+            case OrderStatus.Confirmed:
+                order.ConfirmedAt = now;
+                break;
+
+            case OrderStatus.Delivered:
+                order.CompletedAt = now;
+                break;
+
+            case OrderStatus.Cancelled:
+                order.CancelledAt = now;
+                break;
         }
 
+
         return Result<bool>.Success(true);
+    }
+
+    private async Task NotifyOrderStatusChanged(Order order)
+    {
+        await hub.Clients
+            .Group(order.OrderNumber)
+            .SendAsync("OrderStatusUpdated", new
+            {
+                orderNumber = order.OrderNumber,
+                status = order.Status.ToString()
+            });
     }
 
 }

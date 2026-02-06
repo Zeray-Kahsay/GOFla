@@ -17,7 +17,6 @@ export const addressApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getAddresses: builder.query<Address[], void>({
       query: () => '/addresses',
-      transformResponse: (response: any) => response.data,
       providesTags: (result) =>
         result
           ? [

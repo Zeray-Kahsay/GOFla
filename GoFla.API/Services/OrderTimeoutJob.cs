@@ -12,7 +12,7 @@ public class OrderTimeoutJob(IOrderRepository orderRepository, IStripeService st
         if (order is null || order.PaymentStatus != Domain.PaymentStatus.Pending)
             return;
         
-        await stripeService.CancelPaymentIntentAsync(order.PaymentIntentId!);
+        await stripeService.CancelPaymentIntentAsync(order.ExternalPaymentId!);
         order.Status = Domain.OrderStatus.Cancelled;
 
         await orderRepository.UpdateAsync(order);

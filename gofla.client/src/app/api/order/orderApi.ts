@@ -3,8 +3,18 @@ import type { PagedResult } from "../../../types/pagedResult";
 import { apiSlice } from "../apiSlice";
 
 interface CreateOrderRequest {
-  deliveryAddressId: number;
-  paymentMethodId?: string;
+  restaurantId: number;
+  address:{
+  street: string;
+    city: string;
+    state?: string;
+    postalCode: string;
+    countryCode: string;
+    latitude?: number;
+    longitude?: number;
+    saveAddress: boolean;
+  }
+
 }
 
 interface PaginationParams {

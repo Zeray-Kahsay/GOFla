@@ -11,7 +11,7 @@ public class Cart
     // Navigation properties
     public User User { get; set; } = null!;
     public string UserId { get; set; } = string.Empty;
-    public int  RestaurantId  { get; set; }
+    public int?  RestaurantId  { get; set; }
     public Restaurant Restaurant  { get; set; } = null!;
     public ICollection<CartItem> Items { get; set; } = [];
 }

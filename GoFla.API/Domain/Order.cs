@@ -21,7 +21,9 @@ public class Order
     public decimal TotalAmount { get; set; }
 
     // PAYMENT
-    public string? PaymentIntentId { get; set; }
+    public string? ExternalPaymentId { get; set; } // payment intent /vipps order id
+    public string? PaymentMethodId  { get; set; } //card id, wallet id
+    public PaymentProvider PaymentProvider { get; set; }
     public PaymentStatus PaymentStatus { get; set; }
 
     // LIFECYCLE
@@ -33,6 +35,7 @@ public class Order
     // META
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? PaidAt { get; set; }
+    public DateTime ConfirmedAt { get; set; }
     public DateTime? CompletedAt { get; set; }
     public DateTime? CancelledAt { get; set; }
 

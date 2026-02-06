@@ -10,12 +10,16 @@ import { CartItem } from "./CartItem";
 export function CartSidebar() {
   const dispatch = useAppDispatch();
   const isOpen = useAppSelector((state) => state.cart.isOpen);
-  const { data: cart, isLoading } = useGetCartQuery();
+  const { data: cart, isLoading } = useGetCartQuery(undefined, {
+    refetchOnFocus: true,  // Prevents unnecessay re-renders
+    refetchOnReconnect: true,
+  });
+  const restaurantName = cart?.items?.[0]?.restaurantName;
 
   const handleClose = () => {
     dispatch(closeCart());
   };
-
+  
   if (!isOpen) return null;
 
   return (
@@ -34,6 +38,11 @@ export function CartSidebar() {
             <ShoppingCart size={24} />
             Your Cart
           </h2>
+          {restaurantName && (
+            <p className="text-xs text-gray-500 mt-1" >
+              Ordering from: <span className="font-medium"> {restaurantName} </span>
+            </p>
+          )}
           <button onClick={handleClose} className="p-2 hover:bg-gray-100 rounded-full">
             <X size={24} />
           </button>

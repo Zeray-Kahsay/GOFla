@@ -240,6 +240,21 @@ Configure Stripe webhook endpoint
 Set up Cloudinary account
 Add database seed data
 
+
+#### Client-side
+## Cart to Payment architecture-flow
+Cart → Order → Payment Intent → Payment Method → Webhook → Status → Realtime update
+1️⃣ Review cart
+2️⃣ Choose address
+3️⃣ Create Order (server calculates totals)
+4️⃣ Receive payment client secret
+5️⃣ Show payment options (Card, Vipps, future providers)
+6️⃣ Confirm payment
+7️⃣ Order becomes Paid via webhook
+## Step-1 = Review + Address
+## Step-2 = Payment Method and Pay
+
+
 Enhancements ## TODO 
 
 Add email notifications (order confirmations, etc.)

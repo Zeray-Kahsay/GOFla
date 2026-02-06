@@ -9,16 +9,13 @@ interface AddToCartRequest {
   specialInstructions?: string;
 }
 
-interface UpdateCartItemRequest {
-  quantity: number;
-}
 
 export const cartApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getCart: builder.query<Cart, void>({
       query: () => '/carts',
-      transformResponse: (response: any) => response.data,
-      providesTags: ['Cart'],
+      //transformResponse: (response: any) => response.data,
+      providesTags: [{type: 'Cart', id: 'USER_CART'}],
     }),
     addToCart: builder.mutation<Cart, AddToCartRequest>({
       query: (item) => ({
@@ -26,13 +23,13 @@ export const cartApi = apiSlice.injectEndpoints({
         method: 'POST',
         body: item,
       }),
-      invalidatesTags: ['Cart'],
+      invalidatesTags: [{type: 'Cart', id:'USER_CART'}],
     }),
-    updateCartItem: builder.mutation<Cart, { cartItemId: number; data: UpdateCartItemRequest }>({
-      query: ({ cartItemId, data }) => ({
+    updateCartItem: builder.mutation<Cart, { cartItemId: number; quantity: number }>({
+      query: ({ cartItemId, quantity }) => ({
         url: `/carts/items/${cartItemId}`,
         method: 'PUT',
-        body: data,
+        body: {quantity},
       }),
       invalidatesTags: ['Cart'],
     }),

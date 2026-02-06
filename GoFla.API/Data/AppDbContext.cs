@@ -20,7 +20,7 @@ public class AppDbContext : IdentityDbContext<User>
     public DbSet<Review> Reviews { get; set; }
     public DbSet<ReviewResponse> ReviewResponses { get; set; }
     public DbSet<Favorite> Favorites { get; set; }
-    public DbSet<DeliveryZone> DeliveryZones {get; set; }
+    public DbSet<DeliveryZone> DeliveryZones { get; set; }
 
 
 
@@ -81,7 +81,7 @@ public class AppDbContext : IdentityDbContext<User>
                   .WithMany()
                   .HasForeignKey(r => r.OwnerId)
                   .OnDelete(DeleteBehavior.Restrict);
-                  
+
             entity.HasMany(r => r.Categories)
                   .WithOne(c => c.Restaurant)
                   .HasForeignKey(c => c.RestaurantId)
@@ -127,7 +127,7 @@ public class AppDbContext : IdentityDbContext<User>
             entity.HasOne(m => m.Restaurant)
                 .WithMany(r => r.MenuItems)
                 .HasForeignKey(m => m.RestaurantId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
 
             entity.HasOne(m => m.Category)
                 .WithMany(c => c.MenuItems)
@@ -142,6 +142,13 @@ public class AppDbContext : IdentityDbContext<User>
                 .WithOne(ci => ci.Cart)
                 .HasForeignKey(ci => ci.CartId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(c => c.Restaurant)
+                  .WithMany()
+                  .HasForeignKey(c => c.RestaurantId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+
         });
 
         // Review configuration

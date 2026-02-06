@@ -8,9 +8,9 @@ public record CartItemDto
     public int MenuItemId { get; init; }
     public string Name { get; init; } = string.Empty;
     public string ImageUrl { get; init; } = string.Empty;
-    public decimal Price { get; init; }
+    public decimal UnitPrice { get; init; }
     public int Quantity { get; init; }
     public string? SpecialInstructions { get; init; }
-    public decimal ItemTotal { get; init; }
+    public decimal ItemTotalPrice { get; init; }
     public string RestaurantName { get; init; } = string.Empty;
 }
