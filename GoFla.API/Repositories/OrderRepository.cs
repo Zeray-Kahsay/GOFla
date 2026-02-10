@@ -32,20 +32,15 @@ public class OrderRepository(AppDbContext context) : Repository<Order>(context),
     }
 
 
-
-
-
-
-
-    // public async Task<Order?> GetByOrderNumberAsync(string orderNumber, CancellationToken cancellationToken = default)
-    // {
-    //     return await _dbSet
-    //        .Include(o => o.Items)
-    //        //.ThenInclude(oi => oi.MenuItem)
-    //        .Include(o => o.Restaurant)
-    //        //.Include(o => o.DeliveryAddress)
-    //        .FirstOrDefaultAsync(o => o.OrderNumber == orderNumber, cancellationToken);
-    // }
+    public async Task<Order?> GetByOrderNumberAsync(string orderNumber, CancellationToken cancellationToken = default)
+    {
+        return await _dbSet
+           .Include(o => o.Items)
+           //.ThenInclude(oi => oi.MenuItem)
+           .Include(o => o.Restaurant)
+           //.Include(o => o.DeliveryAddress)
+           .FirstOrDefaultAsync(o => o.OrderNumber == orderNumber, cancellationToken);
+    }
 
     // public async Task<PagedResult<Order>> GetUserOrdersAsync(string userId, string? cursor, int pageSize, CancellationToken cancellationToken = default)
     // {

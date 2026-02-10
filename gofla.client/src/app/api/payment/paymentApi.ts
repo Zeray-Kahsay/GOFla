@@ -6,7 +6,7 @@ export const paymentApi = apiSlice.injectEndpoints({
         createPaymentIntent: builder.mutation<
         {clientSecret: string}, {orderNumber: string; provider: string, method: PaymentMethodType}>({
             query: (data) => ({
-                url: "/payments/create-intent",
+                url: "/payments/create-payment-intent",
                 method: "POST",
                 body: data
             }),

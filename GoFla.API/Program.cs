@@ -1,4 +1,6 @@
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using GoFla.API.Configuration;
@@ -24,7 +26,12 @@ var builder = WebApplication.CreateBuilder(args);
 
 
 // Add services to the container
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+     .AddJsonOptions(options =>
+     {
+         options.JsonSerializerOptions.Converters.Add(
+            new JsonStringEnumConverter(JsonNamingPolicy.CamelCase, allowIntegerValues: false));
+     });
 builder.Services.AddEndpointsApiExplorer();
 
 // Swagger with JWT support
@@ -74,6 +81,8 @@ builder.Services.Configure<FormOptions>(options =>
 // {
 //     options.Limits.MaxRequestBodySize = 50 * 1024 * 1024;
 // });
+
+
 
 // Database
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -220,6 +229,7 @@ builder.Services.AddScoped<IUserContext, UserContext>();
 builder.Services.AddScoped<IImageUploadService, ImageUploadServie>();
 builder.Services.AddScoped<StripePaymentGateway>();
 builder.Services.AddScoped<IPaymentGatewayFactory, PaymentGatewayFactory>();
+builder.Services.AddScoped<IPaymentService, PaymentService>();
 
 
 // Hangfire 

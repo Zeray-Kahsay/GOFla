@@ -12,26 +12,25 @@ public class StripeWebhookController(IOrderService orderService, IConfiguration 
     [HttpPost]
     public async Task<IActionResult> HandleWebhook(CancellationToken ct)
     {
-        var json = await new StreamReader(Request.Body).ReadToEndAsync();
-        var stripeSignature = Request.Headers["Stripe-signature"];
+        var json = await new StreamReader(HttpContext.Request.Body).ReadToEndAsync();
 
-        var endpointSecret = config["Stripe:WebhookSecret"];
-
-        Event stripeEvent;
+        //Event stripeEvent;
 
         try
         {
-            stripeEvent = EventUtility.ConstructEvent(
-                json, stripeSignature, endpointSecret
-            );
+            var stripeEvent = EventUtility.ConstructEvent(
+                 json,
+                 Request.Headers["Stripe-signature"],
+                 config["Stripe:WebhookSecret"]
+             );
+            await orderService.HandleStripeWebhookAsync(stripeEvent, ct);
+
+            return Ok();
         }
-        catch(Exception e)
+        catch (StripeException sEx)
         {
-            return BadRequest($"Invalid signature: {e.Message}");
+            return BadRequest($"Invalid signature: {sEx.Message}");
         }
 
-        await orderService.HandleStripeWebhookAsync(stripeEvent, ct);
-
-        return Ok();
     }
 }
