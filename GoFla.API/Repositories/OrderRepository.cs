@@ -16,7 +16,7 @@ public class OrderRepository(AppDbContext context) : Repository<Order>(context),
 
     public async Task<Order?> GetByPaymentIntentIdAsync(string intentId, CancellationToken ct)
     {
-        return await _dbSet.FirstOrDefaultAsync(o => o.ExternalPaymentId == intentId, ct); // TOdo: temporary fix --- no paymentIntentId in Order.cs
+        return await _dbSet.FirstOrDefaultAsync(o => o.ExternalPaymentId == intentId, ct); 
     }
 
     public async Task<List<Order>> GetExpiredPendingPaymentOrderAsync()

@@ -18,6 +18,7 @@ public class StripeService : IStripeService
         _stripeSettings = stripeSettings.Value;
         _logger = logger;
         StripeConfiguration.ApiKey = _stripeSettings.SecretKey;
+
     }
 
     public async Task<Result<StripeIntentResult>> CreatePaymentIntentAsync(decimal amount, string currency, string orderNumber, CancellationToken ct)

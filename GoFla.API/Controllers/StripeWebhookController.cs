@@ -14,8 +14,6 @@ public class StripeWebhookController(IOrderService orderService, IConfiguration 
     {
         var json = await new StreamReader(HttpContext.Request.Body).ReadToEndAsync();
 
-        //Event stripeEvent;
-
         try
         {
             var stripeEvent = EventUtility.ConstructEvent(

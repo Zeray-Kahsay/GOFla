@@ -19,7 +19,7 @@ export default function CheckoutPage(){
     if (!address || !cart) return;
 
     const res = await createOrder({
-      restaurantId: cart.restaurantId,
+      restaurantId: cart.items[0].restaurantId,
       address
        
     }).unwrap();

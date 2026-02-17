@@ -6,6 +6,7 @@ export interface Restaurant {
   addressDto: AddressDto;
   phone: string;
   deliveryFee: number;
+  tax?: number;
   estimatedDeliveryTime: number;
   isActive: boolean;
   averageRating?: number;

@@ -38,7 +38,7 @@ public static class QueryableExtensions
     Expression<Func<T, TKey>> keySelector,
     TKey cursor,
     bool lessThan
-)
+    )
     {
         var param = keySelector.Parameters[0];
         var left = keySelector.Body;

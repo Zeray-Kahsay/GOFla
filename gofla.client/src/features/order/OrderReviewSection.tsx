@@ -24,7 +24,7 @@ export function OrderReviewSection({cart} : Props){
                             )}
                         </div>
                         <p className="font-semibold" >
-                            {formatCurrency(item.itemTotal)}
+                            {formatCurrency(item.unitPrice)}
                         </p>
                     </div>
                 ))}

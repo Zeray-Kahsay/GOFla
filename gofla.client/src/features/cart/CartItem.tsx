@@ -56,7 +56,7 @@ export function CartItem({ item }: CartItemProps) {
           <p className="text-xs text-gray-500 mt-1">Note: {item.specialInstructions}</p>
         )}
         <p className="text-sm font-semibold text-primary-600 mt-1">
-          {formatCurrency(item.price)}
+          {formatCurrency(item.unitPrice)}
         </p>
       </div>
       

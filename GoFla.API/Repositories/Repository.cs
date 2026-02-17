@@ -27,6 +27,14 @@ public class Repository<T> : IRepository<T> where T : class
         return entity;
     }
 
+    public virtual async Task UpdateAsync(T entity, CancellationToken cancellationToken = default)
+    {
+        _dbSet.Update(entity);
+        await _context.SaveChangesAsync(cancellationToken);
+        var entry = _context.Entry(entity);
+        Console.WriteLine($"Entity of type {typeof(T).Name} updated. State: {entry.State}");
+    }
+
     public virtual async Task DeleteAsync(T entity, CancellationToken cancellationToken = default)
     {
         _dbSet.Remove(entity);
@@ -45,7 +53,7 @@ public class Repository<T> : IRepository<T> where T : class
 
     public virtual async Task<T?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
-        return await _dbSet.FindAsync(new object[] { id }, cancellationToken);
+        return await _dbSet.FindAsync([id], cancellationToken);
     }
 
     public async Task<PagedResult<T>> GetPagedAsync<TKey>(
@@ -110,14 +118,6 @@ public class Repository<T> : IRepository<T> where T : class
             HasMore = hasMore,
             NextCursor = nextCursor
         };
-    }
-
-
-
-    public virtual async Task UpdateAsync(T entity, CancellationToken cancellationToken = default)
-    {
-        _dbSet.Update(entity);
-        await _context.SaveChangesAsync(cancellationToken);
     }
 
 

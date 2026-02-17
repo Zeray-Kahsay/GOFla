@@ -1,6 +1,7 @@
 import { Button } from "../../app/layout/ui/Button";
 import { formatCurrency } from "../../utils/formatters";
 import type { Cart } from "../../types/cart";
+import { useGetRestaurantByIdQuery } from "../../app/api/restaurant/restaurantApi";
 
 interface Props {
   cart: Cart;
@@ -16,10 +17,19 @@ export default function OrderSummary({
   isLoading
 }: Props) {
 
+  var restaurantId = cart.items[0]?.restaurantId ?? 0;
+  const { data: restaurant } = useGetRestaurantByIdQuery(restaurantId, {
+    skip: !restaurantId,
+  });
+
+
+
   // TEMP values until API returns pricing breakdown
-    const deliveryFee =  0;
-   const tax = 0;
+    const deliveryFee =  restaurant?.deliveryFee ?? 0;
+   const tax = restaurant?.tax ?? 0;
   const total = cart.subTotal + deliveryFee + tax;
+
+  console.log(restaurantId,deliveryFee, tax, total);
 
   return (
     <section className="card p-6 sticky top-20 space-y-6">

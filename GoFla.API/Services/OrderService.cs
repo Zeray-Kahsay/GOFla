@@ -17,12 +17,13 @@ public class OrderService(
     IDeliveryZoneService deliveryZoneService, // check if the address is deliverable --- TODO
     IUserContext userContext,
     IPaymentGatewayFactory paymentGatewayFactory,
-    IHubContext<OrderHub> hub
+    IHubContext<OrderHub> hub,
+    ILogger<OrderService> logger
 ) : IOrderService
-   
+
 {
 
-    
+
 
     public async Task<Result<CreateOrderResponse>> CreateOrderFromCartAsync(CreateOrderRequest dto, CancellationToken ct)
     {
@@ -50,15 +51,20 @@ public class OrderService(
         if (restaurant is null)
             return Result<CreateOrderResponse>.Failure("Restaurant not found", "NOT_FOUND");
 
+        if (string.IsNullOrWhiteSpace(dto.Address.Street) || string.IsNullOrWhiteSpace(dto.Address.City))
+        {
+            return Result<CreateOrderResponse>.Failure("Invalid address", "INVALID_ADDRESS");
+        }
+
         // Build Snapshot directly from DTO
         var addressSnapshot = new DeliveryAddressSnapshot
         {
-            Street = dto.Street,
-            City = dto.City,
-            PostalCode = dto.PostalCode,
-            CountryCode = dto.CountryCode,
-            Latitude = dto.Latitude,
-            Longitude = dto.Longitude
+            Street = dto.Address.Street,
+            City = dto.Address.City,
+            PostalCode = dto.Address.PostalCode,
+            CountryCode = dto.Address.CountryCode,
+            Latitude = dto.Address.Latitude,
+            Longitude = dto.Address.Longitude
         };
 
         // Financial calculation
@@ -94,7 +100,7 @@ public class OrderService(
 
 
         // Save address to Profile if user wants to
-        if (dto.SaveAddress)
+        if (dto.Address.SaveAddress)
         {
             await addressRepository.AddAsync(new Domain.Address
             {
@@ -125,19 +131,10 @@ public class OrderService(
 
         order.ExternalPaymentId = paymentResult.Data!.ExternalPaymentId;
         order.PaymentProvider = paymentResult.Data!.Provider;
-
         order.PaymentStatus = PaymentStatus.Pending;
 
-        var result = ChangeOrderStatus(order, OrderStatus.Paid);
-        if (!result.IsSuccess)
-            return Result<CreateOrderResponse>.Failure("Failed order status change", "FAILED_ORDER_STATUS_CHANGE");
-        
         // Persist order status
         await orderRepository.UpdateAsync(order, ct);
-
-        // Notify clients
-        await NotifyOrderStatusChanged(order);
-
 
         // Clear cart
         cart.Items.Clear();
@@ -337,17 +334,41 @@ public class OrderService(
 
     private async Task MarkOrderPaid(PaymentIntent intent, CancellationToken ct)
     {
-        var order = await orderRepository.GetByPaymentIntentIdAsync(intent.Id, ct);
-        if (order is null) return;
+        //  this is prone to race conditions if the payment intent is created after the order is saved. 
+        // Instead we rely on metadata which is set at the time of payment intent creation
+        //var order = await orderRepository.GetByPaymentIntentIdAsync(intent.Id, ct);
 
-        if (order.PaymentStatus == PaymentStatus.Succeeded) return;
+        if (!intent.Metadata.TryGetValue("order_number", out var orderNumber))
+        {
+            logger.LogWarning("PaymentIntent {PaymentIntentId} missing order_number metadata", intent.Id);
+            return;
+        }
+
+        var order = await orderRepository.GetByOrderNumberAsync(orderNumber, ct);
+
+        if (order is null)
+        {
+            logger.LogWarning("Order not found for PaymentIntent ID: {PaymentIntentId}", intent.Id);
+            return;
+        }
+
+        if (order.PaymentStatus == PaymentStatus.Succeeded)
+        {
+            logger.LogInformation("Order {OrderNumber} already marked as paid", order.OrderNumber);
+            return;
+        }
 
         order.PaymentStatus = PaymentStatus.Succeeded;
-        //order.Status = OrderStatus.Paid;
-        ChangeOrderStatus(order, OrderStatus.Paid);
 
+        var result = ChangeOrderStatus(order, OrderStatus.Paid);
+        if (!result.IsSuccess)
+        {
+            logger.LogWarning("Failed to change order status for order {OrderNumber}: {ErrorMessage}", order.OrderNumber, result.ErrorMessage);
+            return;
+        }
 
         await orderRepository.UpdateAsync(order, ct);
+        await NotifyOrderStatusChanged(order);
     }
 
     private async Task MarkOrderPaymentFailed(PaymentIntent intent, CancellationToken ct)
@@ -356,7 +377,6 @@ public class OrderService(
         if (order is null) return;
 
         order.PaymentStatus = PaymentStatus.Failed;
-        //order.Status = OrderStatus.Cancelled;
         ChangeOrderStatus(order, OrderStatus.Cancelled);
 
         await orderRepository.UpdateAsync(order, ct);
@@ -381,7 +401,6 @@ public class OrderService(
         if (order is null) return;
 
         order.PaymentStatus = PaymentStatus.Refunded;
-        //order.Status = OrderStatus.Cancelled;
         ChangeOrderStatus(order, OrderStatus.Cancelled);
 
         await orderRepository.UpdateAsync(order, ct);

@@ -16,20 +16,19 @@ public class StripePaymentGateway : IPaymentGateway
             Currency = "nok",
             Metadata = new Dictionary<string, string>
             {
-                {"orderNumber", order.OrderNumber}
+                {"order_number", order.OrderNumber}
             }
         };
 
         var service = new PaymentIntentService();
         var intent = await service.CreateAsync(options, cancellationToken: ct);
 
-        return Result<CreatePaymentResult>.Success(
-            new CreatePaymentResult(
-                intent.Id,
-                intent.ClientSecret,
-                PaymentProvider.Stripe
-            )
-        );
+        return Result<CreatePaymentResult>.Success(new CreatePaymentResult
+        {
+            ExternalPaymentId = intent.Id,
+            ClientSecret = intent.ClientSecret,
+            Provider = PaymentProvider.Stripe
+        });
     }
 
 
@@ -37,7 +36,7 @@ public class StripePaymentGateway : IPaymentGateway
     {
         var service = new PaymentIntentService();
         await service.CancelAsync(externalPaymentId, cancellationToken: ct);
-        
+
         return Result<bool>.Success(true);
     }
 
